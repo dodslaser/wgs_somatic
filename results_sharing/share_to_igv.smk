@@ -20,8 +20,8 @@ rule share_to_igv:
         expand("{stype}/manta/{sname}_germline_MantaBNDs.vcf", sname=normalname, stype=sampleconfig[normalname]["stype"]),
         expand("{stype}/manta/{sname}_germline_MantaNOBNDs.vcf", sname=normalname, stype=sampleconfig[normalname]["stype"])
     params:
-        updateigv = config["rules"]["share_to_igv"]["updateigv"],
-        igvdatadir = config["rules"]["share_to_igv"]["igvdatadir"]
+        updateigv = pipeconfig["rules"]["share_to_igv"]["updateigv"],
+        igvdatadir = pipeconfig["rules"]["share_to_igv"]["igvdatadir"]
     output:
         "reporting/shared_igv_files.txt" 
     run:

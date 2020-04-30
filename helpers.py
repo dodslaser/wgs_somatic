@@ -7,10 +7,10 @@ def read_config():
         config_data = json.load(configfile)
         return config_data
 
-def read_inputfile():
-    with open("configs/leukemi143.yaml") as inputfile:
-        inputfile_info = yaml.load(inputfile, Loader=yaml.FullLoader)
-        return inputfile_info
+#def read_inputfile():
+#    with open("configs/leukemi143.yaml") as inputfile:
+#        inputfile_info = yaml.load(inputfile, Loader=yaml.FullLoader)
+#        return inputfile_info
 
 def read_clusterconf():
     with open("configs/cluster.yaml") as inputfile:

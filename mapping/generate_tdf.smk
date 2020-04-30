@@ -5,7 +5,7 @@ rule generate_tdf:
     input:
         "{stype}/realign/{sname}_REALIGNED.bam"
     params:
-        igvjar = config["rules"]["generate_tdf"]["tdfgen"]
+        igvjar = pipeconfig["rules"]["generate_tdf"]["tdfgen"]
     output:
         "{stype}/reports/{sname}_REALIGNED.bam.tdf"
     run:

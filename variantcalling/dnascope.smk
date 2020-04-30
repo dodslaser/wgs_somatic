@@ -9,9 +9,9 @@ rule dnascope:
         threads = clusterconf["dnascope"]["threads"],
         sentieon = sentieon,
         referencegenome = referencegenome,
-        dbsnp = config["rules"]["dnascope"]["dbsnp"],
-        model = config["rules"]["dnascope"]["modelpath"],
-        callsettings = config["rules"]["dnascope"]["settings"]
+        dbsnp = pipeconfig["rules"]["dnascope"]["dbsnp"],
+        model = pipeconfig["rules"]["dnascope"]["modelpath"],
+        callsettings = pipeconfig["rules"]["dnascope"]["settings"]
     output:
         "{stype}/dnascope/{sname}_DNAscope.vcf"
     run:
@@ -24,7 +24,7 @@ rule dnascope_modelfilter:
         threads = clusterconf["dnascope_modelfilter"]["threads"],
         sentieon = sentieon,
         referencegenome = referencegenome,
-        model = config["rules"]["dnascope"]["modelpath"]
+        model = pipeconfig["rules"]["dnascope"]["modelpath"]
     output:
         "{stype}/dnascope/{sname}_DNAscope_modelfiltered.vcf"
     run:
@@ -35,8 +35,8 @@ rule dnascope_vcffilter:
         "{stype}/dnascope/{sname}_DNAscope_modelfiltered.vcf"
     params:
         threads = clusterconf["dnascope_vcffilter"]["threads"],
-        bcftools = config["rules"]["dnascope_vcffilter"]["bcftools"],
-        vcftools = config["rules"]["dnascope_vcffilter"]["vcftools"],
+        bcftools = pipeconfig["rules"]["dnascope_vcffilter"]["bcftools"],
+        vcftools = pipeconfig["rules"]["dnascope_vcffilter"]["vcftools"],
         passfilter = "'FILTER=\"PASS\"'"
     output:
         "{stype}/dnascope/{sname}_germline.vcf",

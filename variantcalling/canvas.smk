@@ -13,15 +13,15 @@ rule canvas_somatic:
         normal_wgscov = expand("{stype}/reports/{sname}_WGScov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"]),
         normal_ycov = expand("{stype}/reports/{sname}_Ycov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"])
     params:
-        annotate = config["rules"]["canvas"]["annotate"],
-        annotate_ref = config["rules"]["canvas"]["annotate_ref"],
-        canvasdll = config["rules"]["canvas"]["canvasdll"],
-        dotnet = config["rules"]["canvas"]["dotnet"],
-        genomedir = config["rules"]["canvas"]["genomedir"],
-        reference = config["rules"]["canvas"]["reference"],
-        filter13 = config["rules"]["canvas"]["filter13"],
-        malevcf = config["rules"]["canvas"]["malevcf"],
-        femalevcf = config["rules"]["canvas"]["femalevcf"]
+        annotate = pipeconfig["rules"]["canvas"]["annotate"],
+        annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"],
+        canvasdll = pipeconfig["rules"]["canvas"]["canvasdll"],
+        dotnet = pipeconfig["rules"]["canvas"]["dotnet"],
+        genomedir = pipeconfig["rules"]["canvas"]["genomedir"],
+        reference = pipeconfig["rules"]["canvas"]["reference"],
+        filter13 = pipeconfig["rules"]["canvas"]["filter13"],
+        malevcf = pipeconfig["rules"]["canvas"]["malevcf"],
+        femalevcf = pipeconfig["rules"]["canvas"]["femalevcf"]
     output:
         "{stype}/canvas/{sname}_CNV_somatic.vcf",
         "{stype}/canvas/{sname}_CNV_somatic.vcf.xlsx"
@@ -49,15 +49,15 @@ rule canvas_germline:
         normal_wgscov = expand("{stype}/reports/{sname}_WGScov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"]),
         normal_ycov = expand("{stype}/reports/{sname}_Ycov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"])
     params:
-        annotate = config["rules"]["canvas"]["annotate"],
-        annotate_ref = config["rules"]["canvas"]["annotate_ref"],
-        canvasdll = config["rules"]["canvas"]["canvasdll"],
-        dotnet = config["rules"]["canvas"]["dotnet"],
-        genomedir = config["rules"]["canvas"]["genomedir"],
-        reference = config["rules"]["canvas"]["reference"],
-        filter13 = config["rules"]["canvas"]["filter13"],
-        malevcf = config["rules"]["canvas"]["malevcf"],
-        femalevcf = config["rules"]["canvas"]["femalevcf"]
+        annotate = pipeconfig["rules"]["canvas"]["annotate"],
+        annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"],
+        canvasdll = pipeconfig["rules"]["canvas"]["canvasdll"],
+        dotnet = pipeconfig["rules"]["canvas"]["dotnet"],
+        genomedir = pipeconfig["rules"]["canvas"]["genomedir"],
+        reference = pipeconfig["rules"]["canvas"]["reference"],
+        filter13 = pipeconfig["rules"]["canvas"]["filter13"],
+        malevcf = pipeconfig["rules"]["canvas"]["malevcf"],
+        femalevcf = pipeconfig["rules"]["canvas"]["femalevcf"]
     output:
         "{stype}/canvas/{sname}_CNV_germline.vcf",
         "{stype}/canvas/{sname}_CNV_germline.vcf.xlsx"

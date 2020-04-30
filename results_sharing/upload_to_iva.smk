@@ -8,8 +8,8 @@ rule filter_variants_in_bed:
     input:
         "{stype}/{caller}/{sname}_{vcftype}.vcf"    
     params:
-        rtg = config["rules"]["filter_variants_in_bed"]["rtg"],
-        bedfile = config["rules"]["filter_variants_in_bed"]["bedfile"],
+        rtg = pipeconfig["rules"]["filter_variants_in_bed"]["rtg"],
+        bedfile = pipeconfig["rules"]["filter_variants_in_bed"]["bedfile"],
     output:
         "{stype}/{caller}/{sname}_{vcftype}_refseq3kfilt.vcf"
     run:
@@ -23,16 +23,16 @@ rule upload_to_iva:
     input:
         "{stype}/{caller}/{sname}_{vcftype}_refseq3kfilt.vcf"     
     params:
-        clcserver = config["rules"]["upload_to_iva"]["clcserver"],
-        clcport = config["rules"]["upload_to_iva"]["clcport"],
-        clcqueue = config["rules"]["upload_to_iva"]["clcqueue"],
-        clcuser = config["rules"]["upload_to_iva"]["clcuser"],
-        clccmd = config["rules"]["upload_to_iva"]["clccmd"],
-        passwords = config["rules"]["upload_to_iva"]["passwords"],
-        clusterclcdir = config["rules"]["upload_to_iva"]["clusterclcdir"],
-        clcref = config["rules"]["upload_to_iva"]["clcref"],
-        clcivadir = config["rules"]["upload_to_iva"]["clcivadir"],
-        clcivadir_servpath = config["rules"]["upload_to_iva"]["clcivadir_servpath"]
+        clcserver = pipeconfig["rules"]["upload_to_iva"]["clcserver"],
+        clcport = pipeconfig["rules"]["upload_to_iva"]["clcport"],
+        clcqueue = pipeconfig["rules"]["upload_to_iva"]["clcqueue"],
+        clcuser = pipeconfig["rules"]["upload_to_iva"]["clcuser"],
+        clccmd = pipeconfig["rules"]["upload_to_iva"]["clccmd"],
+        passwords = pipeconfig["rules"]["upload_to_iva"]["passwords"],
+        clusterclcdir = pipeconfig["rules"]["upload_to_iva"]["clusterclcdir"],
+        clcref = pipeconfig["rules"]["upload_to_iva"]["clcref"],
+        clcivadir = pipeconfig["rules"]["upload_to_iva"]["clcivadir"],
+        clcivadir_servpath = pipeconfig["rules"]["upload_to_iva"]["clcivadir_servpath"]
     output:
         "reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt"
     run:
