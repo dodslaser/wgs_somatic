@@ -7,7 +7,7 @@ from pathlib import Path
 import yaml
 import helpers
 
-__author__ = "Rickard 'Ricky' Rickardsson"
+__author__ = "Rickard 'Ricksy' Rickardsson"
 
 ###########################################################
 # Defining Non Cluster Rules
