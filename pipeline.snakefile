@@ -15,20 +15,20 @@ localrules: all, upload_to_iva, share_to_igv
 ##########################################################
 
 
-config = helpers.read_config()
-inputdict = helpers.read_inputfile()
+pipeconfig = helpers.read_config()
+#inputdict = helpers.read_inputfile()
 clusterconf = helpers.read_clusterconf()
 
 shell.executable("/bin/bash")
 
 analysistime = time.strftime("%Y-%m-%d-%H-%M-%S")
 
-normalfastqs = inputdict["normalfastqs"][0]
-normalname = inputdict["normalname"][0]
-tumorfastqs = inputdict["tumorfastqs"][0]
-tumorname = inputdict["tumorname"][0]
-igvuser = inputdict["igvuser"][0]
-ivauser = inputdict["ivauser"][0]
+normalfastqs = config["normalfastqs"]
+normalname = config["normalname"]
+tumorfastqs = config["tumorfastqs"]
+tumorname = config["tumorname"]
+igvuser = config["igvuser"]
+ivauser = config["ivauser"]
 
 sampleconfig = {}
 sampleconfig[normalname] = {}
@@ -57,8 +57,8 @@ else:
     t_pattern_r1 = '_R1_001.fastq.gz'
     t_pattern_r2 = '_R2_001.fastq.gz'
 
-sentieon = config["sentieon"]
-referencegenome = config["referencegenome"]
+sentieon = pipeconfig["sentieon"]
+referencegenome = pipeconfig["referencegenome"]
 
 if igvuser and not ivauser:
     rule all:

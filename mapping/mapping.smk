@@ -38,7 +38,7 @@ rule mapping:
         sentieon = sentieon,
         samplename = get_samplename,
         referencegenome = referencegenome,
-        outputdir = config["rules"]["mapping"]["outputdir"]
+        outputdir = pipeconfig["rules"]["mapping"]["outputdir"]
     output:
         "{stype}/mapping/{fastqpattern}.bam"
     run:
@@ -53,7 +53,7 @@ rule dedup:
         threads = clusterconf["dedup"]["threads"],
         samplename = get_samplename,
         sentieon = sentieon,
-        outputdir = config["rules"]["mapping"]["outputdir"]
+        outputdir = pipeconfig["rules"]["mapping"]["outputdir"]
     run:
         inp_bamfiles = ""
         for bamfile in input.bamfiles:
@@ -68,9 +68,9 @@ rule realign_mapping:
         threads = clusterconf["realign_mapping"]["threads"],
         sentieon = sentieon,
         referencegenome = referencegenome,
-        mills = config["rules"]["realign"]["mills"],
-        tgenomes = config["rules"]["realign"]["tgenomes"],
-        outputdir = config["rules"]["realign"]["outputdir"]
+        mills = pipeconfig["rules"]["realign"]["mills"],
+        tgenomes = pipeconfig["rules"]["realign"]["tgenomes"],
+        outputdir = pipeconfig["rules"]["realign"]["outputdir"]
     output:
         "{stype}/realign/{sname}_REALIGNED.bam"
     run:
@@ -83,10 +83,10 @@ rule baserecal:
         threads = clusterconf["baserecal"]["threads"],
         sentieon = sentieon,
         referencegenome = referencegenome,
-        dbsnp = config["rules"]["recal"]["dbsnp"],
-        mills = config["rules"]["recal"]["mills"],
-        tgenomes = config["rules"]["recal"]["tgenomes"],
-        outputdir = config["rules"]["recal"]["outputdir"]
+        dbsnp = pipeconfig["rules"]["recal"]["dbsnp"],
+        mills = pipeconfig["rules"]["recal"]["mills"],
+        tgenomes = pipeconfig["rules"]["recal"]["tgenomes"],
+        outputdir = pipeconfig["rules"]["recal"]["outputdir"]
     output:
         "{stype}/recal/{sname}_RECAL_DATA.TABLE"
     run:

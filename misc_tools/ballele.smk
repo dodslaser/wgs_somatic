@@ -5,7 +5,7 @@ rule ballele_plot:
     input:
         "{stype}/dnascope/{sname}_germline.vcf"
     params:
-        ballele = config["rules"]["ballele_plot"]["ballele"]
+        ballele = pipeconfig["rules"]["ballele_plot"]["ballele"]
     output:
         "{stype}/reports/{sname}_baf.igv"
     run:

@@ -6,15 +6,15 @@ rule manta_germline:
     input:
         expand("{stype}/realign/{sname}_REALIGNED.bam", sname=normalname, stype=sampleconfig[normalname]["stype"])
     params:
-        reference = config["referencegenome"],
-        svdb = config["rules"]["manta"]["svdb"],
-        mantaconf = config["rules"]["manta"]["mantaconf"], 
-        annotate = config["rules"]["manta"]["annotate"],
-        annotate_ref = config["rules"]["manta"]["annotate_ref"],
-        swegendb = config["rules"]["manta"]["swegendb"],
-        gnomaddb = config["rules"]["manta"]["gnomaddb"],
-        localdb = config["rules"]["manta"]["localdb"],
-        bcftools = config["rules"]["manta"]["bcftools"] 
+        reference = pipeconfig["referencegenome"],
+        svdb = pipeconfig["rules"]["manta"]["svdb"],
+        mantaconf = pipeconfig["rules"]["manta"]["mantaconf"], 
+        annotate = pipeconfig["rules"]["manta"]["annotate"],
+        annotate_ref = pipeconfig["rules"]["manta"]["annotate_ref"],
+        swegendb = pipeconfig["rules"]["manta"]["swegendb"],
+        gnomaddb = pipeconfig["rules"]["manta"]["gnomaddb"],
+        localdb = pipeconfig["rules"]["manta"]["localdb"],
+        bcftools = pipeconfig["rules"]["manta"]["bcftools"] 
     output:
         "{stype}/manta/{sname}_germline_mantaSV.vcf",
         "{stype}/manta/{sname}_germline_mantaSV.vcf.xlsx",
@@ -42,15 +42,15 @@ rule manta_somatic:
         tumorbam = expand("{stype}/realign/{sname}_REALIGNED.bam", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
         normalbam = expand("{stype}/realign/{sname}_REALIGNED.bam", sname=normalname, stype=sampleconfig[normalname]["stype"])
     params:
-        reference = config["referencegenome"],
-        svdb = config["rules"]["manta"]["svdb"],
-        mantaconf = config["rules"]["manta"]["mantaconf"],
-        annotate = config["rules"]["manta"]["annotate"],
-        annotate_ref = config["rules"]["manta"]["annotate_ref"],
-        swegendb = config["rules"]["manta"]["swegendb"],
-        gnomaddb = config["rules"]["manta"]["gnomaddb"],
-        localdb = config["rules"]["manta"]["localdb"],
-        bcftools = config["rules"]["manta"]["bcftools"]
+        reference = pipeconfig["referencegenome"],
+        svdb = pipeconfig["rules"]["manta"]["svdb"],
+        mantaconf = pipeconfig["rules"]["manta"]["mantaconf"],
+        annotate = pipeconfig["rules"]["manta"]["annotate"],
+        annotate_ref = pipeconfig["rules"]["manta"]["annotate_ref"],
+        swegendb = pipeconfig["rules"]["manta"]["swegendb"],
+        gnomaddb = pipeconfig["rules"]["manta"]["gnomaddb"],
+        localdb = pipeconfig["rules"]["manta"]["localdb"],
+        bcftools = pipeconfig["rules"]["manta"]["bcftools"]
     output:
         "{stype}/manta/{sname}_somatic_mantaSV.vcf",
         "{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx",

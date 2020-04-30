@@ -13,8 +13,8 @@ rule tnscope:
         normalname = normalname,
         sentieon = sentieon,
         referencegenome = referencegenome,
-        dbsnp = config["rules"]["tnscope"]["dbsnp"],
-        callsettings = config["rules"]["tnscope"]["settings"],
+        dbsnp = pipeconfig["rules"]["tnscope"]["dbsnp"],
+        callsettings = pipeconfig["rules"]["tnscope"]["settings"],
     output:
         "{stype}/tnscope/{sname}_TNscope_tn.vcf"
     run:
@@ -27,7 +27,7 @@ rule tnscope_modelfilter:
         threads = clusterconf["tnscope_modelfilter"]["threads"],
         sentieon = sentieon,
         referencegenome = referencegenome,
-        modelpath = config["rules"]["tnscope_modelfilter"]["modelpath"],
+        modelpath = pipeconfig["rules"]["tnscope_modelfilter"]["modelpath"],
     output:
         "{stype}/tnscope/{sname}_TNscope_tn_ML.vcf"
     run:
@@ -38,8 +38,8 @@ rule tnscope_vcffilter:
         tnscopevcf_ml = "{stype}/tnscope/{sname}_TNscope_tn_ML.vcf"
     params:
         threads = clusterconf["tnscope_vcffilter"]["threads"],
-        outputdir = config["rules"]["tnscope_vcffilter"]["outputdir"],
-        bcftools = config["rules"]["tnscope_vcffilter"]["bcftools"]
+        outputdir = pipeconfig["rules"]["tnscope_vcffilter"]["outputdir"],
+        bcftools = pipeconfig["rules"]["tnscope_vcffilter"]["bcftools"]
     output:
         "{stype}/tnscope/{sname}_somatic.vcf"
     run:
