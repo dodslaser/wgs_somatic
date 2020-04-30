@@ -1,0 +1,113 @@
+{
+    "referencegenome": "/apps/bio/software/Senteion/reference_sets/new/hs37d5.fa",
+    "sentieon": "/apps/bio/software/Sentieon/sentieon-genomics-201911/bin/sentieon",
+    "rules":
+    {
+        "mapping":
+        {
+            "outputdir": "mapping"
+        },
+        "dedup":
+        {
+            "outputdir": "dedup"
+        },
+        "realign":
+        {
+            "outputdir": "realign",
+            "tgenomes": "/apps/bio/repos/wgs_pipeline_somatic/databases/1000G_phase1.indels.b37.vcf.gz",
+            "mills": "/apps/bio/repos/wgs_pipeline_somatic/databases/Mills_and_1000G_gold_standard.indels.b37.vcf.gz"
+        },
+        "recal":
+        {
+            "outputdir": "recal",
+            "tgenomes": "/apps/bio/repos/wgs_pipeline_somatic/databases/1000G_phase1.indels.b37.vcf.gz",
+            "mills": "/apps/bio/repos/wgs_pipeline_somatic/databases/Mills_and_1000G_gold_standard.indels.b37.vcf.gz",
+            "dbsnp": "/apps/bio/repos/wgs_pipeline_somatic/databases/dbsnp_138.b37.vcf.gz"
+        },
+        "tnscope":
+        {
+            "outputdir": "tumor/tnscope",
+            "dbsnp": "/apps/bio/repos/wgs_pipeline_somatic/databases/dbsnp_138.b37.vcf.gz",
+            "settings": "--min_init_normal_lod 0,5 --min_normal_lod 2,0 --min_init_tumor_lod 1,0 --min_tumor_lod 2,8 --trim_soft_clip"
+        },
+        "tnscope_modelfilter":
+        {
+            "outputdir": "tumor/tnscope",
+            "modelpath": "/apps/bio/repos/wgs_pipeline_somatic/databases/sentieonfiles/Sentieon_GiAB_201711.model"
+        },
+        "tnscope_vcffilter":
+        {
+            "bcftools": "/apps/bio/software/bcftools/1.9/bin/bcftools",
+            "outputdir": "tumor/tnscope"
+        },
+        "dnascope":
+        {
+            "settings": "--pcr_indel_model NONE",
+            "modelpath": "/apps/bio/repos/wgs_pipeline_somatic/tools/sentieon/SentieonDNAscopeModelBeta0.5.model",
+            "dbsnp": "/apps/bio/repos/wgs_pipeline_somatic/databases/dbsnp_138.b37.vcf.gz"
+        },
+        "dnascope_modelfilter":
+        {
+            "modelpath": "/apps/bio/repos/wgs_pipeline_somatic/tools/sentieon/SentieonDNAscopeModelBeta0.5.model"
+        },
+        "dnascope_vcffilter":
+        {
+            "bcftools": "/apps/bio/software/bcftools/1.9/bin/bcftools",
+            "vcftools": "/apps/bio/apps/vcftools/0.1.12a/bin/vcftools"
+        },
+        "ballele_plot":
+        {
+            "ballele": "/apps/bio/repos/wgs_pipeline_somatic/tools/localrepos/b_allele_igv_plot/plot_b_allele_freq.py"
+        },
+        "generate_tdf":
+        {
+            "tdfgen": "/apps/bio/repos/wgs_pipeline_somatic/tools/IGVTools/igvtools.jar"
+        },
+        "canvas":
+        {
+            "annotate": "/apps/bio/repos/wgs_pipeline_somatic/tools/localrepos/annotate_manta/annotate_manta_dev.py",
+            "annotate_ref": "/apps/bio/repos/wgs_pipeline_somatic/tools/localrepos/annotate_manta/refseq_20190301_ncbiRefSeq",            
+            "canvasdll": "/apps/bio/software/canvas/Canvas-1.40.0.1613+master_x64/Canvas.dll",
+            "dotnet": "/opt/rh/rh-dotnet20/root/usr/bin/dotnet",
+            "genomedir": "/apps/bio/repos/wgs_pipeline_somatic/tools/canvas_files/WholeGenomeFasta/",
+            "reference": "/apps/bio/repos/wgs_pipeline_somatic/tools/canvas_files/WholeGenomeFasta/kmer.fa",
+            "filter13": "/apps/bio/repos/wgs_pipeline_somatic/tools/canvas_files/filter13.bed",
+            "malevcf": "/apps/bio/repos/wgs_pipeline_somatic/tools/canvas_files/male_hg19.vcf",
+            "femalevcf": "/apps/bio/repos/wgs_pipeline_somatic/tools/canvas_files/female_hg19.vcf"
+        },
+        "share_to_igv":
+        {
+            "igvdatadir": "/seqstore/webfolders/igv/data",
+            "updateigv": "/apps/bio/repos/igv_xml_sync/igv_xml_sync.sh"
+        },
+        "filter_variants_in_bed":
+        {
+            "rtg": "/apps/bio/repos/wgs_pipeline_somatic/tools/rtg-tools-3.9.1-6dde278/rtg",
+            "bedfile": "/apps/bio/repos/wgs_pipeline_somatic/databases/mt_chrrenamed_refseq_20190301_ncbiRefSeq_expanded_3000bases.bed" 
+        },
+        "manta":
+        {
+            "svdb": "/apps/bio/software/anaconda2/envs/svdb2.3/bin/svdb",
+            "mantaconf": "/apps/bio/repos/wgs_pipeline_somatic/tools/manta-1.6.0.centos6_x86_64/bin/configManta.py",
+            "annotate": "/apps/bio/repos/wgs_pipeline_somatic/tools/localrepos/annotate_manta/annotate_manta_dev.py",
+            "annotate_ref": "/apps/bio/repos/wgs_pipeline_somatic/tools/localrepos/annotate_manta/refseq_20190301_ncbiRefSeq",
+            "swegendb": "/apps/bio/repos/wgs_pipeline_somatic/databases/sv_dbs/SweGen_MANTA.sort.vcf",
+            "gnomaddb": "/apps/bio/repos/wgs_pipeline_somatic/databases/sv_dbs/gnomad_v2_sv.sites.vcf",
+            "localdb": "/apps/bio/repos/wgs_pipeline_somatic/databases/sv_dbs/allmanta_20200318_svdb2.3.db",
+            "bcftools": "/apps/bio/software/bcftools/1.9/bin/bcftools"
+        },
+        "upload_to_iva":
+        {
+            "clcserver": "medair.sahlgrenska.gu.se",
+            "clcport": "7777",
+            "clcqueue": "clinical-production",
+            "clcuser": "cmduser",
+            "clccmd": "/apps/clcservercmdline/clcserver", 
+            "passwords": "/root/password_config.json",
+            "clusterclcdir": "/medstore/Development/Sentieon/ingenuity_upload_directory/barncancer",
+            "clcref": "clc://server/CLC_References/homo_sapiens/sequence/hg19/Homo_sapiens_sequence_hg19",
+            "clcivadir": "clc://server/CLC_Data_Folders/Admin/Mathias/Trashcan/IVA_waitingroom",
+            "clcivadir_servpath": "/medstore/CLC_Data_Folders/Admin/Mathias/Trashcan/IVA_waitingroom"
+        }
+    }
+}
