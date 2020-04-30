@@ -1,0 +1,12 @@
+normalname:
+    - "ST475N"
+normalfastqs:
+    - "/seqstore/backups/tommy_martinsson/ST475N"
+tumorname:
+    - "ST475T"
+tumorfastqs:
+    - "/seqstore/backups/tommy_martinsson/ST475T"
+igvuser:
+    - "susanne.fransson"
+ivauser:
+    - ""
