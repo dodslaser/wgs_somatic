@@ -48,7 +48,8 @@ rule dedup:
     input:
         bamfiles = get_mapping
     output:
-        "{stype}/dedup/{sname}_DEDUP.bam"
+        "{stype}/dedup/{sname}_DEDUP.bam",
+        "{stype}/dedup/{sname}_DEDUP_score.txt"
     params:
         threads = clusterconf["dedup"]["threads"],
         samplename = get_samplename,
