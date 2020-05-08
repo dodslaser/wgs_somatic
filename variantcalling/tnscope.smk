@@ -45,13 +45,13 @@ rule tnscope_vcffilter:
     run:
         vcfname = os.path.basename(f"{input.tnscopevcf_ml}")
         vcfname = vcfname.replace(".vcf", "")
-        shell_command = [f"{params.bcftools} filter -s LowQual -e 'QUAL < 1' -m + {input.tnscopevcf_ml}", f">> {params.outputdir}/{vcfname}_lowqual1.vcf ;",
-                        f"{params.bcftools} annotate -x FILTER/triallelic_site {params.outputdir}/{vcfname}_lowqual1.vcf", f">> {params.outputdir}/{vcfname}_triallelic2.vcf ;",
-                        f"{params.bcftools} annotate -x FILTER/alt_allele_in_normal {params.outputdir}/{vcfname}_triallelic2.vcf", f">> {params.outputdir}/{vcfname}_altalleleinnormal4.vcf ;",
-                        f"{params.bcftools} filter -s uncertainAF -e 'FORMAT/AF[0]<0.045 && FORMAT/AD[0:1]<4' -m + {params.outputdir}/{vcfname}_altalleleinnormal4.vcf", f">> {params.outputdir}/{vcfname}_uncertainaf6.vcf ;",
-                        f"{params.bcftools} filter -s likely_artifact -e 'FORMAT/AF[0]<0.1 && FORMAT/AD[1:1]>1' -m + {params.outputdir}/{vcfname}_uncertainaf6.vcf", f">> {params.outputdir}/{vcfname}_likelyartifact7.vcf ;",
-                        f"{params.bcftools} filter -s MLrejected -e 'INFO/ML_PROB<0.37' -m + {params.outputdir}/{vcfname}_likelyartifact7.vcf", f">> {params.outputdir}/{vcfname}_mladjusted8.vcf ;",
-                        f"cp {params.outputdir}/{vcfname}_likelyartifact7.vcf {output}"]
+        shell_command = [f"{params.bcftools} filter -s LowQual -e 'QUAL < 1' -m + {input.tnscopevcf_ml}", f"> {params.outputdir}/{vcfname}_lowqual1.vcf ;",
+                        f"{params.bcftools} annotate -x FILTER/triallelic_site {params.outputdir}/{vcfname}_lowqual1.vcf", f"> {params.outputdir}/{vcfname}_triallelic2.vcf ;",
+                        f"{params.bcftools} annotate -x FILTER/alt_allele_in_normal {params.outputdir}/{vcfname}_triallelic2.vcf", f"> {params.outputdir}/{vcfname}_altalleleinnormal4.vcf ;",
+                        f"{params.bcftools} filter -s uncertainAF -e 'FORMAT/AF[0]<0.045 && FORMAT/AD[0:1]<4' -m + {params.outputdir}/{vcfname}_altalleleinnormal4.vcf", f"> {params.outputdir}/{vcfname}_uncertainaf6.vcf ;",
+                        f"{params.bcftools} filter -s likely_artifact -e 'FORMAT/AF[0]<0.1 && FORMAT/AD[1:1]>1' -m + {params.outputdir}/{vcfname}_uncertainaf6.vcf", f"> {params.outputdir}/{vcfname}_likelyartifact7.vcf ;",
+                        f"{params.bcftools} filter -s MLrejected -e 'INFO/ML_PROB<0.37' -m + {params.outputdir}/{vcfname}_likelyartifact7.vcf", f"> {params.outputdir}/{vcfname}_mladjusted8.vcf ;",
+                        f"{params.bcftools} filter -i 'FILTER=\"PASS\"' {params.outputdir}/{vcfname}_likelyartifact7.vcf > {output}"]
         shell_command = " ".join(shell_command)
         print(shell_command)      
         shell(shell_command)

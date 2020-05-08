@@ -59,7 +59,11 @@
         {
             "ballele": "/apps/bio/repos/wgs_somatic/tools/localrepos/b_allele_igv_plot/plot_b_allele_freq.py"
         },
-        "generate_tdf":
+        "excel_qc":
+        {
+            "qcsumscript": "/apps/bio/repos/wgs_somatic/misc_tools/create_qc_excel.py"    
+        }, 
+       "generate_tdf":
         {
             "tdfgen": "/apps/bio/repos/wgs_somatic/tools/IGVTools/igvtools.jar"
         },

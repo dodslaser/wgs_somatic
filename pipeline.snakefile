@@ -11,12 +11,11 @@ __author__ = "Rickard 'Ricksy' Rickardsson"
 
 ###########################################################
 # Defining Non Cluster Rules
-localrules: all, upload_to_iva, share_to_igv
+localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir
 ##########################################################
 
 
 pipeconfig = helpers.read_config()
-#inputdict = helpers.read_inputfile()
 clusterconf = helpers.read_clusterconf()
 
 shell.executable("/bin/bash")
@@ -63,58 +62,24 @@ referencegenome = pipeconfig["referencegenome"]
 if igvuser and not ivauser:
     rule all:
         input:
-            expand("{stype}/tnscope/{sname}_somatic.vcf", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/dnascope/{sname}_germline.vcf", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/dnascope/{sname}_germline.vcf", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/reports/{sname}_WGScov.tsv", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/reports/{sname}_WGScov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/reports/{sname}_Ycov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"]),
             "reporting/shared_igv_files.txt",
-            expand("{stype}/manta/{sname}_germline_mantaSV.vcf", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/manta/{sname}_germline_mantaSV.vcf.xlsx", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/manta/{sname}_somatic_mantaSV.vcf", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/canvas/{sname}_CNV_somatic.vcf.xlsx", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/canvas/{sname}_CNV_germline.vcf.xlsx", sname=normalname, stype=sampleconfig[normalname]["stype"])
+            "reporting/workflow_finished.txt"
 
 elif igvuser and ivauser:
     rule all:
         input:
-            expand("{stype}/tnscope/{sname}_somatic.vcf", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/dnascope/{sname}_germline.vcf", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/dnascope/{sname}_germline.vcf", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/reports/{sname}_WGScov.tsv", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/reports/{sname}_WGScov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/reports/{sname}_Ycov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"]),
             "reporting/shared_igv_files.txt",
             expand("reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", sname=normalname, stype=sampleconfig[normalname]["stype"], caller="dnascope", vcftype="germline"),
             expand("reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", sname=tumorname, stype=sampleconfig[tumorname]["stype"], caller="tnscope", vcftype="somatic"),
-            expand("{stype}/manta/{sname}_germline_mantaSV.vcf", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/manta/{sname}_germline_mantaSV.vcf.xlsx", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/manta/{sname}_somatic_mantaSV.vcf", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/canvas/{sname}_CNV_somatic.vcf.xlsx", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/canvas/{sname}_CNV_germline.vcf.xlsx", sname=normalname, stype=sampleconfig[normalname]["stype"])
-
+            "reporting/workflow_finished.txt"
 else:
     rule all:
         input:
-            expand("{stype}/tnscope/{sname}_somatic.vcf", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/dnascope/{sname}_germline.vcf", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/dnascope/{sname}_germline.vcf", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/reports/{sname}_baf.igv", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/reports/{sname}_WGScov.tsv", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/reports/{sname}_WGScov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/reports/{sname}_Ycov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/canvas/{sname}_CNV_germline.vcf", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/canvas/{sname}_CNV_somatic.vcf", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/canvas/{sname}_{vartype}_CNV_observed.seg", vartype="somatic", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/canvas/{sname}_{vartype}_CNV_called.seg", vartype="somatic", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/canvas/{sname}_{vartype}_CNV_observed.seg", vartype="germline", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/canvas/{sname}_{vartype}_CNV_called.seg", vartype="germline", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-            expand("{stype}/reports/{sname}_REALIGNED.bam.tdf", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-            expand("{stype}/reports/{sname}_REALIGNED.bam.tdf",  sname=normalname, stype=sampleconfig[normalname]["stype"])
+            "reporting/workflow_finished.txt"
 
+########################################
+# Workflows
+include:        "workflows/tn_workflow.smk"
 
 ########################################
 # Mapping 
@@ -132,8 +97,10 @@ include:        "variantcalling/manta.smk"
 #########################################
 # QC
 include:        "qc/coverage.smk"
+include:        "qc/aggregate_qc.smk"
 
 #########################################
 # ResultSharing:
 include:        "results_sharing/share_to_igv.smk"
+include:        "results_sharing/share_to_resultdir.smk"
 include:        "results_sharing/upload_to_iva.smk"
