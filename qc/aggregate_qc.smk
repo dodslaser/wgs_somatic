@@ -6,8 +6,8 @@ rule excel_qc:
     input:
         tumorcov = expand("{stype}/reports/{sname}_WGScov.tsv", stype=sampleconfig[tumorname]["stype"], sname=tumorname),
         normalcov = expand("{stype}/reports/{sname}_WGScov.tsv", stype=sampleconfig[normalname]["stype"], sname=normalname),
-        tumordedup = expand("{stype}/dedup/{sname}_DEDUP_score.txt", stype=sampleconfig[tumorname]["stype"], sname=tumorname),
-        normaldedup = expand("{stype}/dedup/{sname}_DEDUP_score.txt", stype=sampleconfig[normalname]["stype"], sname=normalname),
+        tumordedup = expand("{stype}/dedup/{sname}_DEDUP.txt", stype=sampleconfig[tumorname]["stype"], sname=tumorname),
+        normaldedup = expand("{stype}/dedup/{sname}_DEDUP.txt", stype=sampleconfig[normalname]["stype"], sname=normalname),
         tumorvcf = expand("{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", stype=sampleconfig[tumorname]["stype"], sname=tumorname),
         normalvcf = expand("{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", stype=sampleconfig[normalname]["stype"], sname=normalname),
         tumorcanvas = expand("{stype}/canvas/{sname}_CNV_somatic.vcf", stype=sampleconfig[tumorname]["stype"], sname=tumorname)

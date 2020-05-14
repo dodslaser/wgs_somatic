@@ -11,7 +11,7 @@ __author__ = "Rickard 'Ricksy' Rickardsson"
 
 ###########################################################
 # Defining Non Cluster Rules
-localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir
+localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
 ##########################################################
 
 
