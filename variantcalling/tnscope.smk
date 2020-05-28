@@ -41,7 +41,8 @@ rule tnscope_vcffilter:
         outputdir = pipeconfig["rules"]["tnscope_vcffilter"]["outputdir"],
         bcftools = pipeconfig["rules"]["tnscope_vcffilter"]["bcftools"]
     output:
-        "{stype}/tnscope/{sname}_somatic.vcf"
+        somatic_n = "{stype}/tnscope/{sname}_somatic_w_normal.vcf",
+        somatic = "{stype}/tnscope/{sname}_somatic.vcf"
     run:
         vcfname = os.path.basename(f"{input.tnscopevcf_ml}")
         vcfname = vcfname.replace(".vcf", "")
@@ -51,7 +52,8 @@ rule tnscope_vcffilter:
                         f"{params.bcftools} filter -s uncertainAF -e 'FORMAT/AF[0]<0.045 && FORMAT/AD[0:1]<4' -m + {params.outputdir}/{vcfname}_altalleleinnormal4.vcf", f"> {params.outputdir}/{vcfname}_uncertainaf6.vcf ;",
                         f"{params.bcftools} filter -s likely_artifact -e 'FORMAT/AF[0]<0.1 && FORMAT/AD[1:1]>1' -m + {params.outputdir}/{vcfname}_uncertainaf6.vcf", f"> {params.outputdir}/{vcfname}_likelyartifact7.vcf ;",
                         f"{params.bcftools} filter -s MLrejected -e 'INFO/ML_PROB<0.37' -m + {params.outputdir}/{vcfname}_likelyartifact7.vcf", f"> {params.outputdir}/{vcfname}_mladjusted8.vcf ;",
-                        f"{params.bcftools} filter -i 'FILTER=\"PASS\"' {params.outputdir}/{vcfname}_likelyartifact7.vcf > {output}"]
+                        f"{params.bcftools} filter -i 'FILTER=\"PASS\"' {params.outputdir}/{vcfname}_likelyartifact7.vcf > {output.somatic_n} ;",
+                        f"{params.bcftools} view -s {wildcards.sname} {output.somatic_n} > {output.somatic}"]
         shell_command = " ".join(shell_command)
         print(shell_command)      
         shell(shell_command)
