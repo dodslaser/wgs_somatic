@@ -70,12 +70,11 @@ rule realign_mapping:
         sentieon = sentieon,
         referencegenome = referencegenome,
         mills = pipeconfig["rules"]["realign"]["mills"],
-        tgenomes = pipeconfig["rules"]["realign"]["tgenomes"],
         outputdir = pipeconfig["rules"]["realign"]["outputdir"]
     output:
         "{stype}/realign/{sname}_REALIGNED.bam"
     run:
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo Realigner -k {params.mills} -k {params.tgenomes} {output}")
+        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo Realigner -k {params.mills} {output}")
 
 rule baserecal:
     input:
@@ -86,9 +85,8 @@ rule baserecal:
         referencegenome = referencegenome,
         dbsnp = pipeconfig["rules"]["recal"]["dbsnp"],
         mills = pipeconfig["rules"]["recal"]["mills"],
-        tgenomes = pipeconfig["rules"]["recal"]["tgenomes"],
         outputdir = pipeconfig["rules"]["recal"]["outputdir"]
     output:
         "{stype}/recal/{sname}_RECAL_DATA.TABLE"
     run:
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo QualCal -k {params.mills} -k {params.dbsnp} -k {params.tgenomes} {output}")
+        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo QualCal -k {params.mills} -k {params.dbsnp} {output}")

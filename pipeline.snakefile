@@ -9,25 +9,25 @@ import helpers
 
 __author__ = "Rickard 'Ricksy' Rickardsson"
 
-###########################################################
-# Defining Non Cluster Rules
-localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
-##########################################################
-
-
-pipeconfig = helpers.read_config()
-clusterconf = helpers.read_clusterconf()
-
-shell.executable("/bin/bash")
-
-analysistime = time.strftime("%Y-%m-%d-%H-%M-%S")
-
 normalfastqs = config["normalfastqs"]
 normalname = config["normalname"]
 tumorfastqs = config["tumorfastqs"]
 tumorname = config["tumorname"]
 igvuser = config["igvuser"]
 ivauser = config["ivauser"]
+reference = config["reference"]
+
+if reference == "hg38":
+    configfilepath = "configs/config_hg38.json"
+else:
+    configfilepath = "configs/config_hg19.json"
+
+pipeconfig = helpers.read_config(configfilepath)
+clusterconf = helpers.read_clusterconf()
+
+shell.executable("/bin/bash")
+
+analysistime = time.strftime("%Y-%m-%d-%H-%M-%S")
 
 sampleconfig = {}
 sampleconfig[normalname] = {}
@@ -59,6 +59,49 @@ else:
 sentieon = pipeconfig["sentieon"]
 referencegenome = pipeconfig["referencegenome"]
 
+
+###########################################################
+# Defining Non Cluster Rules
+localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
+###########################################################
+
+########################################
+# Workflows
+include:        "workflows/tn_workflow.smk"
+
+########################################
+# Mapping
+include:        "mapping/mapping.smk"
+include:        "mapping/generate_tdf.smk"
+
+#########################################
+# VariantCalling
+include:        "variantcalling/tnscope.smk"
+include:        "variantcalling/dnascope.smk"
+include:        "misc_tools/ballele.smk"
+include:        "variantcalling/canvas.smk"
+include:        "variantcalling/manta.smk"
+
+#########################################
+# QC
+include:        "qc/coverage.smk"
+include:        "qc/aggregate_qc.smk"
+
+#########################################
+# ResultSharing:
+include:        "results_sharing/share_to_igv.smk"
+include:        "results_sharing/share_to_resultdir.smk"
+include:        "results_sharing/upload_to_iva.smk"
+
+if reference == "hg38":
+    ###########################################################
+    # HG38 rules
+    ###########################################################
+    # Mapping
+    include:    "mapping/mapping_hg38.smk"
+    # Variantcalling
+    include:    "variantcalling/manta_hg38.smk"
+
 if igvuser and not ivauser:
     rule all:
         input:
@@ -77,30 +120,3 @@ else:
         input:
             "reporting/workflow_finished.txt"
 
-########################################
-# Workflows
-include:        "workflows/tn_workflow.smk"
-
-########################################
-# Mapping 
-include:        "mapping/mapping.smk"
-include:        "mapping/generate_tdf.smk"
-
-########################################
-# VariantCalling
-include:        "variantcalling/tnscope.smk"
-include:        "variantcalling/dnascope.smk"
-include:        "misc_tools/ballele.smk"
-include:        "variantcalling/canvas.smk"
-include:        "variantcalling/manta.smk"
-
-#########################################
-# QC
-include:        "qc/coverage.smk"
-include:        "qc/aggregate_qc.smk"
-
-#########################################
-# ResultSharing:
-include:        "results_sharing/share_to_igv.smk"
-include:        "results_sharing/share_to_resultdir.smk"
-include:        "results_sharing/upload_to_iva.smk"
