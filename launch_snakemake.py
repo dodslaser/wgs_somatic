@@ -37,7 +37,7 @@ def logger(message, logfile=False):
         logfile.write(f"{get_time()}: {message}" + "\n")
     print(message)
 
-def analysis_main(args, output, normalname, normalfastqs, tumorname, tumorfastqs, ivauser="", igvuser=""):
+def analysis_main(args, output, normalname, normalfastqs, tumorname, tumorfastqs, ivauser="", igvuser="", hg38ref=""):
     try:
         ################################################################
         # Write InputArgs to logfile
@@ -65,6 +65,21 @@ def analysis_main(args, output, normalname, normalfastqs, tumorname, tumorfastqs
         # Validate Inputs
         ################################################################
         error_list = []
+
+        if hg38ref:
+            logger(f"hg38 argument given with value: {hg38ref}")
+            if hg38ref != "yes":
+                logger("argument is not yes, if you want hg19 simply dont provide hg38 argument, exiting")
+                error_list.append(f"invalid hg38 argument value: {hg38ref}")
+        
+        if hg38ref == "yes":
+            mainconf = "hg38conf"
+        else:
+            mainconf = "hg19conf"
+        configdir = config["configdir"]
+        mainconf_name = config[mainconf]
+        mainconf_path = f"{configdir}/{mainconf_name}"
+
         # validate fastqdirs
         if not os.path.isdir(normalfastqs):
             error_list.append(f"{normalfastqs} does not appear to be a directory")
@@ -81,7 +96,7 @@ def analysis_main(args, output, normalname, normalfastqs, tumorname, tumorfastqs
         
         # validate iva and igv users if supplied
         if igvuser:
-            mainconf = helpers.read_config()
+            mainconf = helpers.read_config(mainconf_path)
             igvdatadir = mainconf["rules"]["share_to_igv"]["igvdatadir"]
             if not os.path.isdir(f"{igvdatadir}/{igvuser}"):
                 error_list.append(f"{igvuser} does not appear to be a valid preconfigured IGV user")
@@ -96,13 +111,16 @@ def analysis_main(args, output, normalname, normalfastqs, tumorname, tumorfastqs
                 os.mkdir(output)
             except Exception as e:
                 error_list.append(f"outputdirectory: {output} does not exist and could not be created")
+
         if error_list:
-            logger("Errors found in arguments to script:")
-            for arg in vars(args):
-                logger(f"{arg} = {getattr(args, arg)}")
-            for error in error_list:
-                logger(error)
-        
+                logger("Errors found in arguments to script:")
+                for arg in vars(args):
+                    logger(f"{arg} = {getattr(args, arg)}")
+                for error in error_list:
+                    logger(error)
+                logger("Exiting")
+                sys.exit()
+
         #################################################################
         # Prepare AnalysisFolder
         #################################################################
@@ -113,10 +131,11 @@ def analysis_main(args, output, normalname, normalfastqs, tumorname, tumorfastqs
         if not os.path.isdir(runconfigs):
             os.mkdir(runconfigs)
         
-        configdir = config["configdir"]
-        for configfile in config["configfiles"]:
-            copyfile(f"{configdir}/{configfile}", f"{runconfigs}/{configfile}")
-       
+        # copying configfiles to analysisdir
+        clusterconf = config["clusterconf"]
+        copyfile(f"{configdir}/{clusterconf}", f"{runconfigs}/{clusterconf}")
+        copyfile(f"{configdir}/{mainconf_name}", f"{runconfigs}/{mainconf_name}")
+
         samplelog = f"{samplelogs}/{tumorname}.log"
         logger("Input validated:", samplelog)
         logger(f"{command}", samplelog)
@@ -124,7 +143,7 @@ def analysis_main(args, output, normalname, normalfastqs, tumorname, tumorfastqs
         logger(f"{f_normalfastqs}", samplelog)
         logger("Fastqs found for tumor:", samplelog)
         logger(f"{f_tumorfastqs}", samplelog)
-
+        
         ##################################################################
         # Create AnalysisConfigfile
         ##################################################################
@@ -135,6 +154,12 @@ def analysis_main(args, output, normalname, normalfastqs, tumorname, tumorfastqs
         analysisdict["tumorfastqs"] = tumorfastqs
         analysisdict["igvuser"] = igvuser
         analysisdict["ivauser"] = ivauser
+
+        if hg38ref == "yes":
+            analysisdict["reference"] = "hg38"
+        else:
+            analysisdict["reference"] = "hg19"
+
         with open(f"{runconfigs}/{tumorname}_config.json", 'w') as analysisconf:
             json.dump(analysisdict, analysisconf, ensure_ascii=False, indent=4)
         ###################################################################
@@ -165,5 +190,6 @@ if __name__ == '__main__':
     parser.add_argument('-tf', '--tumorfastqs', nargs='?', help='path to directory containing tumor fastqs', required=True)
     parser.add_argument('-iva', '--ivauser', nargs='?', help='location to output results', required=False)
     parser.add_argument('-igv', '--igvuser', nargs='?', help='location to output results', required=False)
+    parser.add_argument('-hg38', '--hg38ref', nargs='?', help='run analysis on hg38 reference (write yes if you want this option)', required=False)
     args = parser.parse_args()
-    analysis_main(args, args.outputdir, args.normalsample, args.normalfastqs, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser)
+    analysis_main(args, args.outputdir, args.normalsample, args.normalfastqs, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser, args.hg38ref)

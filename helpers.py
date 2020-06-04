@@ -2,8 +2,8 @@
 import yaml
 import json
 
-def read_config():
-    with open("configs/config.json", 'r') as configfile:
+def read_config(configpath):
+    with open(configpath, 'r') as configfile:
         config_data = json.load(configfile)
         return config_data
 
