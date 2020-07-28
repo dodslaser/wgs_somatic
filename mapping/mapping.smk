@@ -9,18 +9,22 @@ def get_fastqpairs(wcs):
 
 def get_fwd_pattern(wcs):
     if f"{wcs.stype}" == "normal":
+        print(f"{normalfastqs}/{wcs.fastqpattern}{n_pattern_r1}")
         return f"{normalfastqs}/{wcs.fastqpattern}{n_pattern_r1}"
     else:
+        print(f"{tumorfastqs}/{wcs.fastqpattern}{t_pattern_r1}")
         return f"{tumorfastqs}/{wcs.fastqpattern}{t_pattern_r1}"
 
 def get_rev_pattern(wcs):
     if f"{wcs.stype}" == "normal":
+        print(f"{normalfastqs}/{wcs.fastqpattern}{n_pattern_r2}")
         return f"{normalfastqs}/{wcs.fastqpattern}{n_pattern_r2}"
     else:
+        print(f"{tumorfastqs}/{wcs.fastqpattern}{t_pattern_r2}")
         return f"{tumorfastqs}/{wcs.fastqpattern}{t_pattern_r2}"
 
 def get_samplename(wcs):
-    return sampleconfig[f"{wcs.stype}"]
+    return sampleconfig[f"{wcs.stype}name"]
 
 def get_mapping(wcs):
     if f"{wcs.stype}" == "normal":
@@ -42,7 +46,9 @@ rule mapping:
     output:
         "{stype}/mapping/{fastqpattern}.bam"
     run:
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} bwa mem -M -R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.samplename}\\tPL:ILLUMINA' -t 16 {params.referencegenome} {input.fwd} {input.rev} | {params.sentieon} util sort -o {output} -t 20 --sam2bam -i -")
+        print(fwd)
+        print(rev)
+        shell("export PETASUITE_REFPATH=/seqstore/software/petagene/corpus:/opt/petagene/petasuite/species; export LD_PRELOAD=/usr/lib/petalink.so; export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} bwa mem -M -R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.samplename}\\tPL:ILLUMINA' -t 16 {params.referencegenome} {input.fwd} {input.rev} | {params.sentieon} util sort -o {output} -t 20 --sam2bam -i -")
 
 rule dedup:
     input:
@@ -59,8 +65,8 @@ rule dedup:
         inp_bamfiles = ""
         for bamfile in input.bamfiles:
             inp_bamfiles = f"{inp_bamfiles}-i {bamfile} "
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo LocusCollector --fun score_info {wildcards.stype}/dedup/{params.samplename}_DEDUP_score.txt")
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo Dedup --rmdup --score_info {wildcards.stype}/dedup/{params.samplename}_DEDUP_score.txt --metrics {wildcards.stype}/dedup/{params.samplename}_DEDUP.txt {wildcards.stype}/dedup/{params.samplename}_DEDUP.bam")
+        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo LocusCollector --fun score_info {wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt")
+        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo Dedup --rmdup --score_info {wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt --metrics {wildcards.stype}/dedup/{wilcards.sname}_DEDUP.txt {wildcards.stype}/dedup/{wildcards.sname}_DEDUP.bam")
 
 rule realign_mapping:
     input:
