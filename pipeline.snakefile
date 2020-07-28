@@ -6,16 +6,27 @@ import time
 from pathlib import Path
 import yaml
 import helpers
+import os
 
 __author__ = "Rickard 'Ricksy' Rickardsson"
 
 normalfastqs = config["normalfastqs"]
 normalname = config["normalname"]
+normalid = config["normalid"]
+
 tumorfastqs = config["tumorfastqs"]
 tumorname = config["tumorname"]
+tumorid = config["tumorid"]
+
 igvuser = config["igvuser"]
 ivauser = config["ivauser"]
 reference = config["reference"]
+
+##########################################
+# PetaGene EnvVariables       ( Does not appear to do anything...)
+#os.environ["PETASUITE_REFPATH"] = "/usr/lib/petalink.so"
+#os.environ["LD_PRELOAD"] = "/seqstore/software/petagene/corpus:/opt/petagene/petasuite/species"
+##########################################
 
 if reference == "hg38":
     configfilepath = "configs/config_hg38.json"
@@ -36,6 +47,8 @@ sampleconfig[tumorname] = {}
 sampleconfig[tumorname]["stype"] = "tumor"
 sampleconfig["normal"] = normalname
 sampleconfig["tumor"] = tumorname
+sampleconfig["normalid"] = normalid
+sampleconfig["tumorid"] = tumorid
 
 normal_fastqpairs, = glob_wildcards(normalfastqs + "/{normal_fastqpairs}_R1_001.fastq.gz")
 tumor_fastqpairs, = glob_wildcards(tumorfastqs + "/{tumor_fastqpairs}_R1_001.fastq.gz")
@@ -55,6 +68,9 @@ if not tumor_fastqpairs:
 else:
     t_pattern_r1 = '_R1_001.fastq.gz'
     t_pattern_r2 = '_R2_001.fastq.gz'
+
+print(tumor_fastqpairs)
+print(normal_fastqpairs)
 
 sentieon = pipeconfig["sentieon"]
 referencegenome = pipeconfig["referencegenome"]
@@ -112,8 +128,8 @@ elif igvuser and ivauser:
     rule all:
         input:
             "reporting/shared_igv_files.txt",
-            expand("reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", sname=normalname, stype=sampleconfig[normalname]["stype"], caller="dnascope", vcftype="germline"),
-            expand("reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", sname=tumorname, stype=sampleconfig[tumorname]["stype"], caller="tnscope", vcftype="somatic"),
+            expand("reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", sname=normalid, stype=sampleconfig[normalname]["stype"], caller="dnascope", vcftype="germline"),
+            expand("reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", sname=tumorid, stype=sampleconfig[tumorname]["stype"], caller="tnscope", vcftype="somatic"),
             "reporting/workflow_finished.txt"
 else:
     rule all:
