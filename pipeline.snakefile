@@ -45,10 +45,10 @@ sampleconfig[normalname] = {}
 sampleconfig[normalname]["stype"] = "normal"
 sampleconfig[tumorname] = {}
 sampleconfig[tumorname]["stype"] = "tumor"
-sampleconfig["normal"] = normalname
-sampleconfig["tumor"] = tumorname
-sampleconfig["normalid"] = normalid
-sampleconfig["tumorid"] = tumorid
+sampleconfig["normal"] = normalid
+sampleconfig["tumor"] = tumorid
+sampleconfig["normalname"] = normalname
+sampleconfig["tumorname"] = tumorname
 
 normal_fastqpairs, = glob_wildcards(normalfastqs + "/{normal_fastqpairs}_R1_001.fastq.gz")
 tumor_fastqpairs, = glob_wildcards(tumorfastqs + "/{tumor_fastqpairs}_R1_001.fastq.gz")
@@ -75,6 +75,8 @@ print(normal_fastqpairs)
 sentieon = pipeconfig["sentieon"]
 referencegenome = pipeconfig["referencegenome"]
 
+wildcard_constraints:
+    sname="[^_]*_[^_]*_[^_]*"
 
 ###########################################################
 # Defining Non Cluster Rules
@@ -128,9 +130,9 @@ elif igvuser and ivauser:
     rule all:
         input:
             "reporting/shared_igv_files.txt",
+            "reporting/workflow_finished.txt",
             expand("reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", sname=normalid, stype=sampleconfig[normalname]["stype"], caller="dnascope", vcftype="germline"),
             expand("reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", sname=tumorid, stype=sampleconfig[tumorname]["stype"], caller="tnscope", vcftype="somatic"),
-            "reporting/workflow_finished.txt"
 else:
     rule all:
         input:

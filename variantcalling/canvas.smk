@@ -7,11 +7,11 @@ from misc_tools.fix_sexploidyfile import mod_sex_vcf
 
 rule canvas_somatic:
     input:
-        germline_snv_vcf = expand("{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", sname=normalname, stype=sampleconfig[normalname]["stype"]),
+        germline_snv_vcf = expand("{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", sname=normalid, stype=sampleconfig[normalname]["stype"]),
         somatic_vcf = "{stype}/tnscope/{sname}_somatic.vcf",
         bamfile = "{stype}/realign/{sname}_REALIGNED.bam",
-        normal_wgscov = expand("{stype}/reports/{sname}_WGScov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-        normal_ycov = expand("{stype}/reports/{sname}_Ycov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"])
+        normal_wgscov = expand("{stype}/reports/{sname}_WGScov.tsv", sname=normalid, stype=sampleconfig[normalname]["stype"]),
+        normal_ycov = expand("{stype}/reports/{sname}_Ycov.tsv", sname=normalid, stype=sampleconfig[normalname]["stype"])
     params:
         annotate = pipeconfig["rules"]["canvas"]["annotate"],
         annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"],
@@ -44,10 +44,10 @@ rule canvas_somatic:
  
 rule canvas_germline:
     input:
-        germline_snv_vcf = expand("{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", sname=normalname, stype=sampleconfig[normalname]["stype"]),
+        germline_snv_vcf = expand("{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", sname=normalid, stype=sampleconfig[normalname]["stype"]),
         bamfile = "{stype}/realign/{sname}_REALIGNED.bam",
-        normal_wgscov = expand("{stype}/reports/{sname}_WGScov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-        normal_ycov = expand("{stype}/reports/{sname}_Ycov.tsv", sname=normalname, stype=sampleconfig[normalname]["stype"])
+        normal_wgscov = expand("{stype}/reports/{sname}_WGScov.tsv", sname=normalid, stype=sampleconfig[normalname]["stype"]),
+        normal_ycov = expand("{stype}/reports/{sname}_Ycov.tsv", sname=normalid, stype=sampleconfig[normalname]["stype"])
     params:
         annotate = pipeconfig["rules"]["canvas"]["annotate"],
         annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"],
