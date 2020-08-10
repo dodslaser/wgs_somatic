@@ -46,8 +46,6 @@ rule mapping:
     output:
         "{stype}/mapping/{fastqpattern}.bam"
     run:
-        print(fwd)
-        print(rev)
         shell("export PETASUITE_REFPATH=/seqstore/software/petagene/corpus:/opt/petagene/petasuite/species; export LD_PRELOAD=/usr/lib/petalink.so; export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} bwa mem -M -R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.samplename}\\tPL:ILLUMINA' -t 16 {params.referencegenome} {input.fwd} {input.rev} | {params.sentieon} util sort -o {output} -t 20 --sam2bam -i -")
 
 rule dedup:

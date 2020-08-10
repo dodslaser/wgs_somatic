@@ -3,10 +3,10 @@
 
 rule tnscope:
     input:
-        tumorbam = expand("{stype}/realign/{sname}_REALIGNED.bam", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-        normalbam = expand("{stype}/realign/{sname}_REALIGNED.bam", sname=normalname, stype=sampleconfig[normalname]["stype"]),
-        tumortable = expand("{stype}/recal/{sname}_RECAL_DATA.TABLE", sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-        normaltable = expand("{stype}/recal/{sname}_RECAL_DATA.TABLE", sname=normalname, stype=sampleconfig[normalname]["stype"]),
+        tumorbam = expand("{stype}/realign/{sname}_REALIGNED.bam", sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+        normalbam = expand("{stype}/realign/{sname}_REALIGNED.bam", sname=normalid, stype=sampleconfig[normalname]["stype"]),
+        tumortable = expand("{stype}/recal/{sname}_RECAL_DATA.TABLE", sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+        normaltable = expand("{stype}/recal/{sname}_RECAL_DATA.TABLE", sname=normalid, stype=sampleconfig[normalname]["stype"]),
     params:
         threads = clusterconf["tnscope"]["threads"],
         tumorname = tumorname,
