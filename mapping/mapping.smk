@@ -64,7 +64,7 @@ rule dedup:
         for bamfile in input.bamfiles:
             inp_bamfiles = f"{inp_bamfiles}-i {bamfile} "
         shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo LocusCollector --fun score_info {wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt")
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo Dedup --rmdup --score_info {wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt --metrics {wildcards.stype}/dedup/{wilcards.sname}_DEDUP.txt {wildcards.stype}/dedup/{wildcards.sname}_DEDUP.bam")
+        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo Dedup --rmdup --score_info {wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt --metrics {wildcards.stype}/dedup/{wildcards.sname}_DEDUP.txt {wildcards.stype}/dedup/{wildcards.sname}_DEDUP.bam")
 
 rule realign_mapping:
     input:

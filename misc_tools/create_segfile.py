@@ -3,16 +3,18 @@
 # coding: utf-8
 import os
 import math
+import glob
 def create_seg(rundir, samplename, vartype):
+    searchfile = glob.glob(f"{rundir}/TempCNV_*/CNV.CoverageAndVariantFrequency.txt")
     if os.path.isfile(f"{rundir}/CNV.CoverageAndVariantFrequency.txt"):
         cnv_covandvarfreq = f"{rundir}/CNV.CoverageAndVariantFrequency.txt"
-    elif os.path.isfile(f"{rundir}/TempCNV_{samplename}/CNV.CoverageAndVariantFrequency.txt"):
-        cnv_covandvarfreq = f"{rundir}/TempCNV_{samplename}/CNV.CoverageAndVariantFrequency.txt"
+    elif searchfile:
+        cnv_covandvarfreq = searchfile[0]
     else:
         try:
             cnv_covandvarfreq = [n for n in glob.glob(f"{rundir}/*/CNV.CoverageAndVariantFrequency.txt") if os.path.isfile(n)][0]
         except:
-            logging.info("Could not find CNV.CoverageAndVariantFrequency.txt, no segfiles will be produced. Crashing out")
+            print("Could not find CNV.CoverageAndVariantFrequency.txt, no segfiles will be produced. Crashing out")
 
     with open(cnv_covandvarfreq, "r") as INFILE:
         with open(f"{rundir}/{samplename}_{vartype}_CNV_observed.seg", "w+") as OUTFILE:

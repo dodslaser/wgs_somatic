@@ -42,11 +42,11 @@ rule upload_to_iva:
         clcpass = passconfig["clcpass"]
         ivapass = passconfig[ivauser]["ivapass"]
         ivaemail = passconfig[ivauser]["ivauser"]
-
+        samplename = sampleconfig[f"{wildcards.stype}name"]
         if not os.path.isfile(f"{params.clusterclcdir}/{vcfbase}"):
             copyfile(f"{input}", f"{params.clusterclcdir}/{vcfbase}")
         # upload to clc
-        clcvcfname = vcfbase.replace(".vcf", f"_{wildcards.sname}")
+        clcvcfname = vcfbase.replace(".vcf", f"_{samplename}")
         clcvcfpath = f"{params.clcivadir_servpath}/{clcvcfname}.clc"
         if not os.path.isfile(clcvcfpath):
             shell("echo {params.clccmd} -S {params.clcserver} -P {params.clcport} -U {params.clcuser} -W {clcpass} -G {params.clcqueue} -A import_tracks --type VCF --reference-track {params.clcref} -f clc://serverfile{params.clusterclcdir}/{vcfbase} -d {params.clcivadir}")
