@@ -4,7 +4,7 @@
 import argparse
 import xlsxwriter
 import os
-from determine_match import determine_match
+from workflows.scripts.determine_match import determine_match
 import time
 
 def extract_stats(statsfile, statstype, sampletype, statsdict):
