@@ -4,6 +4,7 @@ import sys
 import json
 import glob
 import ntpath
+import shutil
 import argparse
 
 from run_wrapper_scripts.run_helpers import send_mail
@@ -68,6 +69,8 @@ def run_start(dmx_path):
             if complete:
                 logger(f"Samplesheet found ({samplesheet}) and info added to sampledict. Dumping sampledict to loglocation", newrun)
                 logger(sampledict, newrun)
+                if samplesheet in secondary_samplesheets:
+                    shutil.copyfile(samplesheet, f"{samplesheet_primary}/{os.path.basename(samplesheet)}")
                 break
         if not complete:
             logger(f"Samplesheets found: {samplesheets} but none contains all samples in dmx", newrun)
@@ -76,7 +79,7 @@ def run_start(dmx_path):
         logger(f"No SampleSheets found for {newrun} in either primary or secondary search_location, {samplesheet_primary}, {samplesheet_secondary}", newrun) 
         sys.exit()
 
-    analysis_dict = 
+#    analysis_dict = 
 #    sample_sheet_path = f"{dmx_path}/SampleSheet.csv"
     #if not sample_sheet_path
 
