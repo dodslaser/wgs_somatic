@@ -85,8 +85,7 @@ rule createseg:
         "{stype}/canvas/{sname}_{vartype}_CNV_observed.seg",
         "{stype}/canvas/{sname}_{vartype}_CNV_called.seg"
     run:
-        canvasname = f"{wildcards.sname}".split("_")[0]
         #canvasname = f"{wildcards.sname}_{wildcards.vartype}"
-        create_seg(f"{wildcards.stype}/canvas", canvasname, f"{wildcards.vartype}")
+        create_seg(f"{wildcards.stype}/canvas", f"{wildcards.sname}", f"{wildcards.vartype}")
         
 
