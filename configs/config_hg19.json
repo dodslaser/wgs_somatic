@@ -55,22 +55,14 @@
             "bcftools": "/apps/bio/software/bcftools/1.9/bin/bcftools",
             "vcftools": "/apps/bio/apps/vcftools/0.1.12a/bin/vcftools"
         },
-        "ballele_plot":
-        {
-            "ballele": "/apps/bio/repos/wgs_somatic/tools/localrepos/b_allele_igv_plot/plot_b_allele_freq.py"
-        },
-        "excel_qc":
-        {
-            "qcsumscript": "/apps/bio/repos/wgs_somatic/misc_tools/create_qc_excel.py"    
-        }, 
        "generate_tdf":
         {
             "tdfgen": "/apps/bio/repos/wgs_somatic/tools/IGVTools/igvtools.jar"
         },
         "canvas":
         {
-            "annotate": "/apps/bio/repos/wgs_somatic/tools/localrepos/annotate_manta_canvas/annotate_manta_canvas.py",
-            "annotate_ref": "/apps/bio/repos/wgs_somatic/tools/localrepos/annotate_manta_canvas/refseq_20190301_ncbiRefSeq",            
+            "annotate": "/apps/bio/repos/wgs_somatic/workflows/scripts/annotate_manta_canvas/annotate_manta_canvas.py",
+            "annotate_ref": "/apps/bio/repos/wgs_somatic/workflows/scripts/refseq_20190301_ncbiRefSeq",            
             "canvasdll": "/apps/bio/software/canvas/Canvas-1.40.0.1613+master_x64/Canvas.dll",
             "dotnet": "/opt/rh/rh-dotnet20/root/usr/bin/dotnet",
             "genomedir": "/apps/bio/repos/wgs_somatic/tools/canvas_files/WholeGenomeFasta/",
@@ -93,8 +85,8 @@
         {
             "svdb": "/apps/bio/software/anaconda2/envs/svdb2.3/bin/svdb",
             "mantaconf": "/apps/bio/repos/wgs_somatic/tools/manta-1.6.0.centos6_x86_64/bin/configManta.py",
-            "annotate": "/apps/bio/repos/wgs_somatic/tools/localrepos/annotate_manta_canvas/annotate_manta_canvas.py",
-            "annotate_ref": "/apps/bio/repos/wgs_somatic/tools/localrepos/annotate_manta/refseq_20190301_ncbiRefSeq",
+            "annotate": "/apps/bio/repos/wgs_somatic/workflows/scripts/annotate_manta_canvas/annotate_manta_canvas.py",
+            "annotate_ref": "/apps/bio/repos/wgs_somatic/workflows/scripts/refseq_20190301_ncbiRefSeq",
             "swegendb": "/apps/bio/repos/wgs_somatic/databases/sv_dbs/SweGen_MANTA.sort.vcf",
             "gnomaddb": "/apps/bio/repos/wgs_somatic/databases/sv_dbs/gnomad_v2_sv.sites.vcf",
             "localdb": "/apps/bio/repos/wgs_somatic/databases/sv_dbs/allmanta_20200318_svdb2.3.db",
