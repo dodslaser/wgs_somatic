@@ -31,7 +31,7 @@ def get_mapping(wcs):
         fastqpattern = normal_fastqpairs
     else:
         fastqpattern = tumor_fastqpairs
-    return expand("{stype}/mapping/{fastqpattern}.bam", stype=f"{wcs.stype}", fastqpattern=fastqpattern)
+    return expand("{workingdir}/{stype}/mapping/{fastqpattern}.bam", workingdir=f"{wcs.workingdir}", stype=f"{wcs.stype}", fastqpattern=fastqpattern)
 
 rule mapping:
     input:
@@ -44,7 +44,7 @@ rule mapping:
         referencegenome = referencegenome,
         outputdir = pipeconfig["rules"]["mapping"]["outputdir"]
     output:
-        "{stype}/mapping/{fastqpattern}.bam"
+        "{workingdir}/{stype}/mapping/{fastqpattern}.bam"
     run:
         shell("export PETASUITE_REFPATH=/seqstore/software/petagene/corpus:/opt/petagene/petasuite/species; export LD_PRELOAD=/usr/lib/petalink.so; export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} bwa mem -M -R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.samplename}\\tPL:ILLUMINA' -t 16 {params.referencegenome} {input.fwd} {input.rev} | {params.sentieon} util sort -o {output} -t 20 --sam2bam -i -")
 
@@ -52,8 +52,8 @@ rule dedup:
     input:
         bamfiles = get_mapping
     output:
-        "{stype}/dedup/{sname}_DEDUP.bam",
-        "{stype}/dedup/{sname}_DEDUP.txt"
+        "{workingdir}/{stype}/dedup/{sname}_DEDUP.bam",
+        "{workingdir}/{stype}/dedup/{sname}_DEDUP.txt"
     params:
         threads = clusterconf["dedup"]["threads"],
         samplename = get_samplename,
@@ -63,12 +63,12 @@ rule dedup:
         inp_bamfiles = ""
         for bamfile in input.bamfiles:
             inp_bamfiles = f"{inp_bamfiles}-i {bamfile} "
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo LocusCollector --fun score_info {wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt")
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo Dedup --rmdup --score_info {wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt --metrics {wildcards.stype}/dedup/{wildcards.sname}_DEDUP.txt {wildcards.stype}/dedup/{wildcards.sname}_DEDUP.bam")
+        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo LocusCollector --fun score_info {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt")
+        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo Dedup --rmdup --score_info {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt --metrics {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP.txt {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP.bam")
 
 rule realign_mapping:
     input:
-        "{stype}/dedup/{sname}_DEDUP.bam"
+        "{workingdir}/{stype}/dedup/{sname}_DEDUP.bam"
     params:
         threads = clusterconf["realign_mapping"]["threads"],
         sentieon = sentieon,
@@ -77,13 +77,13 @@ rule realign_mapping:
         tgenomes = pipeconfig["rules"]["realign"]["tgenomes"],
         outputdir = pipeconfig["rules"]["realign"]["outputdir"]
     output:
-        "{stype}/realign/{sname}_REALIGNED.bam"
+        "{workingdir}/{stype}/realign/{sname}_REALIGNED.bam"
     run:
         shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo Realigner -k {params.mills} -k {params.tgenomes} {output}")
 
 rule baserecal:
     input:
-        "{stype}/realign/{sname}_REALIGNED.bam"
+        "{workingdir}/{stype}/realign/{sname}_REALIGNED.bam"
     params:
         threads = clusterconf["baserecal"]["threads"],
         sentieon = sentieon,
@@ -93,6 +93,6 @@ rule baserecal:
         tgenomes = pipeconfig["rules"]["recal"]["tgenomes"],
         outputdir = pipeconfig["rules"]["recal"]["outputdir"]
     output:
-        "{stype}/recal/{sname}_RECAL_DATA.TABLE"
+        "{workingdir}/{stype}/recal/{sname}_RECAL_DATA.TABLE"
     run:
         shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo QualCal -k {params.mills} -k {params.dbsnp} -k {params.tgenomes} {output}")
