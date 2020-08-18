@@ -22,6 +22,8 @@ igvuser = config["igvuser"]
 ivauser = config["ivauser"]
 reference = config["reference"]
 
+workingdir = config["workingdir"]
+
 ##########################################
 # PetaGene EnvVariables       ( Does not appear to do anything...)
 #os.environ["PETASUITE_REFPATH"] = "/usr/lib/petalink.so"
@@ -89,52 +91,64 @@ include:        "workflows/tn_workflow.smk"
 
 ########################################
 # Mapping
-include:        "mapping/mapping.smk"
-include:        "mapping/generate_tdf.smk"
+include:        "workflows/rules/mapping/generate_tdf.smk"
 
 #########################################
 # VariantCalling
-include:        "variantcalling/tnscope.smk"
-include:        "variantcalling/dnascope.smk"
-include:        "misc_tools/ballele.smk"
-include:        "variantcalling/canvas.smk"
-include:        "variantcalling/manta.smk"
+include:        "workflows/rules/variantcalling/tnscope.smk"
+include:        "workflows/rules/variantcalling/dnascope.smk"
+include:        "workflows/rules/misc_tools/ballele.smk"
+include:        "workflows/rules/variantcalling/canvas.smk"
 
 #########################################
 # QC
-include:        "qc/coverage.smk"
-include:        "qc/aggregate_qc.smk"
+include:        "workflows/rules/qc/coverage.smk"
+include:        "workflows/rules/qc/aggregate_qc.smk"
 
 #########################################
 # ResultSharing:
-include:        "results_sharing/share_to_igv.smk"
-include:        "results_sharing/share_to_resultdir.smk"
-include:        "results_sharing/upload_to_iva.smk"
+include:        "workflows/rules/results_sharing/share_to_igv.smk"
+include:        "workflows/rules/results_sharing/share_to_resultdir.smk"
+include:        "workflows/rules/results_sharing/upload_to_iva.smk"
+
+
 
 if reference == "hg38":
     ###########################################################
     # HG38 rules
     ###########################################################
     # Mapping
-    include:    "mapping/mapping_hg38.smk"
+    include:    "workflows/rules/mapping/mapping_hg38.smk"
     # Variantcalling
-    include:    "variantcalling/manta_hg38.smk"
-
-if igvuser and not ivauser:
-    rule all:
-        input:
-            "reporting/shared_igv_files.txt",
-            "reporting/workflow_finished.txt"
-
-elif igvuser and ivauser:
-    rule all:
-        input:
-            "reporting/shared_igv_files.txt",
-            "reporting/workflow_finished.txt",
-            expand("reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", sname=normalid, stype=sampleconfig[normalname]["stype"], caller="dnascope", vcftype="germline"),
-            expand("reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", sname=tumorid, stype=sampleconfig[tumorname]["stype"], caller="tnscope", vcftype="somatic"),
+    include:    "workflows/rules/variantcalling/manta_hg38.smk"
 else:
-    rule all:
-        input:
-            "reporting/workflow_finished.txt"
+    ###########################################################
+    # HG19 rules
+    ###########################################################
+    # Mapping
+    include:        "workflows/rules/mapping/mapping.smk"
+    # VariantCalling
+    include:        "workflows/rules/variantcalling/manta.smk"
 
+def get_igv_input(wildcards):
+    if igvuser:
+        return expand("{workingdir}/reporting/shared_igv_files.txt", workingdir=workingdir),
+    return []
+
+def get_iva_input(wildcards):
+    input_list = []
+    if ivauser:
+        if ivauser == "testing":
+            input_list.append(expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"], caller="dnascope", vcftype="germline"))
+            input_list.append(expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"], caller="tnscope", vcftype="somatic"))
+        else:
+            input_list.append(expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"], caller="dnascope", vcftype="germline"))
+            input_list.append(expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"], caller="tnscope", vcftype="somatic"))
+         return ",".join(input_list)
+    return []
+
+rule all:
+    input:
+        get_igv_input
+        get_iva_input
+        expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir)

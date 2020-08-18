@@ -188,6 +188,7 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
         analysisdict["tumorfastqs"] = tumorfastqs
         analysisdict["igvuser"] = igvuser
         analysisdict["ivauser"] = ivauser
+        analysisdict["workingdir"] = output
 
         if hg38ref == "yes":
             analysisdict["reference"] = "hg38"
@@ -199,15 +200,18 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
         ###################################################################
         # Start SnakeMake pipeline
         ###################################################################
+        scriptdir = os.path.dirname(os.path.realpath(__file__)) # find current dir
+
         snakemake_path = config["snakemake_env"]
         os.environ["PATH"] += os.pathsep + snakemake_path
         my_env = os.environ.copy() 
-        snakemake_args = f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{tumorid}_config.json --dag | dot -Tsvg > /seqstore/webfolders/wgs/admin/barncancer/dags/dag_{current_date}.svg"
+        snakemake_args = f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{tumorid}_config.json --dag | dot -Tsvg > {samplelogs}/dag_{current_date}.svg"
         # >>>>>>>>>>>> Create Dag of pipeline
         subprocess.run(snakemake_args, shell=True, env=my_env) # CREATE DAG
-        snakemake_args = f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{tumorid}_config.json --cluster-config configs/cluster.yaml --cluster \"qsub -S /bin/bash -pe mpi {{cluster.threads}} -q {{cluster.queue}} -N {{cluster.name}} -o {samplelogs}/{{cluster.output}} -e {samplelogs}/{{cluster.error}} -l {{cluster.excl}}\" --jobs 999 --latency-wait 60 --directory {output} &>> {samplelog}"
+        snakemake_args = f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{tumorid}_config.json --cluster-config configs/cluster.yaml --cluster \"qsub -S /bin/bash -pe mpi {{cluster.threads}} -q {{cluster.queue}} -N {{cluster.name}} -o {samplelogs}/{{cluster.output}} -e {samplelogs}/{{cluster.error}} -l {{cluster.excl}}\" --jobs 999 --latency-wait 60 --directory {scriptdir} &>> {samplelog}"
         # >>>>>>>>>>>> Start pipeline
         subprocess.run(snakemake_args, shell=True, env=my_env) # Shellscript pipeline
+
         #subprocess.run(f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{tumorname}_config.json --cluster-config configs/cluster.yaml --cluster \"qsub -S /bin/bash -pe mpi " + "{cluster.threads} -q {cluster.queue} -N {cluster.name} -o " + samplelogs + "{cluster.output}"  , shell=True, env=my_env) # Shellscript pipeline
         if delete_fastqs_list:
             for deletefastq in delete_fastqs_list:
