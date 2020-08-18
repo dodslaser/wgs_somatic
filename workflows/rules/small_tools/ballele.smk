@@ -1,12 +1,12 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+from workflows.scripts.b_allele_igv_plot.plot_b_allele_freq import plot_freq
+
 rule ballele_plot:
     input:
-        "{stype}/dnascope/{sname}_germline.vcf"
-    params:
-        ballele = pipeconfig["rules"]["ballele_plot"]["ballele"]
+        "{workingdir}/{stype}/dnascope/{sname}_germline.vcf"
     output:
-        "{stype}/reports/{sname}_baf.igv"
+        "{workingdir}/{stype}/reports/{sname}_baf.igv"
     run:
-        shell("{params.ballele} -v {input} -o {output}")
+        plot_freq("{input}, {output}")
