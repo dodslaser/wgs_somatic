@@ -39,14 +39,18 @@ rule mapping:
         rev = get_rev_pattern
     params:
         threads = clusterconf["mapping"]["threads"],
-        sentieon = sentieon,
+        sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
         samplename = get_samplename,
-        referencegenome = referencegenome,
-        outputdir = pipeconfig["rules"]["mapping"]["outputdir"]
+        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"]
+    singularity:
+        pipeconfig["singularities"]["sentieon"]["sing"]
     output:
         "{workingdir}/{stype}/mapping/{fastqpattern}.bam"
-    run:
-        shell("export PETASUITE_REFPATH=/seqstore/software/petagene/corpus:/opt/petagene/petasuite/species; export LD_PRELOAD=/usr/lib/petalink.so; export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} bwa mem -M -R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.samplename}\\tPL:ILLUMINA' -t 16 {params.referencegenome} {input.fwd} {input.rev} | {params.sentieon} util sort -o {output} -t 20 --sam2bam -i -")
+    shell:
+        "{params.sentieon} bwa mem "
+            "-M -R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.samplename}\\tPL:ILLUMINA' "
+            "-t 16 {params.referencegenome} {input.fwd} {input.rev} "
+        "| {params.sentieon} util sort -o {output} -t 20 --sam2bam -i -")
 
 rule dedup:
     input:
@@ -57,14 +61,17 @@ rule dedup:
     params:
         threads = clusterconf["dedup"]["threads"],
         samplename = get_samplename,
-        sentieon = sentieon,
-        outputdir = pipeconfig["rules"]["mapping"]["outputdir"]
-    run:
-        inp_bamfiles = ""
-        for bamfile in input.bamfiles:
-            inp_bamfiles = f"{inp_bamfiles}-i {bamfile} "
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo LocusCollector --fun score_info {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt")
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} {inp_bamfiles}--algo Dedup --rmdup --score_info {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt --metrics {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP.txt {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP.bam")
+        sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
+    shell:
+        "shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;"
+        "{params.sentieon} driver -t {params.threads} "
+            "-i {shellbamfiles} --algo LocusCollector "
+            "--fun score_info {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt ;"
+        "{params.sentieon} driver -t {params.threads} "
+            "-i {shellbamfiles} --algo Dedup --rmdup "
+            "--score_info {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt "
+            "--metrics {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP.txt "
+            "{wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP.bam"
 
 rule realign_mapping:
     input:
