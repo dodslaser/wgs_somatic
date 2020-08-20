@@ -46,8 +46,8 @@ rule mapping:
     shell:
         "{params.sentieon} bwa mem "
             "-M -R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.samplename}\\tPL:ILLUMINA' "
-            "-t 16 {params.referencegenome} {params.fwd_fmt} {params.rev_fmt} "
-        "| {params.sentieon} util sort -o {output} -t 20 --sam2bam -i -")
+            "-t {params.threads} {params.referencegenome} {params.fwd_fmt} {params.rev_fmt} "
+        "| {params.sentieon} util sort -o {output} -t {params.threads} --sam2bam -i -"
 
 rule dedup:
     input:
@@ -64,10 +64,15 @@ rule dedup:
     shell:
         "shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;"
         "{params.sentieon} driver -t {params.threads} "
-            "-i {shellbamfiles} --algo LocusCollector "
-            "--fun score_info {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt ;"
-        "{params.sentieon} driver -t {params.threads} "
-            "-i {shellbamfiles} --algo Dedup --rmdup "
+            "-i $shellbamfiles "
+            "--algo LocusCollector "
+            "--fun score_info "
+            "{wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt ;"
+        "{params.sentieon} driver "
+            "-t {params.threads} "
+            "-i $shellbamfiles "
+            "--algo Dedup "
+            "--rmdup "
             "--score_info {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP_score.txt "
             "--metrics {wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP.txt "
             "{wildcards.workingdir}/{wildcards.stype}/dedup/{wildcards.sname}_DEDUP.bam"
@@ -75,32 +80,32 @@ rule dedup:
 rule realign_mapping:
     input:
         "{workingdir}/{stype}/dedup/{sname}_DEDUP.bam"
-    params:
-        threads = clusterconf["realign_mapping"]["threads"],
-        sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
-        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"], 
-        mills = pipeconfig["singularities"]["sentieon"][["mills"],
-        tgenomes = pipeconfig["singularities"]["sentieon"][["tgenomes"],
     singularity:
         pipeconfig["singularities"]["sentieon"]["sing"]
     output:
         "{workingdir}/{stype}/realign/{sname}_REALIGNED.bam"
+    params:
+        threads = clusterconf["realign_mapping"]["threads"],
+        sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
+        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
+        mills = pipeconfig["singularities"]["sentieon"]["mills"],
+        tgenomes = pipeconfig["singularities"]["sentieon"]["tgenomes"]
     shell:
-        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo Realigner -k {params.mills} -k {params.tgenomes} {output}")
+        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo Realigner -k {params.mills} -k {params.tgenomes} {output}"
 
 rule baserecal:
     input:
         "{workingdir}/{stype}/realign/{sname}_REALIGNED.bam"
+    singularity:
+        pipeconfig["singularities"]["sentieon"]["sing"]
     params:
         threads = clusterconf["baserecal"]["threads"],
         sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
         referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
         dbsnp = pipeconfig["singularities"]["sentieon"]["dbsnp"],
         mills = pipeconfig["singularities"]["sentieon"]["mills"],
-        tgenomes = pipeconfig["singularities"]["sentieon"]["tgenomes"],
-    singularity:
-        pipeconfig["singularities"]["sentieon"]["sing"]
+        tgenomes = pipeconfig["singularities"]["sentieon"]["tgenomes"]
     output:
         "{workingdir}/{stype}/recal/{sname}_RECAL_DATA.TABLE"
     shell:
-        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo QualCal -k {params.mills} -k {params.dbsnp} -k {params.tgenomes} {output}")
+        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo QualCal -k {params.mills} -k {params.dbsnp} -k {params.tgenomes} {output}"
