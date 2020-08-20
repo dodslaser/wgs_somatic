@@ -11,27 +11,35 @@ rule tnscope:
         threads = clusterconf["tnscope"]["threads"],
         tumorname = tumorname,
         normalname = normalname,
-        sentieon = sentieon,
-        referencegenome = referencegenome,
-        dbsnp = pipeconfig["rules"]["tnscope"]["dbsnp"],
+        sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
+        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
+        dbsnp = pipeconfig["singularities"]["sentieon"]["dbsnp"],
         callsettings = pipeconfig["rules"]["tnscope"]["settings"],
+    singularity:
+        pipeconfig["singularities"]["sentieon"]["sing"]
     output:
         "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn.vcf"
-    run:
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input.tumorbam} -q {input.tumortable} -i {input.normalbam} -q {input.normaltable} --algo TNscope --tumor_sample {params.tumorname} --normal_sample {params.normalname} {params.callsettings} {output}")
+    shell:
+        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} "
+            "-i {input.tumorbam} -q {input.tumortable} -i {input.normalbam} -q {input.normaltable} "
+            "--algo TNscope --tumor_sample {params.tumorname} --normal_sample {params.normalname} "
+            "{params.callsettings} {output}"
 
 rule tnscope_modelfilter:
     input:
         tnscopevcf = "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn.vcf"
     params:
         threads = clusterconf["tnscope_modelfilter"]["threads"],
-        sentieon = sentieon,
-        referencegenome = referencegenome,
-        modelpath = pipeconfig["rules"]["tnscope_modelfilter"]["modelpath"],
+        sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
+        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
+        modelpath = pipeconfig["singularities"]["sentieon"]["tnscope_m"],
+    singularity:
+        pipeconfig["singularities"]["sentieon"]["sing"]
     output:
         "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn_ML.vcf"
-    run:
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} --algo TNModelApply -m {params.modelpath} -v {input.tnscopevcf} {output}")
+    shell:
+        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} "
+            "--algo TNModelApply -m {params.modelpath} -v {input.tnscopevcf} {output}"
 
 rule tnscope_vcffilter:
     input:

@@ -6,28 +6,34 @@ rule dnascope:
         "{workingdir}/{stype}/dedup/{sname}_DEDUP.bam"
     params:
         threads = clusterconf["dnascope"]["threads"],
-        sentieon = sentieon,
-        referencegenome = referencegenome,
-        dbsnp = pipeconfig["rules"]["dnascope"]["dbsnp"],
-        model = pipeconfig["rules"]["dnascope"]["modelpath"],
+        sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
+        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"]
+        dbsnp = pipeconfig["singularities"]["sentieon"]["dbsnp"],
+        model = pipeconfig["singularities"]["sentieon"]["dnascope_m"],
         callsettings = pipeconfig["rules"]["dnascope"]["settings"]
+    singularity:
+        pipeconfig["singularities"]["sentieon"]["sing"]
     output:
         "{workingdir}/{stype}/dnascope/{sname}_DNAscope.vcf"
-    run:
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo DNAscope -d {params.dbsnp} --var_type snp,indel --model {params.model} {params.callsettings} {output}")
+    shell:
+        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} "
+            "-i {input} --algo DNAscope -d {params.dbsnp} "
+            "--var_type snp,indel --model {params.model} {params.callsettings} {output}"
         
 rule dnascope_modelfilter:
     input:
         "{workingdir}/{stype}/dnascope/{sname}_DNAscope.vcf"
     params:
         threads = clusterconf["dnascope_modelfilter"]["threads"],
-        sentieon = sentieon,
-        referencegenome = referencegenome,
-        model = pipeconfig["rules"]["dnascope"]["modelpath"]
+        sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
+        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
+        model = pipeconfig["singularities"]["sentieon"]["dnascope_m"],
+    singularity:
+        pipeconfig["singularities"]["sentieon"]["sing"]
     output:
         "{workingdir}/{stype}/dnascope/{sname}_DNAscope_modelfiltered.vcf"
-    run:
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} --algo DNAModelApply --model {params.model} -v {input} {output}")
+    shell:
+        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} --algo DNAModelApply --model {params.model} -v {input} {output}"
 
 rule dnascope_vcffilter:
     input:
