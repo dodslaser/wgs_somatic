@@ -7,11 +7,11 @@ from workflows.scripts.fix_sexploidyfile import mod_sex_vcf
 
 rule canvas_somatic:
     input:
-        germline_snv_vcf = expand("{workingdir}/{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", sname=normalid, stype=sampleconfig[normalname]["stype"]),
+        germline_snv_vcf = expand("{workingdir}/{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
         somatic_vcf = "{workingdir}/{stype}/tnscope/{sname}_somatic.vcf",
         bamfile = "{workingdir}/{stype}/realign/{sname}_REALIGNED.bam",
-        normal_wgscov = expand("{workingdir}/{stype}/reports/{sname}_WGScov.tsv", sname=normalid, stype=sampleconfig[normalname]["stype"]),
-        normal_ycov = expand("{workingdir}/{stype}/reports/{sname}_Ycov.tsv", sname=normalid, stype=sampleconfig[normalname]["stype"])
+        normal_wgscov = expand("{workingdir}/{stype}/reports/{sname}_WGScov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+        normal_ycov = expand("{workingdir}/{stype}/reports/{sname}_Ycov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
     params:
         annotate = pipeconfig["rules"]["canvas"]["annotate"],
         annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"],
@@ -44,10 +44,10 @@ rule canvas_somatic:
  
 rule canvas_germline:
     input:
-        germline_snv_vcf = expand("{workingdir}/{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", sname=normalid, stype=sampleconfig[normalname]["stype"]),
+        germline_snv_vcf = expand("{workingdir}/{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
         bamfile = "{workingdir}/{stype}/realign/{sname}_REALIGNED.bam",
-        normal_wgscov = expand("{workingdir}/{stype}/reports/{sname}_WGScov.tsv", sname=normalid, stype=sampleconfig[normalname]["stype"]),
-        normal_ycov = expand("{workingdir}/{stype}/reports/{sname}_Ycov.tsv", sname=normalid, stype=sampleconfig[normalname]["stype"])
+        normal_wgscov = expand("{workingdir}/{stype}/reports/{sname}_WGScov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+        normal_ycov = expand("{workingdir}/{stype}/reports/{sname}_Ycov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
     params:
         annotate = pipeconfig["rules"]["canvas"]["annotate"],
         annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"],

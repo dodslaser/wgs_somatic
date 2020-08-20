@@ -90,14 +90,20 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
             else:
                 f_normalfastqs = glob.glob(f"{normalfastqs}/*fastq.gz")
                 if not f_normalfastqs:
-                    error_list.append(f"No fastqs found in normaldir")
+                    logger(f"Warning: No fastqs found in normaldir")
+                    f_normalfastqs = glob.glob(f"{normalfastqs}/*fasterq")
+                    if not f_normalfastqs:
+                        error_list.append(f"No fastqs or fasterqs found in normaldir")
+
             if not os.path.isdir(tumorfastqs):
                 error_list.append(f"{tumorfastqs} does not appear to be a directory")
             else:
                 f_tumorfastqs = glob.glob(f"{tumorfastqs}/*fastq.gz")
                 if not f_tumorfastqs:
-                    error_list.append(f"No fastqs found in tumordir")
-
+                    logger(f"Warning: No fastqs found in tumordir")
+                    f_tumorfastqs = glob.glob(f"{tumorfastqs}/*fasterq")
+                    if not f_tumorfastqs:
+                        error_list.append(f"No fastqs or fasterqs found in tumordir")
         # validate iva and igv users if supplied
         if igvuser:
             mainconf = helpers.read_config(mainconf_path)
@@ -178,14 +184,14 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
 
         ###################################################################
         # Prepare Singularity Binddirs
-        binddirs = config["snakemake"]["bind_dirs"]
+        binddirs = config["singularitybinddirs"]
         binddir_string = ""
         for binddir in binddirs:
             source = binddirs[binddir]["source"]
             destination = binddirs[binddir]["destination"]
             logger(f"preparing binddir variable {binddir} source: {source} destination: {destination}")
             binddir_string = f"{binddir_string}{source}:{destination},"
-        binddir_string = f"{binddir_string}{workingdir}"
+        binddir_string = f"{binddir_string}{output}"
 
 
 
@@ -224,4 +230,4 @@ if __name__ == '__main__':
     parser.add_argument('-hg38', '--hg38ref', nargs='?', help='run analysis on hg38 reference (write yes if you want this option)', required=False)
     parser.add_argument('-stype', '--starttype', nargs='?', help='write forcestart if you want to ignore fastqs', required=False)
     args = parser.parse_args()
-    analysis_main(args, args.runnormal, args.runtumor, args.outputdir, args.normalsample, args.normalfastqs, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser, args.petagene, args.hg38ref, args.starttype)
+    analysis_main(args, args.runnormal, args.runtumor, args.outputdir, args.normalsample, args.normalfastqs, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser, args.hg38ref, args.starttype)

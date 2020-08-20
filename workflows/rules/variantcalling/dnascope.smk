@@ -7,7 +7,7 @@ rule dnascope:
     params:
         threads = clusterconf["dnascope"]["threads"],
         sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
-        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"]
+        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
         dbsnp = pipeconfig["singularities"]["sentieon"]["dbsnp"],
         model = pipeconfig["singularities"]["sentieon"]["dnascope_m"],
         callsettings = pipeconfig["rules"]["dnascope"]["settings"]

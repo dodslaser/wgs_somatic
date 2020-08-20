@@ -63,7 +63,6 @@ fastq_dict = {}
 fastq_dict["normal"] = {}
 fastq_dict["normal"]["fastqpair_patterns"] = {}
 
-fastq_dict = {}
 fastq_dict["tumor"] = {}
 fastq_dict["tumor"]["fastqpair_patterns"] = {}
 
@@ -119,7 +118,7 @@ include:        "workflows/rules/mapping/generate_tdf.smk"
 # VariantCalling
 include:        "workflows/rules/variantcalling/tnscope.smk"
 include:        "workflows/rules/variantcalling/dnascope.smk"
-include:        "workflows/rules/misc_tools/ballele.smk"
+include:        "workflows/rules/small_tools/ballele.smk"
 include:        "workflows/rules/variantcalling/canvas.smk"
 
 #########################################
@@ -153,24 +152,32 @@ else:
     include:        "workflows/rules/variantcalling/manta.smk"
 
 def get_igv_input(wildcards):
+    print(igvuser)
     if igvuser:
-        return expand("{workingdir}/reporting/shared_igv_files.txt", workingdir=workingdir),
+        return expand("{workingdir}/reporting/shared_igv_files.txt", workingdir=workingdir)
+    return []
+
+def upload_germline_iva(wildcards):
+    print(ivauser)
+    if ivauser:
+        if ivauser == "testing":
+            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=normalid, stype="normal", caller="dnascope", vcftype="germline")
+        else:
+            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=normalid, stype="normal", caller="dnascope", vcftype="germline")
     return []
 
 def get_iva_input(wildcards):
-    input_list = []
     if ivauser:
         if ivauser == "testing":
-            input_list.append(expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"], caller="dnascope", vcftype="germline"))
-            input_list.append(expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"], caller="tnscope", vcftype="somatic"))
+            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=normalid, stype="normal", caller="dnascope", vcftype="germline"), expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
         else:
-            input_list.append(expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"], caller="dnascope", vcftype="germline"))
-            input_list.append(expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"], caller="tnscope", vcftype="somatic"))
-         return ",".join(input_list)
+            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=normalid, stype="normal", caller="dnascope", vcftype="germline"), expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
     return []
 
 rule all:
     input:
-        get_igv_input
-        get_iva_input
+        get_igv_input,
+        get_iva_input,
+#        upload_somatic_iva,
+#        upload_germline_iva,
         expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir)
