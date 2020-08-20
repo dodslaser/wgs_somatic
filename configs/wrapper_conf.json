@@ -6,4 +6,13 @@
     "hg38conf": "config_hg38.json",
     "hg19conf": "config_hg19.json",
     "clusterconf": "cluster.yaml"
+    "singularitybinddirs:
+    {
+        "petagene":
+        {
+            "source": "/seqstore/software/petagene/corpus",
+            "destination": "/opt/petagene/corpus"
+        }
+    }
 }
+
