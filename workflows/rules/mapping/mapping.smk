@@ -59,6 +59,8 @@ rule dedup:
         threads = clusterconf["dedup"]["threads"],
         samplename = get_samplename,
         sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
+    singularity:
+        pipeconfig["singularities"]["sentieon"]["sing"]
     shell:
         "shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;"
         "{params.sentieon} driver -t {params.threads} "
@@ -75,28 +77,30 @@ rule realign_mapping:
         "{workingdir}/{stype}/dedup/{sname}_DEDUP.bam"
     params:
         threads = clusterconf["realign_mapping"]["threads"],
-        sentieon = sentieon,
-        referencegenome = referencegenome,
-        mills = pipeconfig["rules"]["realign"]["mills"],
-        tgenomes = pipeconfig["rules"]["realign"]["tgenomes"],
-        outputdir = pipeconfig["rules"]["realign"]["outputdir"]
+        sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
+        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"], 
+        mills = pipeconfig["singularities"]["sentieon"][["mills"],
+        tgenomes = pipeconfig["singularities"]["sentieon"][["tgenomes"],
+    singularity:
+        pipeconfig["singularities"]["sentieon"]["sing"]
     output:
         "{workingdir}/{stype}/realign/{sname}_REALIGNED.bam"
-    run:
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo Realigner -k {params.mills} -k {params.tgenomes} {output}")
+    shell:
+        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo Realigner -k {params.mills} -k {params.tgenomes} {output}")
 
 rule baserecal:
     input:
         "{workingdir}/{stype}/realign/{sname}_REALIGNED.bam"
     params:
         threads = clusterconf["baserecal"]["threads"],
-        sentieon = sentieon,
-        referencegenome = referencegenome,
-        dbsnp = pipeconfig["rules"]["recal"]["dbsnp"],
-        mills = pipeconfig["rules"]["recal"]["mills"],
-        tgenomes = pipeconfig["rules"]["recal"]["tgenomes"],
-        outputdir = pipeconfig["rules"]["recal"]["outputdir"]
+        sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
+        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
+        dbsnp = pipeconfig["singularities"]["sentieon"]["dbsnp"],
+        mills = pipeconfig["singularities"]["sentieon"]["mills"],
+        tgenomes = pipeconfig["singularities"]["sentieon"]["tgenomes"],
+    singularity:
+        pipeconfig["singularities"]["sentieon"]["sing"]
     output:
         "{workingdir}/{stype}/recal/{sname}_RECAL_DATA.TABLE"
-    run:
-        shell("export SENTIEON_LICENSE=medair1.medair.lcl:8990 ; {params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo QualCal -k {params.mills} -k {params.dbsnp} -k {params.tgenomes} {output}")
+    shell:
+        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo QualCal -k {params.mills} -k {params.dbsnp} -k {params.tgenomes} {output}")
