@@ -72,14 +72,14 @@ for normalfastqdir in normalfastqdirs:
         normal_fwd_fastqs = glob.glob(f"{normalfastqdir}/*{fwdpattern}")
         if normal_fwd_fastqs:
             for normal_fwd_fastq in normal_fwd_fastqs:
-                fastqpair_pattern = normal_fwd_fastq.replace(fwdpattern, "")
+                fastqpair_pattern = os.path.basename(normal_fwd_fastq).replace(fwdpattern, "")
                 fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern] = {}
                 fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = normal_fwd_fastq
     for revpattern in revpatterns:
         normal_rev_fastqs = glob.glob(f"{normalfastqdir}/*{revpattern}")
         if normal_rev_fastqs:
             for normal_rev_fastq in normal_rev_fastqs:
-                fastqpair_pattern = normal_rev_fastq.replace(revpattern, "")
+                fastqpair_pattern = os.path.basename(normal_rev_fastq).replace(revpattern, "")
                 fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = normal_rev_fastq
 
 # Prepare Tumor Fastq Variables
@@ -88,14 +88,14 @@ for tumorfastqdir in tumorfastqdirs:
         tumor_fwd_fastqs = glob.glob(f"{tumorfastqdir}/*{fwdpattern}")
         if tumor_fwd_fastqs:
             for tumor_fwd_fastq in tumor_fwd_fastqs:
-                fastqpair_pattern = tumor_fwd_fastq.replace(fwdpattern, "")
+                fastqpair_pattern = os.path.basename(tumor_fwd_fastq).replace(fwdpattern, "")
                 fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern] = {}
                 fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = tumor_fwd_fastq
     for revpattern in revpatterns:
         tumor_rev_fastqs = glob.glob(f"{tumorfastqdir}/*{revpattern}")
         if tumor_rev_fastqs:
             for tumor_rev_fastq in tumor_rev_fastqs:
-                fastqpair_pattern = tumor_rev_fastq.replace(revpattern, "")
+                fastqpair_pattern = os.path.basename(tumor_rev_fastq).replace(revpattern, "")
                 fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = tumor_rev_fastq 
 
 wildcard_constraints:
@@ -152,32 +152,28 @@ else:
     include:        "workflows/rules/variantcalling/manta.smk"
 
 def get_igv_input(wildcards):
-    print(igvuser)
     if igvuser:
         return expand("{workingdir}/reporting/shared_igv_files.txt", workingdir=workingdir)
     return []
 
 def upload_germline_iva(wildcards):
-    print(ivauser)
     if ivauser:
         if ivauser == "testing":
             return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=normalid, stype="normal", caller="dnascope", vcftype="germline")
         else:
             return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=normalid, stype="normal", caller="dnascope", vcftype="germline")
     return []
-
-def get_iva_input(wildcards):
+def upload_somatic_iva(wildcards):
     if ivauser:
         if ivauser == "testing":
-            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=normalid, stype="normal", caller="dnascope", vcftype="germline"), expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
+            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
         else:
-            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=normalid, stype="normal", caller="dnascope", vcftype="germline"), expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
+            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
     return []
 
 rule all:
     input:
         get_igv_input,
-        get_iva_input,
-#        upload_somatic_iva,
-#        upload_germline_iva,
+        upload_somatic_iva,
+        upload_germline_iva,
         expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir)
