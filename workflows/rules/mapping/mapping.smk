@@ -1,36 +1,31 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-def get_fastqpairs(wcs):
-    if f"{wcs.stype}" == "normal":
-        return normal_fastqpairs
-    else:
-        return tumor_fastqpairs
-
 def get_fwd_pattern(wcs):
-    if f"{wcs.stype}" == "normal":
-        print(f"{normalfastqs}/{wcs.fastqpattern}{n_pattern_r1}")
-        return f"{normalfastqs}/{wcs.fastqpattern}{n_pattern_r1}"
-    else:
-        print(f"{tumorfastqs}/{wcs.fastqpattern}{t_pattern_r1}")
-        return f"{tumorfastqs}/{wcs.fastqpattern}{t_pattern_r1}"
+    return fastq_dict[f"{wcs.stype}"]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["fwd"] 
 
 def get_rev_pattern(wcs):
-    if f"{wcs.stype}" == "normal":
-        print(f"{normalfastqs}/{wcs.fastqpattern}{n_pattern_r2}")
-        return f"{normalfastqs}/{wcs.fastqpattern}{n_pattern_r2}"
-    else:
-        print(f"{tumorfastqs}/{wcs.fastqpattern}{t_pattern_r2}")
-        return f"{tumorfastqs}/{wcs.fastqpattern}{t_pattern_r2}"
+    return fastq_dict[f"{wcs.stype}"]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["rev"]
+
+def format_fwd(wcs):
+    fastq = fastq_dict[f"{wcs.stype}"]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["rev"]
+    if fastq.endswith(".fasterq"):
+        fastq = fastq.replace(".fasterq", "fastq.gz")
+    return fastq
+
+def format_rev(wcs):
+    fastq = fastq_dict[f"{wcs.stype}"]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["fwd"]
+    if fastq.endswith(".fasterq"):
+        fastq = fastq.replace(".fasterq", "fastq.gz")
+    return fastq
 
 def get_samplename(wcs):
     return sampleconfig[f"{wcs.stype}name"]
 
 def get_mapping(wcs):
-    if f"{wcs.stype}" == "normal":
-        fastqpattern = normal_fastqpairs
-    else:
-        fastqpattern = tumor_fastqpairs
+    fastqpatterns = []
+    for fastqpattern in fastq_dict[f"{wcs.stype}"]["fastqpair_patterns"]:
+        fastqpatterns.append(fastqpattern)
     return expand("{workingdir}/{stype}/mapping/{fastqpattern}.bam", workingdir=f"{wcs.workingdir}", stype=f"{wcs.stype}", fastqpattern=fastqpattern)
 
 rule mapping:
@@ -41,7 +36,9 @@ rule mapping:
         threads = clusterconf["mapping"]["threads"],
         sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
         samplename = get_samplename,
-        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"]
+        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
+        fwd_fmt = format_fwd,
+        rev_fmt = format_rev
     singularity:
         pipeconfig["singularities"]["sentieon"]["sing"]
     output:
@@ -49,7 +46,7 @@ rule mapping:
     shell:
         "{params.sentieon} bwa mem "
             "-M -R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.samplename}\\tPL:ILLUMINA' "
-            "-t 16 {params.referencegenome} {input.fwd} {input.rev} "
+            "-t 16 {params.referencegenome} {params.fwd_fmt} {params.rev_fmt} "
         "| {params.sentieon} util sort -o {output} -t 20 --sam2bam -i -")
 
 rule dedup:
