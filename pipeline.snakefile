@@ -10,11 +10,11 @@ import os
 
 __author__ = "Rickard 'Ricksy' Rickardsson"
 
-normalfastqs = config["normalfastqs"]
+normalfastqdirs = config["normalfastqs"]
 normalname = config["normalname"]
 normalid = config["normalid"]
 
-tumorfastqs = config["tumorfastqs"]
+tumorfastqdirs = config["tumorfastqs"]
 tumorname = config["tumorname"]
 tumorid = config["tumorid"]
 
@@ -24,16 +24,16 @@ reference = config["reference"]
 
 workingdir = config["workingdir"]
 
-##########################################
-# PetaGene EnvVariables       ( Does not appear to do anything...)
-#os.environ["PETASUITE_REFPATH"] = "/usr/lib/petalink.so"
-#os.environ["LD_PRELOAD"] = "/seqstore/software/petagene/corpus:/opt/petagene/petasuite/species"
-##########################################
+##################################################
+# Chose Config based on Reference
+# ---------------------------------------------
 
 if reference == "hg38":
     configfilepath = "configs/config_hg38.json"
 else:
     configfilepath = "configs/config_hg19.json"
+#----------------------------------------------
+
 
 pipeconfig = helpers.read_config(configfilepath)
 clusterconf = helpers.read_clusterconf()
@@ -52,30 +52,52 @@ sampleconfig["tumor"] = tumorid
 sampleconfig["normalname"] = normalname
 sampleconfig["tumorname"] = tumorname
 
-normal_fastqpairs, = glob_wildcards(normalfastqs + "/{normal_fastqpairs}_R1_001.fastq.gz")
-tumor_fastqpairs, = glob_wildcards(tumorfastqs + "/{tumor_fastqpairs}_R1_001.fastq.gz")
+####################################################
+# Prepare Fastq Variables 
+# -------------------------------------------------
 
-if not normal_fastqpairs:
-    normal_fastqpairs, = glob_wildcards(normalfastqs + "/{normal_fastqpairs}_1.fastq.gz")
-    n_pattern_r1 = '_1.fastq.gz'
-    n_pattern_r2 = '_2.fastq.gz'
-else:
-    n_pattern_r1 = '_R1_001.fastq.gz'
-    n_pattern_r2 = '_R2_001.fastq.gz'
+fwdpatterns = ["_1.fastq.gz", "_R1_001.fastq.gz", "_1.fasterq", "_R1_001.fasterq"] 
+revpatterns = ["_2.fastq.gz", "_R2_001.fastq.gz", "_2.fasterq", "_R2_001.fasterq"]
 
-if not tumor_fastqpairs:
-    tumor_fastqpairs, = glob_wildcards(tumorfastqs + "/{tumor_fastqpairs}_1.fastq.gz")
-    t_pattern_r1 = '_1.fastq.gz'
-    t_pattern_r2 = '_2.fastq.gz'
-else:
-    t_pattern_r1 = '_R1_001.fastq.gz'
-    t_pattern_r2 = '_R2_001.fastq.gz'
+fastq_dict = {}
+fastq_dict["normal"] = {}
+fastq_dict["normal"]["fastqpair_patterns"] = {}
 
-print(tumor_fastqpairs)
-print(normal_fastqpairs)
+fastq_dict = {}
+fastq_dict["tumor"] = {}
+fastq_dict["tumor"]["fastqpair_patterns"] = {}
 
-sentieon = pipeconfig["sentieon"]
-referencegenome = pipeconfig["referencegenome"]
+# Prepare Normal Fastq Variables
+for normalfastqdir in normalfastqdirs:
+    for fwdpattern in fwdpatterns:
+        normal_fwd_fastqs = glob.glob(f"{normalfastqdir}/*{fwdpattern}")
+        if normal_fwd_fastqs:
+            for normal_fwd_fastq in normal_fwd_fastqs:
+                fastqpair_pattern = normal_fwd_fastq.replace(fwdpattern, "")
+                fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern] = {}
+                fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = normal_fwd_fastq
+    for revpattern in revpatterns:
+        normal_rev_fastqs = glob.glob(f"{normalfastqdir}/*{revpattern}")
+        if normal_rev_fastqs:
+            for normal_rev_fastq in normal_rev_fastqs:
+                fastqpair_pattern = normal_rev_fastq.replace(revpattern, "")
+                fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = normal_rev_fastq
+
+# Prepare Tumor Fastq Variables
+for tumorfastqdir in tumorfastqdirs:
+    for fwdpattern in fwdpatterns:
+        tumor_fwd_fastqs = glob.glob(f"{tumorfastqdir}/*{fwdpattern}")
+        if tumor_fwd_fastqs:
+            for tumor_fwd_fastq in tumor_fwd_fastqs:
+                fastqpair_pattern = tumor_fwd_fastq.replace(fwdpattern, "")
+                fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern] = {}
+                fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = tumor_fwd_fastq
+    for revpattern in revpatterns:
+        tumor_rev_fastqs = glob.glob(f"{tumorfastqdir}/*{revpattern}")
+        if tumor_rev_fastqs:
+            for tumor_rev_fastq in tumor_rev_fastqs:
+                fastqpair_pattern = tumor_rev_fastq.replace(revpattern, "")
+                fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = tumor_rev_fastq 
 
 wildcard_constraints:
     sname="[^_]*_[^_]*_[^_]*"
