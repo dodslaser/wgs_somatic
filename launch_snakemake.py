@@ -191,6 +191,10 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
             destination = binddirs[binddir]["destination"]
             logger(f"preparing binddir variable {binddir} source: {source} destination: {destination}")
             binddir_string = f"{binddir_string}{source}:{destination},"
+            for normalfastqdir in analysisdict["normalfastqs"]:
+                 binddir_string = f"{binddir_string}{normalfastqdir},"
+            for tumorfastqdir in analysisdict["tumorfastqs"]:
+                binddir_string = f"{binddir_string}{tumorfastqdir},"
         binddir_string = f"{binddir_string}{output}"
 
 
