@@ -26,7 +26,7 @@ def get_mapping(wcs):
     fastqpatterns = []
     for fastqpattern in fastq_dict[f"{wcs.stype}"]["fastqpair_patterns"]:
         fastqpatterns.append(fastqpattern)
-    return expand("{workingdir}/{stype}/mapping/{fastqpattern}.bam", workingdir=f"{wcs.workingdir}", stype=f"{wcs.stype}", fastqpattern=fastqpattern)
+    return expand("{workingdir}/{stype}/mapping/{fastqpattern}.bam", workingdir=f"{wcs.workingdir}", stype=f"{wcs.stype}", fastqpattern=fastqpatterns)
 
 rule mapping:
     input:

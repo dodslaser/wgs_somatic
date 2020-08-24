@@ -7,7 +7,7 @@ rule dnascope:
     params:
         threads = clusterconf["dnascope"]["threads"],
         sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
-        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
+        reference = pipeconfig["singularities"]["sentieon"]["reference"],
         dbsnp = pipeconfig["singularities"]["sentieon"]["dbsnp"],
         model = pipeconfig["singularities"]["sentieon"]["dnascope_m"],
         callsettings = pipeconfig["rules"]["dnascope"]["settings"]
@@ -16,7 +16,7 @@ rule dnascope:
     output:
         "{workingdir}/{stype}/dnascope/{sname}_DNAscope.vcf"
     shell:
-        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} "
+        "{params.sentieon} driver -t {params.threads} -r {params.reference} "
             "-i {input} --algo DNAscope -d {params.dbsnp} "
             "--var_type snp,indel --model {params.model} {params.callsettings} {output}"
         
@@ -26,14 +26,14 @@ rule dnascope_modelfilter:
     params:
         threads = clusterconf["dnascope_modelfilter"]["threads"],
         sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
-        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
+        reference = pipeconfig["singularities"]["sentieon"]["reference"],
         model = pipeconfig["singularities"]["sentieon"]["dnascope_m"],
     singularity:
         pipeconfig["singularities"]["sentieon"]["sing"]
     output:
         "{workingdir}/{stype}/dnascope/{sname}_DNAscope_modelfiltered.vcf"
     shell:
-        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} --algo DNAModelApply --model {params.model} -v {input} {output}"
+        "{params.sentieon} driver -t {params.threads} -r {params.reference} --algo DNAModelApply --model {params.model} -v {input} {output}"
 
 rule dnascope_vcffilter:
     input:
