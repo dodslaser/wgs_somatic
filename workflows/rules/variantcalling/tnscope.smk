@@ -12,7 +12,7 @@ rule tnscope:
         tumorname = tumorname,
         normalname = normalname,
         sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
-        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
+        reference = pipeconfig["singularities"]["sentieon"]["reference"],
         dbsnp = pipeconfig["singularities"]["sentieon"]["dbsnp"],
         callsettings = pipeconfig["rules"]["tnscope"]["settings"],
     singularity:
@@ -20,7 +20,7 @@ rule tnscope:
     output:
         "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn.vcf"
     shell:
-        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} "
+        "{params.sentieon} driver -t {params.threads} -r {params.reference} "
             "-i {input.tumorbam} -q {input.tumortable} -i {input.normalbam} -q {input.normaltable} "
             "--algo TNscope --tumor_sample {params.tumorname} --normal_sample {params.normalname} "
             "{params.callsettings} {output}"
@@ -31,14 +31,14 @@ rule tnscope_modelfilter:
     params:
         threads = clusterconf["tnscope_modelfilter"]["threads"],
         sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
-        referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
+        reference = pipeconfig["singularities"]["sentieon"]["reference"],
         modelpath = pipeconfig["singularities"]["sentieon"]["tnscope_m"],
     singularity:
         pipeconfig["singularities"]["sentieon"]["sing"]
     output:
         "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn_ML.vcf"
     shell:
-        "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} "
+        "{params.sentieon} driver -t {params.threads} -r {params.reference} "
             "--algo TNModelApply -m {params.modelpath} -v {input.tnscopevcf} {output}"
 
 rule tnscope_vcffilter:
