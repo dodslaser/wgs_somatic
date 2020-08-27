@@ -1,6 +1,26 @@
 {
-    "referencegenome": "/apps/bio/repos/wgs_somatic/databases/hg38/GCA_000001405.15_GRCh38_full_plus_hs38d1_analysis_set.fna",
-    "sentieon": "/apps/bio/software/Sentieon/sentieon-genomics-201911/bin/sentieon",
+    "referencegenome": "databases/hg38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
+    "singularities":
+    {
+        "sentieon":
+        {
+            "sing": "singularities/sentieon/hg38/sentieon_peta_hg38.simg",
+            "tool_path": "/sentieon-genomics-201911/bin/sentieon",
+            "reference": "/databases/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
+            "mills": "/databases/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
+            "dbsnp": "/databases/Homo_sapiens_assembly38.dbsnp138.vcf.gz,
+            "dnascope_m": "/databases/SentieonDNAscopeModelBeta0.5.model",
+            "tnscope_m": "/databases/Sentieon_GiAB_201711.model"
+        },
+        "canvas":
+        {
+            "sing": "singularities/canvas/hg38/canvas_hg38.simg",
+            "tool_path": "/Canvas-1.40.0.1613+master_x64/Canvas.dll",
+            "reference": "/databases/kmer.fa",
+            "genomedir": "/databases/",
+            "filter13": "/databases/filter13.bed"
+        }
+    },
     "rules":
     {
         "mapping":
@@ -13,25 +33,20 @@
         },
         "realign":
         {
-            "outputdir": "realign",
-            "mills": "/apps/bio/repos/wgs_somatic/databases/hg38/mills_1000g/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
+            "outputdir": "realign"
         },
         "recal":
         {
-            "outputdir": "recal",
-            "mills": "/apps/bio/repos/wgs_somatic/databases/hg38/mills_1000g/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
-            "dbsnp": "/apps/bio/repos/wgs_somatic/databases/hg38/dbsnp/Homo_sapiens_assembly38.dbsnp138.vcf.gz"
+            "outputdir": "recal"
         },
         "tnscope":
         {
             "outputdir": "tumor/tnscope",
-            "dbsnp": "/apps/bio/repos/wgs_somatic/databases/dbsnp_138.b37.vcf.gz",
             "settings": "--min_init_normal_lod 0,5 --min_normal_lod 2,0 --min_init_tumor_lod 1,0 --min_tumor_lod 2,8 --trim_soft_clip"
         },
         "tnscope_modelfilter":
         {
-            "outputdir": "tumor/tnscope",
-            "modelpath": "/apps/bio/repos/wgs_somatic/databases/sentieonfiles/Sentieon_GiAB_201711.model"
+            "outputdir": "tumor/tnscope"
         },
         "tnscope_vcffilter":
         {
@@ -40,9 +55,7 @@
         },
         "dnascope":
         {
-            "settings": "--pcr_indel_model NONE",
-            "modelpath": "/apps/bio/repos/wgs_somatic/tools/sentieon/SentieonDNAscopeModelBeta0.5.model",
-            "dbsnp": "/apps/bio/repos/wgs_somatic/databases/hg38/dbsnp/Homo_sapiens_assembly38.dbsnp138.vcf.gz"
+            "settings": "--pcr_indel_model NONE"
         },
         "dnascope_modelfilter":
         {
@@ -53,25 +66,14 @@
             "bcftools": "/apps/bio/software/bcftools/1.9/bin/bcftools",
             "vcftools": "/apps/bio/apps/vcftools/0.1.12a/bin/vcftools"
         },
-        "ballele_plot":
-        {
-            "ballele": "/apps/bio/repos/wgs_somatic/tools/localrepos/b_allele_igv_plot/plot_b_allele_freq.py"
-        },
-        "excel_qc":
-        {
-            "qcsumscript": "/apps/bio/repos/wgs_somatic/misc_tools/create_qc_excel.py"    
-        }, 
        "generate_tdf":
         {
             "tdfgen": "/apps/bio/repos/wgs_somatic/tools/IGVTools/igvtools.jar"
         },
         "canvas":
         {
-            "annotate": "/apps/bio/repos/wgs_somatic/tools/localrepos/annotate_manta_canvas/annotate_manta_canvas.py",
-            "annotate_ref": "/apps/bio/repos/wgs_somatic/tools/localrepos/annotate_manta_canvas/refseq_20190301_ncbiRefSeq",            
-            "canvasdll": "/apps/bio/software/canvas/Canvas-1.40.0.1613+master_x64/Canvas.dll",
-            "dotnet": "/opt/rh/rh-dotnet20/root/usr/bin/dotnet",
-            "genomedir": "/apps/bio/repos/wgs_somatic/tools/canvas_files/WholeGenomeFasta/",
+            "annotate": "/apps/bio/repos/wgs_somatic/workflows/scripts/annotate_manta_canvas/annotate_manta_canvas.py",
+            "annotate_ref": "/apps/bio/repos/wgs_somatic/workflows/scripts/refseq_20190301_ncbiRefSeq",            
             "reference": "/apps/bio/repos/wgs_somatic/tools/canvas_files/WholeGenomeFasta/kmer.fa",
             "filter13": "/apps/bio/repos/wgs_somatic/tools/canvas_files/filter13.bed",
             "malevcf": "/apps/bio/repos/wgs_somatic/tools/canvas_files/male_hg19.vcf",
@@ -91,8 +93,8 @@
         {
             "svdb": "/apps/bio/software/anaconda2/envs/svdb2.3/bin/svdb",
             "mantaconf": "/apps/bio/repos/wgs_somatic/tools/manta-1.6.0.centos6_x86_64/bin/configManta.py",
-            "annotate": "/apps/bio/repos/wgs_somatic/tools/localrepos/annotate_manta_canvas/annotate_manta_canvas.py",
-            "annotate_ref": "/apps/bio/repos/wgs_somatic/tools/localrepos/annotate_manta/refseq_20190301_ncbiRefSeq",
+            "annotate": "/apps/bio/repos/wgs_somatic/workflows/scripts/annotate_manta_canvas/annotate_manta_canvas.py",
+            "annotate_ref": "/apps/bio/repos/wgs_somatic/workflows/scripts/annotate_manta_canvas/refseq_20190301_ncbiRefSeq",
             "swegendb": "/apps/bio/repos/wgs_somatic/databases/sv_dbs/SweGen_MANTA.sort.vcf",
             "gnomaddb": "/apps/bio/repos/wgs_somatic/databases/sv_dbs/gnomad_v2_sv.sites.vcf",
             "localdb": "/apps/bio/repos/wgs_somatic/databases/sv_dbs/allmanta_20200318_svdb2.3.db",
