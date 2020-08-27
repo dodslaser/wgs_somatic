@@ -1,0 +1,55 @@
+Bootstrap: library
+From: centos:7
+Stage: build
+
+
+%files
+    petasuite-cloud-edition-1.2.6p10-1.x86_64.rpm /opt
+    GCA_000001405.15_GRCh38_no_alt_analysis_set.fna databases/
+    GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.amb databases/
+    GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.ann databases/
+    GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.bwt databases/
+    GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.dict databases/
+    GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai databases/
+    GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.pac databases/
+    GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.sa databases/
+    Homo_sapiens_assembly38.dbsnp138.vcf.gz
+    Homo_sapiens_assembly38.dbsnp138.vcf.gz.csi
+    Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+    Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi
+    SentieonDNAscopeModelBeta0.5.model databases/
+    Sentieon_GiAB_201711.model databases/
+
+%post
+    # Install python3 and other requirements for git and pip3
+    yum install -y python3
+    yum install -y epel-release
+    yum install -y python3-pip
+    yum -y groupinstall "Development Tools"
+    yum -y install wget
+
+    # Get sentieon
+    wget https://s3.amazonaws.com/sentieon-release/software/sentieon-genomics-201911.tar.gz #-P /tmp/test/
+
+    # Unzip using tar
+    tar -zxvf sentieon-genomics-201911.tar.gz
+
+    # Install vim
+    yum install -y vim
+
+    # Install PetaSuite
+    yum install -y /opt/petasuite-cloud-edition-1.2.6p10-1.x86_64.rpm
+
+%environment
+    # below will be set with bind during execute
+    PETASUITE_REFPATH=/opt/petagene/corpus
+    LD_PRELOAD=/usr/lib/petalink.so
+    SENTIEON_LICENSE=medair1.medair.lcl:8990
+    export PETASUITE_REFPATH LD_PRELOAD SENTIEON_LICENSE 
+
+%runscript
+    exec /bin/bash "$@"
+
+%labels
+    Author Vilma Canfjorden & Mathias J (gjorde coolaste grejerna)
+    Version v0.0.2
