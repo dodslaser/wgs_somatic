@@ -123,7 +123,6 @@ include:        "workflows/rules/variantcalling/canvas.smk"
 
 #########################################
 # QC
-include:        "workflows/rules/qc/coverage.smk"
 include:        "workflows/rules/qc/aggregate_qc.smk"
 
 #########################################
@@ -142,6 +141,8 @@ if reference == "hg38":
     include:    "workflows/rules/mapping/mapping_hg38.smk"
     # Variantcalling
     include:    "workflows/rules/variantcalling/manta_hg38.smk"
+    # Coverage
+    include:    "workflows/rules/qc/coverage_hg38.smk"
 else:
     ###########################################################
     # HG19 rules
@@ -150,6 +151,8 @@ else:
     include:        "workflows/rules/mapping/mapping.smk"
     # VariantCalling
     include:        "workflows/rules/variantcalling/manta.smk"
+    # Coverage
+    include:        "workflows/rules/qc/coverage.smk"
 
 def get_igv_input(wildcards):
     if igvuser:
