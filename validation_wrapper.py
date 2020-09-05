@@ -77,8 +77,8 @@ for trange in valconf["fractions"]["hg38"]:
         analysisdict["sample"]["tumorname"] = tumorname
         analysisdict["sample"]["tumorid"] = tumorid
         analysisdict["sample"]["normalid"] = normalid
-        analysisdict["tumorfastqs"] = valconf["fractions"]["hg38"][trange]["tumor"] 
-        analysisdict["normalfastqs"] = valconf["fractions"]["hg38"][trange]["normal"] 
+        analysisdict["tumorfastqs"] = [valconf["fractions"]["hg38"][trange]["tumor"]]
+        analysisdict["normalfastqs"] = [valconf["fractions"]["hg38"][trange]["normal"] ]
         analysisdict["workingdir"] = output
  
         #################################################################

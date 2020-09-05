@@ -7,30 +7,31 @@ from pathlib import Path
 import yaml
 import helpers
 import os
+import json
 
 __author__ = "Rickard 'Ricksy' Rickardsson"
 
 normaldata = config["normalfastqs"]
 normalfastqdirs = normaldata
-normalname = config["normalname"]
-normalid = config["normalid"]
+normalname = config["sample"]["normalname"]
+normalid = config["sample"]["normalid"]
 
 tumordata = config["tumorfastqs"]
 tumorfastqdirs = tumordata
-tumorname = config["tumorname"]
-tumorid = config["tumorid"]
+tumorname = config["sample"]["tumorname"]
+tumorid = config["sample"]["tumorid"]
 
 rtg = config["rtg"]["tools"]
 rtgsdf = config["rtg"]["sdf"]
 bedfile = config["data"]["bed"]
-truthset = config["data"]["tsett"]
-
+truthset = config["data"]["tset"]
+tnscopesetting = config["tnscope"]
 workingdir = config["workingdir"]
 
 ##################################################
 # Chose Config based on Reference
 # ---------------------------------------------
-
+reference = "hg38"
 configfilepath = "configs/config_hg38.json"
 
 #----------------------------------------------
@@ -104,23 +105,19 @@ wildcard_constraints:
 
 ###########################################################
 # Defining Non Cluster Rules
-
+localrules: all, validation_wf
 ###########################################################
 
 ########################################
 # Workflows
-#include:
+include:        "validation_scripts/validation_workflow.smk"
 
 ########################################
 # Mapping
 
 #########################################
 # VariantCalling
-include:        "workflows/rules/variantcalling/tnscope.smk"
-
-#########################################
-# QC
-include:        "workflows/rules/qc/coverage.smk"
+include:        "workflows/rules/variantcalling/tnscope_eval.smk"
 
 #########################################
 # ResultSharing:
@@ -138,17 +135,6 @@ else:
     ###########################################################
     # Mapping
     include:        "workflows/rules/mapping/mapping.smk"
-
-def get_igv_input(wildcards):
-    if igvuser:
-        return expand("{workingdir}/reporting/shared_igv_files.txt", workingdir=workingdir)
-    return []
-
-        if ivauser == "testing":
-            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
-        else:
-            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
-    return []
 
 rule all:
     input:

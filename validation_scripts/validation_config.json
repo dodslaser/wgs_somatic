@@ -90,7 +90,7 @@
 
         }
     },
-    "outputdir": "/medstore/Development/WGS_Somatic/artificial_coriell/hg38/analysis",
+    "outputdir": "/seqstore/webfolders/wgs/admin/barncancer/evaltnscope_hg38",
     "tnscope_settings":
     {
         "19":
