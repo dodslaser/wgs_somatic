@@ -12,6 +12,9 @@ mapping:
     error: "SMK-WGS-{rule}_{wildcards.fastqpattern}.stderr"
     threads: 20
 
+rtgtools_eval:
+    threads: 10
+
 dedup:
     threads: 20
 
