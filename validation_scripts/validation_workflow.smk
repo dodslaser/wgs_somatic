@@ -12,12 +12,15 @@ rule validation_wf:
 
 rule rtgtools_eval:
     input:
-        "{workingdir}/{stype}/tnscope/{sname}_somatic.vcf"
+        expand("{workingdir}/{stype}/tnscope/{sname}_somatic.vcf", workingdir=workingdir, stype="tumor", sname=tumorid)
     params:
-        rtg =
-        sdf = 
-        truthset = 
-        bedfile =  
+        rtg = config["rtg"]["tools"],
+        sdf = config["rtg"]["sdf"],
+        truthset = config["data"]["bed"],
+        bedfile = config["data"]["tset"]
     output:
         "{workingdir}/rtgeval/summary.txt"
     run:
+        shell("{params.rtg} bgzip {input}")
+        shell("{params.rtg} index {input}.gz")
+        shell("{params.rtg} vcfeval --squash-ploidy -e {params.bed} -b {params.truthset} -c {input}.gz -o {wildcards.workingdir}/rtgeval/") 
