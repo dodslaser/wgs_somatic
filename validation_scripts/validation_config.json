@@ -96,6 +96,18 @@
         "19":
         {
            "settings": "--min_init_normal_lod 0.5 --min_normal_lod 2.0 --min_init_tumor_lod 1.0 --min_tumor_lod 2,8 --trim_soft_clip"
+        },
+        "20":
+        {
+           "settings": "--min_init_normal_lod 0.5 --min_normal_lod 3.0 --min_init_tumor_lod 1.0 --min_tumor_lod 3,5 --trim_soft_clip"
+        },
+        "21":
+        {
+           "settings": "--min_init_normal_lod 0.5 --min_normal_lod 1.5 --min_init_tumor_lod 1.0 --min_tumor_lod 2,2 --trim_soft_clip"
+        },
+        "22":
+        {
+           "settings": "--min_init_normal_lod 0.5 --min_normal_lod 1.8 --min_init_tumor_lod 1.0 --min_tumor_lod 2,5 --trim_soft_clip"
         }
     },
     "rtgtools":
