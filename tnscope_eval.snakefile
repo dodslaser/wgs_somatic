@@ -26,6 +26,13 @@ rtgsdf = config["rtg"]["sdf"]
 bedfile = config["data"]["bed"]
 truthset = config["data"]["tset"]
 tnscopesetting = config["tnscope"]
+
+tnscopesetting_list = []
+for setting in tnscopesetting:
+    tnscopesetting_list.append(setting)
+
+
+
 workingdir = config["workingdir"]
 
 ##################################################

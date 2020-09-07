@@ -55,92 +55,92 @@ for trange in valconf["fractions"]["hg38"]:
     if not os.path.isdir(f"{output}/{trange}"):
         os.mkdir(f"{output}/{trange}")
     
-    for tnsetting in valconf["tnscope_settings"]:
-        if not os.path.isdir(f"{output}/{trange}/{tnsetting}"):
-            os.mkdir(f"{output}/{trange}/{tnsetting}")
+#    for tnsetting in valconf["tnscope_settings"]:
+#        if not os.path.isdir(f"{output}/{trange}/{tnsetting}"):
+#            os.mkdir(f"{output}/{trange}/{tnsetting}")
         
-        runnormal = valconf["fractions"]["hg38"][trange]["runname"]
-        runtumor = valconf["fractions"]["hg38"][trange]["runname"]
-        normalname = valconf["fractions"]["hg38"][trange]["normalname"]
-        tumorname = valconf["fractions"]["hg38"][trange]["tumorname"]
+    runnormal = valconf["fractions"]["hg38"][trange]["runname"]
+    runtumor = valconf["fractions"]["hg38"][trange]["runname"]
+    normalname = valconf["fractions"]["hg38"][trange]["normalname"]
+    tumorname = valconf["fractions"]["hg38"][trange]["tumorname"]
 
-        date, _, _, chip, *_ = runnormal.split('_')
-        normalid= '_'.join([normalname, date, chip])
-        date, _, _, chip, *_ = runtumor.split('_')
-        tumorid = '_'.join([tumorname, date, chip])       
+    date, _, _, chip, *_ = runnormal.split('_')
+    normalid= '_'.join([normalname, date, chip])
+    date, _, _, chip, *_ = runtumor.split('_')
+    tumorid = '_'.join([tumorname, date, chip])       
 
-        # AnalysisConfig Continued...
-        output = f"{output}/{trange}/{tnsetting}"
-        analysisdict["tnscope"] = valconf["tnscope_settings"][tnsetting]
-        analysisdict["sample"] = {}
-        analysisdict["sample"]["normalname"] = normalname
-        analysisdict["sample"]["tumorname"] = tumorname
-        analysisdict["sample"]["tumorid"] = tumorid
-        analysisdict["sample"]["normalid"] = normalid
-        analysisdict["tumorfastqs"] = [valconf["fractions"]["hg38"][trange]["tumor"]]
-        analysisdict["normalfastqs"] = [valconf["fractions"]["hg38"][trange]["normal"] ]
-        analysisdict["workingdir"] = output
- 
-        #################################################################
-        # Prepare AnalysisFolder
-        #################################################################
-        date, _, _, chip, *_ = runnormal.split('_')
-        normalid= '_'.join([normalname, date, chip])
-        date, _, _, chip, *_ = runtumor.split('_')
-        tumorid = '_'.join([tumorname, date, chip])
+    # AnalysisConfig Continued...
+    output = f"{output}/{trange}"
+    analysisdict["tnscope"] = valconf["tnscope_settings"]
+    analysisdict["sample"] = {}
+    analysisdict["sample"]["normalname"] = normalname
+    analysisdict["sample"]["tumorname"] = tumorname
+    analysisdict["sample"]["tumorid"] = tumorid
+    analysisdict["sample"]["normalid"] = normalid
+    analysisdict["tumorfastqs"] = [valconf["fractions"]["hg38"][trange]["tumor"]]
+    analysisdict["normalfastqs"] = [valconf["fractions"]["hg38"][trange]["normal"] ]
+    analysisdict["workingdir"] = output
 
-        
-        mainconf = "hg38conf"
-        configdir = config["configdir"]
-        mainconf_name = config[mainconf]
-        mainconf_path = f"{configdir}/{mainconf_name}"
+    #################################################################
+    # Prepare AnalysisFolder
+    #################################################################
+    date, _, _, chip, *_ = runnormal.split('_')
+    normalid= '_'.join([normalname, date, chip])
+    date, _, _, chip, *_ = runtumor.split('_')
+    tumorid = '_'.join([tumorname, date, chip])
 
-        samplelogs = f"{output}/logs"
-        if not os.path.isdir(samplelogs):
-            os.mkdir(samplelogs)
-        runconfigs = f"{output}/configs"
-        if not os.path.isdir(runconfigs):
-            os.mkdir(runconfigs)
+    
+    mainconf = "hg38conf"
+    configdir = config["configdir"]
+    mainconf_name = config[mainconf]
+    mainconf_path = f"{configdir}/{mainconf_name}"
 
-        # copying configfiles to analysisdir
-        clusterconf = config["clusterconf"]
-        copyfile(f"{configdir}/{clusterconf}", f"{runconfigs}/{clusterconf}")
-        copyfile(f"{configdir}/{mainconf_name}", f"{runconfigs}/{mainconf_name}")
+    samplelogs = f"{output}/logs"
+    if not os.path.isdir(samplelogs):
+        os.mkdir(samplelogs)
+    runconfigs = f"{output}/configs"
+    if not os.path.isdir(runconfigs):
+        os.mkdir(runconfigs)
 
-        samplelog = f"{samplelogs}/{tumorid}.log"
-        logger("Starting validation analysis with information:", samplelog)
-        logger(f"{analysisdict}", samplelog)
-        
-        with open(f"{runconfigs}/{tumorid}_config.json", 'w') as analysisconf:
-            json.dump(analysisdict, analysisconf, ensure_ascii=False, indent=4)
+    # copying configfiles to analysisdir
+    clusterconf = config["clusterconf"]
+    copyfile(f"{configdir}/{clusterconf}", f"{runconfigs}/{clusterconf}")
+    copyfile(f"{configdir}/{mainconf_name}", f"{runconfigs}/{mainconf_name}")
 
-        ###################################################################
-        # Prepare Singularity Binddirs
-        binddirs = config["singularitybinddirs"]
-        binddir_string = ""
-        for binddir in binddirs:
-            source = binddirs[binddir]["source"]
-            destination = binddirs[binddir]["destination"]
-            logger(f"preparing binddir variable {binddir} source: {source} destination: {destination}")
-            binddir_string = f"{binddir_string}{source}:{destination},"
-            for normalfastqdir in analysisdict["normalfastqs"]:
-                 binddir_string = f"{binddir_string}{normalfastqdir},"
-            for tumorfastqdir in analysisdict["tumorfastqs"]:
-                binddir_string = f"{binddir_string}{tumorfastqdir},"
-        binddir_string = f"{binddir_string}{output}"
+    samplelog = f"{samplelogs}/{tumorid}.log"
+    logger("Starting validation analysis with information:", samplelog)
+    logger(f"{analysisdict}", samplelog)
+    
+    with open(f"{runconfigs}/{tumorid}_config.json", 'w') as analysisconf:
+        json.dump(analysisdict, analysisconf, ensure_ascii=False, indent=4)
+
+    ###################################################################
+    # Prepare Singularity Binddirs
+    binddirs = config["singularitybinddirs"]
+    binddir_string = ""
+    for binddir in binddirs:
+        source = binddirs[binddir]["source"]
+        destination = binddirs[binddir]["destination"]
+        logger(f"preparing binddir variable {binddir} source: {source} destination: {destination}")
+        binddir_string = f"{binddir_string}{source}:{destination},"
+        for normalfastqdir in analysisdict["normalfastqs"]:
+             binddir_string = f"{binddir_string}{normalfastqdir},"
+        for tumorfastqdir in analysisdict["tumorfastqs"]:
+            binddir_string = f"{binddir_string}{tumorfastqdir},"
+    binddir_string = f"{binddir_string}{output}"
 
 
-        ###################################################################
-        # Start SnakeMake pipeline
-        ###################################################################
-        scriptdir = os.path.dirname(os.path.realpath(__file__)) # find current dir
+    ###################################################################
+    # Start SnakeMake pipeline
+    ###################################################################
+    scriptdir = os.path.dirname(os.path.realpath(__file__)) # find current dir
 
-        snakemake_path = config["snakemake_env"]
-        os.environ["PATH"] += os.pathsep + snakemake_path
-        my_env = os.environ.copy()
-        snakemake_args = f"snakemake -s tnscope_eval.snakefile --configfile {runconfigs}/{tumorid}_config.json --dag | dot -Tsvg > {samplelogs}/dag_{current_date}.svg"
-        # >>>>>>>>>>>> Create Dag of pipeline
-        subprocess.run(snakemake_args, shell=True, env=my_env) # CREATE DAG
-        snakemake_args = f"snakemake -s tnscope_eval.snakefile --configfile {runconfigs}/{tumorid}_config.json --use-singularity --singularity-args '--bind {binddir_string}' --cluster-config configs/cluster.yaml --cluster \"qsub -S /bin/bash -pe mpi {{cluster.threads}} -q {{cluster.queue}} -N {{cluster.name}} -o {samplelogs}/{{cluster.output}} -e {samplelogs}/{{cluster.error}} -l {{cluster.excl}}\" --jobs 999 --latency-wait 60 --directory {scriptdir} &>> {samplelog}"
-        # >>>>>>>>>>>> Start pipeline
-        subprocess.run(snakemake_args, shell=True, env=my_env) # Shellscript pipeline
+    snakemake_path = config["snakemake_env"]
+    os.environ["PATH"] += os.pathsep + snakemake_path
+    my_env = os.environ.copy()
+    snakemake_args = f"snakemake -s tnscope_eval.snakefile --configfile {runconfigs}/{tumorid}_config.json --dag | dot -Tsvg > {samplelogs}/dag_{current_date}.svg"
+    # >>>>>>>>>>>> Create Dag of pipeline
+    subprocess.run(snakemake_args, shell=True, env=my_env) # CREATE DAG
+    snakemake_args = f"snakemake -s tnscope_eval.snakefile --configfile {runconfigs}/{tumorid}_config.json --use-singularity --singularity-args '--bind {binddir_string}' --cluster-config configs/cluster.yaml --cluster \"qsub -S /bin/bash -pe mpi {{cluster.threads}} -q {{cluster.queue}} -N {{cluster.name}} -o {samplelogs}/{{cluster.output}} -e {samplelogs}/{{cluster.error}} -l {{cluster.excl}}\" --jobs 999 --latency-wait 60 --directory {scriptdir} &>> {samplelog}"
+    # >>>>>>>>>>>> Start pipeline
+    subprocess.run(snakemake_args, shell=True, env=my_env) # Shellscript pipeline
