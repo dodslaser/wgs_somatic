@@ -4,8 +4,8 @@
     {
         "sentieon":
         {
-            "sing": "singularities/sentieon/hg38/sentieon_peta_hg38.simg",
-            "tool_path": "/sentieon-genomics-201911/bin/sentieon",
+            "sing": "singularities/sentieon/hg38/sentieon_peta_201911.01_hg38.simg",
+            "tool_path": "/sentieon-genomics-201911.01/bin/sentieon",
             "reference": "/databases/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
             "mills": "/databases/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
             "dbsnp": "/databases/Homo_sapiens_assembly38.dbsnp138.vcf.gz",
