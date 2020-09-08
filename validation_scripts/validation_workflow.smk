@@ -6,7 +6,8 @@ import shutil
 
 rule validation_wf:
     input:
-        expand("{workingdir}/rtgeval/{tnsetting}/{sname}_summary.txt", workingdir=workingdir, tnsetting=tnscopesetting_list, sname=tumorid)
+        expand("{workingdir}/rtgeval/{tnsetting}/{sname}_summary.txt", workingdir=workingdir, tnsetting=tnscopesetting_list, sname=tumorid),
+        expand("{workingdir}/{stype}/tnscope_given/{sname}_TNscope_tn_given.vcf", workingdir=workingdir, stype="tumor", sname=tumorid)
     output:
         "{workingdir}/reporting/workflow_finished.txt"
     run:
@@ -14,14 +15,15 @@ rule validation_wf:
 
 rule rtgtools_eval:
     input:
-        expand("{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_somatic_{tnsetting}.vcf", tnsetting=tnscopesetting_list, workingdir=workingdir, stype="tumor", sname=tumorid)
+        #expand("{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_somatic_{tnsetting}.vcf", tnsetting=tnscopesetting_list, workingdir=workingdir, stype="tumor", sname=tumorid)
+        "{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_somatic_{tnsetting}.vcf"
     params:
         rtg = config["rtg"]["tools"],
         sdf = config["rtg"]["sdf"],
         truthset = config["data"]["tset"],
         bedfile = config["data"]["bed"]
     output:
-        "{workingdir}/rtgeval/{tnsetting}/{sname}_summary.txt"
+        "{workingdir}/{stype}/rtgeval/{tnsetting}/{sname}_summary.txt"
     run:
         #if not os.path.isdir("{wildcards.workingdir}/rtgeval/"):
         #    os.mkdir(f"{wildcards.workingdir}/rtgeval/")
