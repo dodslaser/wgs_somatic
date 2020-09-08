@@ -12,6 +12,11 @@
         {
             "source": "/seqstore/software/petagene/corpus",
             "destination": "/opt/petagene/corpus"
+        },
+        "databases":
+        {
+            "source": "/apps/bio/dependencies/wgs_somatic/hg38/sentieon/",
+            "destination": "/databases"
         }
     }
 }
