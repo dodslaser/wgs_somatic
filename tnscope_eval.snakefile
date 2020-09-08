@@ -124,7 +124,7 @@ include:        "validation_scripts/validation_workflow.smk"
 
 #########################################
 # VariantCalling
-include:        "workflows/rules/variantcalling/tnscope_eval.smk"
+include:        "validation_scripts/tnscope_eval.smk"
 
 #########################################
 # ResultSharing:
