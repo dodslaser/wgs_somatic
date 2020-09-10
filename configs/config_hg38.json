@@ -1,25 +1,26 @@
 {
-    "referencegenome": "databases/hg38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
+    "referencegenome": "/apps/bio/dependencies/wgs_somatic/hg38/sentieon/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
     "singularities":
     {
         "sentieon":
         {
-            "sing": "singularities/sentieon/hg38/sentieon_peta_hg38.simg",
-            "tool_path": "/sentieon-genomics-201911/bin/sentieon",
+            "sing": "singularities/sentieon/hg38/sentieon_peta_201911.01_hg38.simg",
+            "tool_path": "/sentieon-genomics-201911.01/bin/sentieon",
             "reference": "/databases/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
             "mills": "/databases/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
-            "dbsnp": "/databases/Homo_sapiens_assembly38.dbsnp138.vcf.gz,
+            "dbsnp": "/databases/Homo_sapiens_assembly38.dbsnp138.vcf.gz",
             "dnascope_m": "/databases/SentieonDNAscopeModelBeta0.5.model",
             "tnscope_m": "/databases/Sentieon_GiAB_201711.model"
         },
         "canvas":
         {
             "sing": "singularities/canvas/hg38/canvas_hg38.simg",
-            "tool_path": "/Canvas-1.40.0.1613+master_x64/Canvas.dll",
-            "reference": "/databases/kmer.fa",
-            "genomedir": "/databases/",
-            "filter13": "/databases/filter13.bed"
-        }
+            "dll": "/Canvas-1.40.0.1613+master_x64/Canvas.dll",
+            "tool_path": "/canvas/run_canvas.py",
+            "reference": "/database/",
+            "kmerfile": "/database/kmer.fa",
+            "filter13": "/database/filter13.bed"
+        } 
     },
     "rules":
     {
@@ -55,7 +56,8 @@
         },
         "dnascope":
         {
-            "settings": "--pcr_indel_model NONE"
+            "settings": "--pcr_indel_model NONE",
+            "modelpath": "/apps/bio/repos/wgs_somatic/tools/sentieon/SentieonDNAscopeModelBeta0.5.model"
         },
         "dnascope_modelfilter":
         {
@@ -72,12 +74,8 @@
         },
         "canvas":
         {
-            "annotate": "/apps/bio/repos/wgs_somatic/workflows/scripts/annotate_manta_canvas/annotate_manta_canvas.py",
-            "annotate_ref": "/apps/bio/repos/wgs_somatic/workflows/scripts/refseq_20190301_ncbiRefSeq",            
-            "reference": "/apps/bio/repos/wgs_somatic/tools/canvas_files/WholeGenomeFasta/kmer.fa",
-            "filter13": "/apps/bio/repos/wgs_somatic/tools/canvas_files/filter13.bed",
-            "malevcf": "/apps/bio/repos/wgs_somatic/tools/canvas_files/male_hg19.vcf",
-            "femalevcf": "/apps/bio/repos/wgs_somatic/tools/canvas_files/female_hg19.vcf"
+            "annotate": "workflows/scripts/annotate_manta_canvas/annotate_manta_canvas.py",
+            "annotate_ref": "/apps/bio/dependencies/wgs_somatic/hg38/refseq/RefseqAll_ncbiRefSeq_hg38_GenesGenepredictions.gtf"            
         },
         "share_to_igv":
         {
@@ -87,17 +85,14 @@
         "filter_variants_in_bed":
         {
             "rtg": "/apps/bio/repos/wgs_somatic/tools/rtg-tools-3.9.1-6dde278/rtg",
-            "bedfile": "/apps/bio/repos/wgs_somatic/databases/mt_chrrenamed_refseq_20190301_ncbiRefSeq_expanded_3000bases.bed" 
+            "bedfile": "/apps/bio/dependencies/wgs_somatic/hg38/refseq/RefseqAll_ncbiRefSeq_hg38_GenesGenepredictions_3000.bed" 
         },
         "manta":
         {
             "svdb": "/apps/bio/software/anaconda2/envs/svdb2.3/bin/svdb",
             "mantaconf": "/apps/bio/repos/wgs_somatic/tools/manta-1.6.0.centos6_x86_64/bin/configManta.py",
             "annotate": "/apps/bio/repos/wgs_somatic/workflows/scripts/annotate_manta_canvas/annotate_manta_canvas.py",
-            "annotate_ref": "/apps/bio/repos/wgs_somatic/workflows/scripts/annotate_manta_canvas/refseq_20190301_ncbiRefSeq",
-            "swegendb": "/apps/bio/repos/wgs_somatic/databases/sv_dbs/SweGen_MANTA.sort.vcf",
-            "gnomaddb": "/apps/bio/repos/wgs_somatic/databases/sv_dbs/gnomad_v2_sv.sites.vcf",
-            "localdb": "/apps/bio/repos/wgs_somatic/databases/sv_dbs/allmanta_20200318_svdb2.3.db",
+            "annotate_ref": "/apps/bio/dependencies/wgs_somatic/hg38/refseq/RefseqAll_ncbiRefSeq_hg38_GenesGenepredictions.gtf",
             "bcftools": "/apps/bio/software/bcftools/1.9/bin/bcftools"
         },
         "upload_to_iva":

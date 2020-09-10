@@ -9,4 +9,4 @@ rule ballele_plot:
     output:
         "{workingdir}/{stype}/reports/{sname}_baf.igv"
     run:
-        plot_freq("{input}, {output}")
+        plot_freq("{input}", "{output}")
