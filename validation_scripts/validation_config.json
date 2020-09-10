@@ -48,6 +48,11 @@
         {
             "5_10":
             {
+                "thresholds":
+                {
+                    "high": "10",
+                    "low": "5"
+                },
                 "bed": "/medstore/Development/WGS_Somatic/artificial_coriell/truthset/hg38/intersecting_bedfile/na12878_na24385_intersect_confbed.bed",
                 "tset": "/medstore/Development/WGS_Somatic/artificial_coriell/truthset/hg38/NA24385_NA12878_truthset/NA24385Tumor_VS_NA12878Normal_inconf.vcf.gz",
                 "runname": "5-10_tnscope_eval_T24385-N878",
@@ -55,9 +60,14 @@
                 "tumorname": "5-10-24385",
                 "normal": "/medstore/Development/WGS_Somatic/artificial_coriell/fastqs/normalfastqs/na1287830x",
                 "tumor": "/medstore/Development/WGS_Somatic/artificial_coriell/fastqs/tumorfastqs/hg38/range5_10"
-            },
+           },
             "10_20":
             {
+                "thresholds":
+                {
+                    "high": "20",
+                    "low": "10"
+                },
                 "bed": "/medstore/Development/WGS_Somatic/artificial_coriell/truthset/hg38/intersecting_bedfile/na12878_na24385_intersect_confbed.bed",
                 "tset": "/medstore/Development/WGS_Somatic/artificial_coriell/truthset/hg38/NA24385_NA12878_truthset/NA24385Tumor_VS_NA12878Normal_inconf.vcf.gz",
                 "runname": "10-20_tnscope_eval_T24385-N878",
@@ -68,6 +78,11 @@
             },
             "35_70":
             {
+                "thresholds":
+                {
+                    "high": "70",
+                    "low": "35"
+                },
                 "bed": "/medstore/Development/WGS_Somatic/artificial_coriell/truthset/hg38/intersecting_bedfile/na12878_na24385_intersect_confbed.bed",
                 "tset": "/medstore/Development/WGS_Somatic/artificial_coriell/truthset/hg38/NA12878_NA24385_truthset/NA12878Tumor_VS_NA24385Normal_inconf.vcf.gz",
                 "runname": "35-70_tnscope_eval_T878-N24385",
@@ -78,6 +93,11 @@
             },
             "45_90":
             {
+                "thresholds":
+                {
+                    "high": "90",
+                    "low": "45"
+                },
                 "bed": "/medstore/Development/WGS_Somatic/artificial_coriell/truthset/hg38/intersecting_bedfile/na12878_na24385_intersect_confbed.bed",
                 "tset": "/medstore/Development/WGS_Somatic/artificial_coriell/truthset/hg38/NA12878_NA24385_truthset/NA12878Tumor_VS_NA24385Normal_inconf.vcf.gz",
                 "runname": "45-90_tnscope_eval_T878-N24385",
@@ -85,9 +105,22 @@
                 "tumorname": "45-90-878",
                 "normal": "/medstore/Development/WGS_Somatic/artificial_coriell/fastqs/normalfastqs/na2438530x",
                 "tumor": "/medstore/Development/WGS_Somatic/artificial_coriell/fastqs/tumorfastqs/hg38/range45_90"
+            },
+            "45-90_5-10normal":
+            {
+                "thresholds":
+                {
+                    "high": "90",
+                    "low": "45"
+                },
+                "bed": "/medstore/Development/WGS_Somatic/artificial_coriell/truthset/hg38/intersecting_bedfile/na12878_na24385_intersect_confbed.bed",
+                "tset": "/medstore/Development/WGS_Somatic/artificial_coriell/truthset/hg38/NA12878_NA24385_truthset/NA12878Tumor_VS_NA24385Normal_inconf.vcf.gz",
+                "runname": "45-90_tnscope_eval_T878-N24385-N510cont",
+                "normalname": "na2438527xna128783x",
+                "tumorname": "45-90-878",
+                "normal": "/medstore/Development/WGS_Somatic/artificial_coriell/fastqs/normalfastqs/na24385_27x_na12878_3x",
+                "tumor": "/medstore/Development/WGS_Somatic/artificial_coriell/fastqs/tumorfastqs/hg38/range45_90"
             }
-
-
         }
     },
     "outputdir": "/seqstore/webfolders/wgs/admin/barncancer/evaltnscope_hg38",
