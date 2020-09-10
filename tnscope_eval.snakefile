@@ -7,31 +7,40 @@ from pathlib import Path
 import yaml
 import helpers
 import os
+import json
 
 __author__ = "Rickard 'Ricksy' Rickardsson"
 
-normalfastqdirs = config["normalfastqs"]
-normalname = config["normalname"]
-normalid = config["normalid"]
+normaldata = config["normalfastqs"]
+normalfastqdirs = normaldata
+normalname = config["sample"]["normalname"]
+normalid = config["sample"]["normalid"]
 
-tumorfastqdirs = config["tumorfastqs"]
-tumorname = config["tumorname"]
-tumorid = config["tumorid"]
+tumordata = config["tumorfastqs"]
+tumorfastqdirs = tumordata
+tumorname = config["sample"]["tumorname"]
+tumorid = config["sample"]["tumorid"]
 
-igvuser = config["igvuser"]
-ivauser = config["ivauser"]
-reference = config["reference"]
+rtg = config["rtg"]["tools"]
+rtgsdf = config["rtg"]["sdf"]
+bedfile = config["data"]["bed"]
+truthset = config["data"]["tset"]
+tnscopesetting = config["tnscope"]
+
+tnscopesetting_list = []
+for setting in tnscopesetting:
+    tnscopesetting_list.append(setting)
+
+
 
 workingdir = config["workingdir"]
 
 ##################################################
 # Chose Config based on Reference
 # ---------------------------------------------
+reference = "hg38"
+configfilepath = "configs/config_hg38.json"
 
-if reference == "hg38":
-    configfilepath = "configs/config_hg38.json"
-else:
-    configfilepath = "configs/config_hg19.json"
 #----------------------------------------------
 
 
@@ -103,34 +112,22 @@ wildcard_constraints:
 
 ###########################################################
 # Defining Non Cluster Rules
-localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
+localrules: all, validation_wf
 ###########################################################
 
 ########################################
 # Workflows
-include:        "workflows/tn_workflow.smk"
+include:        "validation_scripts/validation_workflow.smk"
 
 ########################################
 # Mapping
-include:        "workflows/rules/mapping/generate_tdf.smk"
 
 #########################################
 # VariantCalling
-include:        "workflows/rules/variantcalling/tnscope.smk"
-include:        "workflows/rules/variantcalling/dnascope.smk"
-include:        "workflows/rules/small_tools/ballele.smk"
-include:        "workflows/rules/variantcalling/canvas.smk"
-
-#########################################
-# QC
-include:        "workflows/rules/qc/aggregate_qc.smk"
+include:        "validation_scripts/tnscope_eval.smk"
 
 #########################################
 # ResultSharing:
-include:        "workflows/rules/results_sharing/share_to_igv.smk"
-include:        "workflows/rules/results_sharing/share_to_resultdir.smk"
-include:        "workflows/rules/results_sharing/upload_to_iva.smk"
-
 
 
 if reference == "hg38":
@@ -139,44 +136,13 @@ if reference == "hg38":
     ###########################################################
     # Mapping
     include:    "workflows/rules/mapping/mapping_hg38.smk"
-    # Variantcalling
-    include:    "workflows/rules/variantcalling/manta_hg38.smk"
-    # Coverage
-    include:    "workflows/rules/qc/coverage_hg38.smk"
 else:
     ###########################################################
     # HG19 rules
     ###########################################################
     # Mapping
     include:        "workflows/rules/mapping/mapping.smk"
-    # VariantCalling
-    include:        "workflows/rules/variantcalling/manta.smk"
-    # Coverage
-    include:        "workflows/rules/qc/coverage.smk"
-
-def get_igv_input(wildcards):
-    if igvuser:
-        return expand("{workingdir}/reporting/shared_igv_files.txt", workingdir=workingdir)
-    return []
-
-def upload_germline_iva(wildcards):
-    if ivauser:
-        if ivauser == "testing":
-            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=normalid, stype="normal", caller="dnascope", vcftype="germline")
-        else:
-            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=normalid, stype="normal", caller="dnascope", vcftype="germline")
-    return []
-def upload_somatic_iva(wildcards):
-    if ivauser:
-        if ivauser == "testing":
-            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}_test.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
-        else:
-            return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
-    return []
 
 rule all:
     input:
-        get_igv_input,
-        upload_somatic_iva,
-        upload_germline_iva,
         expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir)

@@ -5,6 +5,38 @@ from workflows.scripts.gender import calc_gender
 from workflows.scripts.create_segfile import create_seg
 from workflows.scripts.fix_sexploidyfile import mod_sex_vcf
 
+rule filter_canvas_somatic:
+    input:
+        "{workingdir}/{stype}/canvas/{sname}_somatic_CNV.vcf.gz"
+    params:
+        annotate = pipeconfig["rules"]["canvas"]["annotate"],
+        annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"]
+    output:
+        "{workingdir}/{stype}/canvas/{sname}_CNV_somatic.vcf.xlsx",
+        "{workingdir}/{stype}/canvas/{sname}_CNV_somatic.vcf"
+    run:
+        shell("gunzip {input}")
+        shell("grep -v 'Canvas:REF' {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_somatic_CNV.vcf > {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf")
+        shell("{params.annotate} -v {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf -g {params.annotate_ref} -o {wildcards.workingdir}/{wildcards.stype}/canvas/")
+        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf.xlsx", "{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic.vcf.xlsx")
+        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf", "{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic.vcf")
+
+rule filter_canvas_germline:
+    input:
+        "{workingdir}/{stype}/canvas/{sname}_germline_CNV.vcf.gz"
+    params:
+        annotate = pipeconfig["rules"]["canvas"]["annotate"],
+        annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"]
+    output:
+        "{workingdir}/{stype}/canvas/{sname}_CNV_germline.vcf.xlsx",
+        "{workingdir}/{stype}/canvas/{sname}_CNV_germline.vcf"
+    run:
+        shell("gunzip {input}")
+        shell("grep -v 'Canvas:REF' {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_germline_CNV.vcf > {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf")
+        shell("{params.annotate} -v {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf -g {params.annotate_ref} -o {wildcards.workingdir}/{wildcards.stype}/canvas/")
+        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf.xlsx", "{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline.vcf.xlsx")
+        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf", "{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline.vcf")
+
 rule canvas_somatic:
     input:
         germline_snv_vcf = expand("{workingdir}/{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
@@ -13,35 +45,22 @@ rule canvas_somatic:
         normal_wgscov = expand("{workingdir}/{stype}/reports/{sname}_WGScov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
         normal_ycov = expand("{workingdir}/{stype}/reports/{sname}_Ycov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
     params:
+        dll = pipeconfig["singularities"]["canvas"]["dll"],
         annotate = pipeconfig["rules"]["canvas"]["annotate"],
         annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"],
-        canvasdll = pipeconfig["rules"]["canvas"]["canvasdll"],
-        dotnet = pipeconfig["rules"]["canvas"]["dotnet"],
-        genomedir = pipeconfig["rules"]["canvas"]["genomedir"],
-        reference = pipeconfig["rules"]["canvas"]["reference"],
-        filter13 = pipeconfig["rules"]["canvas"]["filter13"],
-        malevcf = pipeconfig["rules"]["canvas"]["malevcf"],
-        femalevcf = pipeconfig["rules"]["canvas"]["femalevcf"]
+        genomedir = pipeconfig["singularities"]["canvas"]["reference"],
+        kmerfile = pipeconfig["singularities"]["canvas"]["kmerfile"],
+        run_py = pipeconfig["singularities"]["canvas"]["tool_path"],
+        filter13 = pipeconfig["singularities"]["canvas"]["filter13"]
+    singularity:
+        pipeconfig["singularities"]["canvas"]["sing"]
     output:
-        "{workingdir}/{stype}/canvas/{sname}_CNV_somatic.vcf",
-        "{workingdir}/{stype}/canvas/{sname}_CNV_somatic.vcf.xlsx"
-    run:
-        calculated_gender = calc_gender(input.normal_wgscov[0], input.normal_ycov[0])
-        dotnetdir = os.path.dirname(params.dotnet)
-        if calculated_gender == "male":
-            ploidyvcf = params.malevcf
-            ploidyvcf = mod_sex_vcf(ploidyvcf, f"{wildcards.sname}", f"{wildcards.stype}/canvas/")
-        else:
-            ploidyvcf = params.femalevcf
-            ploidyvcf = mod_sex_vcf(ploidyvcf, f"{wildcards.sname}", f"{wildcards.stype}/canvas/")
-        shell("export PATH={dotnetdir}:$PATH ; {params.dotnet} {params.canvasdll} Somatic-WGS --bam={input.bamfile} --somatic-vcf={input.somatic_vcf} --sample-b-allele-vcf={input.germline_snv_vcf} --sample-name={wildcards.sname} --ploidy-vcf={ploidyvcf} -g {params.genomedir} -r {params.reference} -f {params.filter13} -o {wildcards.stype}/canvas/")
-        if os.path.isfile(f"{wildcards.stype}/canvas/CNV.vcf.gz"):
-            shell("gunzip {wildcards.stype}/canvas/CNV.vcf.gz")
-        shell("grep -v 'Canvas:REF' {wildcards.stype}/canvas/CNV.vcf > {wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic.vcf")
-        shell("{params.annotate} -v {wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic.vcf -g {params.annotate_ref} -o {wildcards.stype}/canvas/")
-        #os.rename(f"{wildcards.stype}/canvas/CNV.vcf", "{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic.vcf")
-#        create_segfile(f"{wildcards.stype}/canvas", analysistime, f"{wildcards.sname}")
- 
+        "{workingdir}/{stype}/canvas/{sname}_somatic_CNV.vcf.gz",
+        "{workingdir}/{stype}/canvas/{sname}_somatic_CNV_observed.seg",
+        "{workingdir}/{stype}/canvas/{sname}_somatic_CNV_called.seg"
+    shell:
+        "{params.run_py} --bam {input.bamfile} --normal_vcf {input.germline_snv_vcf} --o {wildcards.workingdir}/{wildcards.stype}/canvas/ -t TN --samplename {wildcards.sname} --wgscovfile {input.normal_wgscov} --ycovfile {input.normal_ycov} --somatic_vcf {input.somatic_vcf} --referencedir {params.genomedir} --kmerfile {params.kmerfile} --canvasdll {params.dll} --filterfile {params.filter13}"
+
 rule canvas_germline:
     input:
         germline_snv_vcf = expand("{workingdir}/{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
@@ -49,43 +68,18 @@ rule canvas_germline:
         normal_wgscov = expand("{workingdir}/{stype}/reports/{sname}_WGScov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
         normal_ycov = expand("{workingdir}/{stype}/reports/{sname}_Ycov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
     params:
+        dll = pipeconfig["singularities"]["canvas"]["dll"],
         annotate = pipeconfig["rules"]["canvas"]["annotate"],
         annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"],
-        canvasdll = pipeconfig["rules"]["canvas"]["canvasdll"],
-        dotnet = pipeconfig["rules"]["canvas"]["dotnet"],
-        genomedir = pipeconfig["rules"]["canvas"]["genomedir"],
-        reference = pipeconfig["rules"]["canvas"]["reference"],
-        filter13 = pipeconfig["rules"]["canvas"]["filter13"],
-        malevcf = pipeconfig["rules"]["canvas"]["malevcf"],
-        femalevcf = pipeconfig["rules"]["canvas"]["femalevcf"]
+        genomedir = pipeconfig["singularities"]["canvas"]["reference"],
+        kmerfile = pipeconfig["singularities"]["canvas"]["kmerfile"],
+        run_py = pipeconfig["singularities"]["canvas"]["tool_path"],
+        filter13 = pipeconfig["singularities"]["canvas"]["filter13"]
+    singularity:
+        pipeconfig["singularities"]["canvas"]["sing"]
     output:
-        "{workingdir}/{stype}/canvas/{sname}_CNV_germline.vcf",
-        "{workingdir}/{stype}/canvas/{sname}_CNV_germline.vcf.xlsx"
-    run:
-        calculated_gender = calc_gender(input.normal_wgscov[0], input.normal_ycov[0])
-        dotnetdir = os.path.dirname(params.dotnet)
-        if calculated_gender == "male":
-            ploidyvcf = params.malevcf
-            ploidyvcf = mod_sex_vcf(ploidyvcf, f"{wildcards.sname}", f"{wildcards.stype}/canvas/")
-        else:
-            ploidyvcf = params.femalevcf
-            ploidyvcf = mod_sex_vcf(ploidyvcf, f"{wildcards.sname}", f"{wildcards.stype}/canvas/")
-        shell("export PATH={dotnetdir}:$PATH ; {params.dotnet} {params.canvasdll} SmallPedigree-WGS --bam={input.bamfile} --sample-b-allele-vcf={input.germline_snv_vcf} --ploidy-vcf={ploidyvcf} -g {params.genomedir} -r {params.reference} -f {params.filter13} -o {wildcards.stype}/canvas/")
-        if os.path.isfile(f"{wildcards.stype}/canvas/CNV.vcf.gz"):
-            shell("gunzip {wildcards.stype}/canvas/CNV.vcf.gz")
-        shell("grep -v 'Canvas:REF' {wildcards.stype}/canvas/CNV.vcf > {wildcards.stype}/canvas/{wildcards.sname}_CNV_germline.vcf")
-        shell("{params.annotate} -v {wildcards.stype}/canvas/{wildcards.sname}_CNV_germline.vcf -g {params.annotate_ref} -o {wildcards.stype}/canvas/")
-        #os.rename(f"{wildcards.stype}/canvas/CNV.vcf", f"{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline.vcf")
-#        create_segfile(f"{wildcards.stype}/canvas", analysistime, f"{wildcards.sname}")
-
-rule createseg:
-    input:
-        "{workingdir}/{stype}/canvas/{sname}_CNV_{vartype}.vcf"
-    output:
-        "{workingdir}/{stype}/canvas/{sname}_{vartype}_CNV_observed.seg",
-        "{workingdir}/{stype}/canvas/{sname}_{vartype}_CNV_called.seg"
-    run:
-        #canvasname = f"{wildcards.sname}_{wildcards.vartype}"
-        create_seg(f"{wildcards.workingdir}/{wildcards.stype}/canvas", f"{wildcards.sname}", f"{wildcards.vartype}")
-        
-
+        "{workingdir}/{stype}/canvas/{sname}_germline_CNV.vcf.gz",
+        "{workingdir}/{stype}/canvas/{sname}_germline_CNV_observed.seg",
+        "{workingdir}/{stype}/canvas/{sname}_germline_CNV_called.seg"
+    shell:
+        "{params.run_py} --bam {input.bamfile} --normal_vcf {input.germline_snv_vcf} --o {wildcards.workingdir}/{wildcards.stype}/canvas/ -t germline --samplename {wildcards.sname} --wgscovfile {input.normal_wgscov} --ycovfile {input.normal_ycov} --referencedir {params.genomedir} --kmerfile {params.kmerfile} --canvasdll {params.dll} --filterfile {params.filter13}"
