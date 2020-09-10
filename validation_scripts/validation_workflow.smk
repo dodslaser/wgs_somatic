@@ -18,7 +18,7 @@ rule share_eval_to_igv:
         expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=tumorid, stype="tumor"),
         expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalid, stype="normal"),
         expand("{workingdir}/{stype}/rtgeval/{tnsetting}/{sname}_{tnsetting}_FP.vcf", workingdir=workingdir, sname=tumorid, stype="tumor", tnsetting=tnscopesetting_list),
-        expand("{workingdir}/{stype}/rtgeval/{tnsetting}/{sname}_{tnsetting}_FN.vcf" workingdir=workingdir, sname=tumorid, stype="tumor", tnsetting=tnscopesetting_list)
+        expand("{workingdir}/{stype}/rtgeval/{tnsetting}/{sname}_{tnsetting}_FN.vcf", workingdir=workingdir, sname=tumorid, stype="tumor", tnsetting=tnscopesetting_list)
     params:
         igvdatadir = pipeconfig["rules"]["share_to_igv"]["igvdatadir"]
     output:
@@ -38,7 +38,7 @@ rule filter_truthset:
         expand("{workingdir}/{stype}/tnscope_given/{sname}_TNscope_tn_given.vcf", workingdir=workingdir, stype="tumor", sname=tumorid)
     params:
         rtg = config["rtg"]["tools"],
-        bcftools = config["tnscope_vcffilter"]["bcftools"],
+        bcftools = pipeconfig["rules"]["tnscope_vcffilter"]["bcftools"],
         high_thresh = config["data"]["thresholds"]["high"],
         low_thresh = config["data"]["thresholds"]["low"]
     output:

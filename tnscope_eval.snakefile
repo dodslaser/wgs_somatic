@@ -112,7 +112,7 @@ wildcard_constraints:
 
 ###########################################################
 # Defining Non Cluster Rules
-localrules: all, validation_wf
+localrules: all, validation_wf, filter_truthset, share_eval_to_igv
 ###########################################################
 
 ########################################
@@ -135,7 +135,7 @@ if reference == "hg38":
     # HG38 rules
     ###########################################################
     # Mapping
-    include:    "workflows/rules/mapping/mapping_hg38.smk"
+    include:        "workflows/rules/mapping/mapping_hg38.smk"
 else:
     ###########################################################
     # HG19 rules
