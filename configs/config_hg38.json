@@ -17,9 +17,9 @@
             "sing": "singularities/canvas/hg38/canvas_hg38.simg",
             "dll": "/Canvas-1.40.0.1613+master_x64/Canvas.dll",
             "tool_path": "/canvas/run_canvas.py",
-            "reference": "/database/",
-            "kmerfile": "/database/kmer.fa",
-            "filter13": "/database/filter13.bed"
+            "reference": "/canvasfiles/",
+            "kmerfile": "/canvasfiles/kmer.fa",
+            "filter13": "/canvasfiles/filter13.bed"
         } 
     },
     "rules":
