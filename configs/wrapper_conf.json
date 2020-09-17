@@ -17,6 +17,11 @@
         {
             "source": "/apps/bio/dependencies/wgs_somatic/hg38/sentieon/",
             "destination": "/databases"
+        },
+        "canvasfiles":
+        {
+            "source": "/apps/bio/dependencies/wgs_somatic/hg38/canvas/",
+            "destination": "/canvasfiles"
         }
     }
 }
