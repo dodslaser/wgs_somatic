@@ -4,7 +4,7 @@ import os
 
 rule manta_germline:
     input:
-        expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalname, stype=sampleconfig[normalname]["stype"])
+        expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
     params:
         reference = pipeconfig["referencegenome"],
         svdb = pipeconfig["rules"]["manta"]["svdb"],
@@ -32,8 +32,8 @@ rule manta_germline:
 
 rule manta_somatic:
     input:
-        tumorbam = expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=tumorname, stype=sampleconfig[tumorname]["stype"]),
-        normalbam = expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalname, stype=sampleconfig[normalname]["stype"])
+        tumorbam = expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+        normalbam = expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
     params:
         reference = pipeconfig["referencegenome"],
         svdb = pipeconfig["rules"]["manta"]["svdb"],
