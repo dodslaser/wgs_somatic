@@ -6,11 +6,6 @@ Stage: build
 %files
     /apps/bio/dependencies/wgs_somatic/petasuite-cloud-edition-1.2.6p10-1.x86_64.rpm /opt
     Canvas-1.40.0.1613.master_x64.tar.gz
-    /apps/bio/dependencies/wgs_somatic/hg38/canvas/filter13.bed /database
-    /apps/bio/dependencies/wgs_somatic/hg38/canvas/genome.fa /database
-    /apps/bio/dependencies/wgs_somatic/hg38/canvas/genome.fa.fai /database
-    /apps/bio/dependencies/wgs_somatic/hg38/canvas/GenomeSize.xml /database
-    /apps/bio/dependencies/wgs_somatic/hg38/canvas/kmer.fa /database
 
 %post
     # Install python3 and other requirements for git and pip3
@@ -39,6 +34,9 @@ Stage: build
 
     # Install Canvas 
     tar -zxvf Canvas-1.40.0.1613.master_x64.tar.gz
+    # change permissions on canvasdir
+    chown -R 775 /Canvas-1.40.0.1613+master_x64/
+    chmod +x /Canvas-1.40.0.1613+master_x64/tabix
 
 %environment
     # below will be set with bind during execute
