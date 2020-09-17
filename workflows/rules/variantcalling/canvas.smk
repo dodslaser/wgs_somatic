@@ -45,6 +45,7 @@ rule canvas_somatic:
         normal_wgscov = expand("{workingdir}/{stype}/reports/{sname}_WGScov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
         normal_ycov = expand("{workingdir}/{stype}/reports/{sname}_Ycov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
     params:
+        genomeversion = config["reference"],
         dll = pipeconfig["singularities"]["canvas"]["dll"],
         annotate = pipeconfig["rules"]["canvas"]["annotate"],
         annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"],
@@ -59,7 +60,7 @@ rule canvas_somatic:
         "{workingdir}/{stype}/canvas/{sname}_somatic_CNV_observed.seg",
         "{workingdir}/{stype}/canvas/{sname}_somatic_CNV_called.seg"
     shell:
-        "{params.run_py} --bam {input.bamfile} --normal_vcf {input.germline_snv_vcf} --o {wildcards.workingdir}/{wildcards.stype}/canvas/ -t TN --samplename {wildcards.sname} --wgscovfile {input.normal_wgscov} --ycovfile {input.normal_ycov} --somatic_vcf {input.somatic_vcf} --referencedir {params.genomedir} --kmerfile {params.kmerfile} --canvasdll {params.dll} --filterfile {params.filter13}"
+        "{params.run_py} --genomeversion {params.genomeversion} --bam {input.bamfile} --normal_vcf {input.germline_snv_vcf} --o {wildcards.workingdir}/{wildcards.stype}/canvas/ -t TN --samplename {wildcards.sname} --wgscovfile {input.normal_wgscov} --ycovfile {input.normal_ycov} --somatic_vcf {input.somatic_vcf} --referencedir {params.genomedir} --kmerfile {params.kmerfile} --canvasdll {params.dll} --filterfile {params.filter13}"
 
 rule canvas_germline:
     input:
@@ -68,6 +69,7 @@ rule canvas_germline:
         normal_wgscov = expand("{workingdir}/{stype}/reports/{sname}_WGScov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
         normal_ycov = expand("{workingdir}/{stype}/reports/{sname}_Ycov.tsv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
     params:
+        genomeversion = config["reference"],
         dll = pipeconfig["singularities"]["canvas"]["dll"],
         annotate = pipeconfig["rules"]["canvas"]["annotate"],
         annotate_ref = pipeconfig["rules"]["canvas"]["annotate_ref"],
@@ -82,4 +84,4 @@ rule canvas_germline:
         "{workingdir}/{stype}/canvas/{sname}_germline_CNV_observed.seg",
         "{workingdir}/{stype}/canvas/{sname}_germline_CNV_called.seg"
     shell:
-        "{params.run_py} --bam {input.bamfile} --normal_vcf {input.germline_snv_vcf} --o {wildcards.workingdir}/{wildcards.stype}/canvas/ -t germline --samplename {wildcards.sname} --wgscovfile {input.normal_wgscov} --ycovfile {input.normal_ycov} --referencedir {params.genomedir} --kmerfile {params.kmerfile} --canvasdll {params.dll} --filterfile {params.filter13}"
+        "{params.run_py} --genomeversion {params.genomeversion} --bam {input.bamfile} --normal_vcf {input.germline_snv_vcf} --o {wildcards.workingdir}/{wildcards.stype}/canvas/ -t germline --samplename {wildcards.sname} --wgscovfile {input.normal_wgscov} --ycovfile {input.normal_ycov} --referencedir {params.genomedir} --kmerfile {params.kmerfile} --canvasdll {params.dll} --filterfile {params.filter13}"
