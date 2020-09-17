@@ -74,21 +74,28 @@ rule tnscope_vcffilter:
     params:
         threads = clusterconf["tnscope_vcffilter"]["threads"],
         outputdir = pipeconfig["rules"]["tnscope_vcffilter"]["outputdir"],
-        bcftools = pipeconfig["rules"]["tnscope_vcffilter"]["bcftools"]
+        bcftools = pipeconfig["rules"]["tnscope_vcffilter"]["bcftools"],
+        high_thresh = config["data"]["thresholds"]["high"],
+        low_thresh = config["data"]["thresholds"]["low"]
     output:
         somatic_n = "{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_somatic_w_normal_{tnsetting}.vcf",
-        somatic = "{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_somatic_{tnsetting}.vcf"
+        somatic = "{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_somatic_{tnsetting}.vcf",
+        withfilters = "{workingdir}/{stype}/tnscope/{sname}_{tnsetting}_somatic_w_normal_w_filters.vcf",
+        somatic_freqrange = "{workingdir}/{stype}/tnscope/{sname}_{tnsetting}_somatic_freqrange.vcf"
     run:
         vcfname = os.path.basename(f"{input.tnscopevcf_ml}")
         vcfname = vcfname.replace(".vcf", "")
-        shell_command = [f"{params.bcftools} filter -s LowQual -e 'QUAL < 1' -m + {input.tnscopevcf_ml}", f"> {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_lowqual1.vcf ;",
-                        f"{params.bcftools} annotate -x FILTER/triallelic_site {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_lowqual1.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_triallelic2.vcf ;",
-                        f"{params.bcftools} annotate -x FILTER/alt_allele_in_normal {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_triallelic2.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_altalleleinnormal4.vcf ;",
-                        f"{params.bcftools} filter -s uncertainAF -e 'FORMAT/AF[0]<0.045 && FORMAT/AD[0:1]<4' -m + {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_altalleleinnormal4.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_uncertainaf6.vcf ;",
-                        f"{params.bcftools} filter -s likely_artifact -e 'FORMAT/AF[0]<0.1 && FORMAT/AD[1:1]>1' -m + {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_uncertainaf6.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_likelyartifact7.vcf ;",
-                        f"{params.bcftools} filter -s MLrejected -e 'INFO/ML_PROB<0.37' -m + {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_likelyartifact7.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_mladjusted8.vcf ;",
-                        f"{params.bcftools} filter -i 'FILTER=\"PASS\"' {wildcards.workingdir}/{params.outputdir}/{wildcards.tnsetting}/{vcfname}_likelyartifact7.vcf > {output.somatic_n} ;",
-                        f"{params.bcftools} view -s {tumorname} {output.somatic_n} > {output.somatic}"]
+        shell_command = [f"{params.bcftools} filter -s LowQual -e 'QUAL < 1' -m + {input.tnscopevcf_ml}", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_lowqual1.vcf ;",
+                        f"{params.bcftools} annotate -x FILTER/triallelic_site {wildcards.workingdir}/{params.outputdir}/{vcfname}_lowqual1.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_triallelic2.vcf ;",
+                        f"{params.bcftools} annotate -x FILTER/alt_allele_in_normal {wildcards.workingdir}/{params.outputdir}/{vcfname}_triallelic2.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_altalleleinnormal4.vcf ;",
+                        f"{params.bcftools} filter -s uncertainAF -e 'FORMAT/AF[0]<0.045 && FORMAT/AD[0:1]<4' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_altalleleinnormal4.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_uncertainaf6.vcf ;",
+                        f"{params.bcftools} filter -s likely_artifact -e 'FORMAT/AF[0]<0.1 && FORMAT/AF[1]>0.6' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_uncertainaf6.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_likelyartifact7.vcf ;",
+                        f"{params.bcftools} filter -s lowAD -e 'FORMAT/AD[0:1] < 3' {wildcards.workingdir}/{params.outputdir}/{vcfname}_likelyartifact7.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_lowad8.vcf ;",
+                        f"{params.bcftools} filter -s MLrejected -e 'INFO/ML_PROB<0.37' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_lowad8.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf ;",
+                        f"{params.bcftools} filter -i 'FILTER=\"PASS\"' {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf > {output.somatic_n} ;",
+                        f"cp {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf {output.withfilters}",
+                        f"{params.bcftools} filter -i '(FORMAT/AD[0:1]*100)/(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.low_thresh} & (FORMAT/AD[0:1]*100)/(FORMAT/AD[0:0]+FORMAT/AD[0:1]) <= {params.high_thresh}' {output.somatic_n}", f"> {output.somatic_freqrange} ;",
+                        f"{params.bcftools} view -s {tumorname} {output.somatic_n} > {output.somatic}"] 
         shell_command = " ".join(shell_command)
         print(shell_command)      
         shell(shell_command)
