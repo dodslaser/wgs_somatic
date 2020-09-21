@@ -68,6 +68,10 @@
             "bcftools": "/apps/bio/software/bcftools/1.9/bin/bcftools",
             "vcftools": "/apps/bio/apps/vcftools/0.1.12a/bin/vcftools"
         },
+        "ballele_plot":
+        {
+            "dbsnp": "/apps/bio/dependencies/wgs_somatic/hg38/sentieon/Homo_sapiens_assembly38.dbsnp138.vcf.gz"
+        },
        "generate_tdf":
         {
             "tdfgen": "/apps/bio/repos/wgs_somatic/tools/IGVTools/igvtools.jar"
