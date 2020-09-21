@@ -22,6 +22,11 @@
         {
             "source": "/apps/bio/dependencies/wgs_somatic/hg38/canvas/",
             "destination": "/canvasfiles"
+        },
+        "canvassequence":
+        {
+            "source": "/apps/bio/dependencies/wgs_somatic/hg38/canvas/Sequence",
+            "destination": "/Sequence"
         }
     }
 }
