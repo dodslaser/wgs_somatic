@@ -6,7 +6,9 @@ from workflows.scripts.b_allele_igv_plot.plot_b_allele_freq import plot_freq
 rule ballele_plot:
     input:
         "{workingdir}/{stype}/dnascope/{sname}_germline.vcf"
+    params:
+        dbsnp = pipeconfig["rules"]["ballele_plot"]["dbsnp"]
     output:
         "{workingdir}/{stype}/reports/{sname}_baf.igv"
     run:
-        plot_freq("{input}", "{output}")
+        plot_freq("{input}", "{output}", "{params.dbsnp}")
