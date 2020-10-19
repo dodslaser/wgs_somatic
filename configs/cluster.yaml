@@ -1,0 +1,69 @@
+__default__:
+    queue: wgs.q
+    threads: 20
+    excl: excl=1
+    name: "SMK-WGS-{rule}_{wildcards.sname}"
+    output: "SMK-WGS-{rule}_{wildcards.sname}.stdout"
+    error: "SMK-WGS-{rule}_{wildcards.sname}.stderr"
+
+mapping:
+    name: "SMK-WGS-{rule}_{wildcards.fastqpattern}"
+    output: "SMK-WGS-{rule}_{wildcards.fastqpattern}.stdout"
+    error: "SMK-WGS-{rule}_{wildcards.fastqpattern}.stderr"
+    threads: 20
+
+rtgtools_eval:
+    threads: 10
+
+dedup:
+    threads: 20
+
+realign_mapping:
+    threads: 20
+
+baserecal:
+    threads: 20
+
+tnscope:
+    threads: 40
+
+tnscope_modelfilter:
+    threads: 20
+
+tnscope_vcffilter:
+    threads: 2
+
+dnascope:
+    threads: 40
+
+generate_tdf:
+    threads: 4
+
+dnascope_modelfilter:
+    threads: 20
+
+dnascope_vcffilter:
+    threads: 2
+
+ballele_plot:
+    threads: 2
+
+wgs_coverage:
+    threads: 4
+
+y_coverage:
+    threads: 4
+
+share_to_igv:
+    threads: 2
+
+manta_somatic:
+    threads: 20
+
+manta_germline:
+    threads: 20
+
+cutadapt:
+    queue: wgs.q
+    threads:  1
+    excl: excl=1

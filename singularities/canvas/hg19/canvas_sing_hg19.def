@@ -1,0 +1,54 @@
+Bootstrap: library
+From: centos:7
+Stage: build
+
+
+%files
+    /apps/bio/dependencies/wgs_somatic/petasuite-cloud-edition-1.2.6p10-1.x86_64.rpm /opt
+    Canvas-1.40.0.1613.master_x64.tar.gz
+    /apps/bio/dependencies/wgs_somatic/hg38/canvas/filter13.bed /database
+    /apps/bio/dependencies/wgs_somatic/hg38/canvas/genome.fa /database
+    /apps/bio/dependencies/wgs_somatic/hg38/canvas/genome.fa.fai /database
+    /apps/bio/dependencies/wgs_somatic/hg38/canvas/GenomeSize.xml /database
+    /apps/bio/dependencies/wgs_somatic/hg38/canvas/kmer.fa /database
+
+%post
+    # Install python3 and other requirements for git and pip3
+    yum install -y python3
+    yum install -y epel-release
+    yum install -y python3-pip
+    yum -y groupinstall "Development Tools"
+    yum -y install wget
+
+    # Install vim
+    yum install -y vim
+
+    # Install PetaSuite
+    yum install -y /opt/petasuite-cloud-edition-1.2.6p10-1.x86_64.rpm
+
+    # Install Git
+    yum install -y git.x86_64
+
+    # Pull Down CanvasRepo
+    git clone https://mathiasbio@github.com/ClinicalGenomicsGBG/canvas.git
+
+    # Install dotnet
+    rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
+    yum update -y
+    yum install dotnet-sdk-2.2 -y
+
+    # Install Canvas 
+    tar -zxvf Canvas-1.40.0.1613.master_x64.tar.gz
+
+%environment
+    # below will be set with bind during execute
+    PETASUITE_REFPATH=/opt/petagene/corpus
+    LD_PRELOAD=/usr/lib/petalink.so
+    PATH=/opt/rh/rh-dotnet20/root/usr/bin:$PATH
+    export PETASUITE_REFPATH LD_PRELOAD PATH
+
+%runscript
+    exec /bin/bash "$@"
+
+%labels
+    Version v0.0.2

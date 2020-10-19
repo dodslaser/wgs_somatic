@@ -1,0 +1,75 @@
+{
+    "investigators":
+    {
+        "SF":
+        {
+            "name": "Susanne Fransson",
+            "email": "susanne.fransson@clingen.gu.se"
+        },
+        "BTB":
+        {
+            "name": "GBG GMSBT grupp",
+            "email": "gms_btb@gu.se"
+        },
+        "CO":
+        {
+            "name": "Carola Oldfors",
+            "email": "carola.oldfors@gu.se"
+        },
+        "ES":
+        {
+            "name": "Emma Samuelsson",
+            "email": "emma.k.samuelsson@vgregion.se"
+        },
+        "ER":
+        {
+            "name": "Elham Rekabdar",
+            "email": "elham.rekabdar@genomics.sahlgrenska.gu.se"
+        },
+        "SL":
+        {
+            "name": "Stina Lassesson",
+            "email": "stina.lassesson@gu.se"
+        },
+        "EWB":
+        {
+            "name": "Erik Berkowicz",
+            "email": "erik.berkowicz@vgregion.se"
+        },
+        "YA":
+        {
+            "name": "Ywonne Andrén",
+            "email": "ywonne.andren@vgregion.se"
+        },
+        "MJ":
+        {
+            "name": "Mathias Johansson",
+            "email": "mathias.johansson@gu.se"
+        },
+        "VC":
+        {
+            "name": "Vilma Canfjorden",
+            "email": "vilma.canfjorden@gu.se"
+        },
+        "AA":
+        {
+            "name": "Alvar Almstedt",
+            "email": "alvar.almstedt@gu.se"
+        },
+        "JW":
+        {
+            "name": "Josephine Wernersson",
+            "email": "josephine.wernersson@vgregion.se"
+        },
+        "ADMIN":
+        {
+            "name": "WGS Admin",
+            "email": "mathias.johansson@gu.se"
+        },
+        "CGG":
+        {
+            "name": "Labpersonel WGS",
+            "email": "cgg-internal@listserv.gu.se"
+        }
+    }
+}
