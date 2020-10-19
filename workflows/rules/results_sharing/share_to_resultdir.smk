@@ -5,6 +5,8 @@ from shutil import copyfile
 
 rule share_to_resultdir:
     input:
+        expand("{workingdir}/{stype}/{caller}/{sname}_{vcftype}_refseq3kfilt.vcf", workingdir=workingdir, stype=sampleconfig[tumorname]["stype"], caller="tnscope", sname=tumorid, vcftype="somatic"),
+        expand("{workingdir}/{stype}/{caller}/{sname}_{vcftype}_refseq3kfilt.vcf", workingdir=workingdir, stype=sampleconfig[normalname]["stype"], caller="dnascope", sname=normalid, vcftype="germline"),
         expand("{workingdir}/qc_report/{tumorname}_qc_stats.xlsx", workingdir=workingdir, tumorname=tumorname),
         expand("{workingdir}/{stype}/canvas/{sname}_CNV_somatic.vcf.xlsx", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
         expand("{workingdir}/{stype}/canvas/{sname}_CNV_germline.vcf.xlsx", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
@@ -14,5 +16,5 @@ rule share_to_resultdir:
     run:
         for resultfile in input:
             filebase = os.path.basename(f"{resultfile}")
-            copyfile(f"{resultfile}", f"{filebase}")
+            copyfile(f"{resultfile}", f"{wildcards.workingdir}/{filebase}")
         shell("echo {input} >> {output}")

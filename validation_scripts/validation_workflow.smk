@@ -19,7 +19,7 @@ rule share_eval_to_igv:
         expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalid, stype="normal"),
         expand("{workingdir}/{stype}/rtgeval/{tnsetting}/{sname}_{tnsetting}_FP.vcf", workingdir=workingdir, sname=tumorid, stype="tumor", tnsetting=tnscopesetting_list),
         expand("{workingdir}/{stype}/rtgeval/{tnsetting}/{sname}_{tnsetting}_FN.vcf", workingdir=workingdir, sname=tumorid, stype="tumor", tnsetting=tnscopesetting_list),
-        expand("{workingdir}/{stype}/tnscope/{sname}_{tnsetting}_somatic_w_normal_w_filters.vcf", workingdir=workingdir,  sname=tumorid, stype="tumor", tnsetting=tnscopesetting_list),
+        expand("{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_{tnsetting}_somatic_w_normal_w_filters.vcf", workingdir=workingdir,  sname=tumorid, stype="tumor", tnsetting=tnscopesetting_list),
         expand("{workingdir}/{stype}/rtgeval/{tnsetting}_freqrange/{sname}_{tnsetting}_FP_freqrange.vcf", workingdir=workingdir, sname=tumorid, stype="tumor", tnsetting=tnscopesetting_list),
         expand("{workingdir}/{stype}/rtgeval/{tnsetting}_freqrange/{sname}_{tnsetting}_FN_freqrange.vcf", workingdir=workingdir, sname=tumorid, stype="tumor", tnsetting=tnscopesetting_list)
     params:
@@ -88,7 +88,7 @@ rule rtgtools_eval:
 rule rtgtools_eval_freq:
     input:
         filtered_truthset = "{workingdir}/{stype}/tnscope_given/truthset.filtered.ADabove2.freqthreshold.vcf.gz",
-        calls = "{workingdir}/{stype}/tnscope/{sname}_{tnsetting}_somatic_freqrange.vcf"
+        calls = "{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_{tnsetting}_somatic_freqrange.vcf"
     params:
         rtg = config["rtg"]["tools"],
         sdf = config["rtg"]["sdf"],
@@ -103,7 +103,7 @@ rule rtgtools_eval_freq:
         vcfbase = os.path.basename(f"{input.calls}")
         if not os.path.isfile(f"{wildcards.workingdir}/{wildcards.stype}/rtgeval/{vcfbase}"):
             shutil.copyfile(f"{input.calls}", f"{wildcards.workingdir}/{wildcards.stype}/rtgeval/{vcfbase}")
-            shell(f"{params.rtg} bgzip {wildcards.workingdir}/{wildcards.stype}/rtgeval/{vcfbase}")
+            shell("{params.rtg} bgzip {wildcards.workingdir}/{wildcards.stype}/rtgeval/{vcfbase}")
             shell("{params.rtg} index {wildcards.workingdir}/{wildcards.stype}/rtgeval/{vcfbase}.gz")
         if os.path.isdir(f"{wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}_freqrange"):
             shutil.rmtree(f"{wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}_freqrange")
@@ -111,7 +111,7 @@ rule rtgtools_eval_freq:
         shell("mv {wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}_freqrange/summary.txt {wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}_freqrange/{wildcards.sname}_summary.txt")
         shell("cp {wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}_freqrange/fp.vcf.gz {wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}_freqrange/{wildcards.sname}_{wildcards.tnsetting}_FP_freqrange.vcf.gz")
         shell("cp {wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}_freqrange/fn.vcf.gz {wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}_freqrange/{wildcards.sname}_{wildcards.tnsetting}_FN_freqrange.vcf.gz")
-        shell("gunzip {wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}/{wildcards.sname}_{wildcards.tnsetting}_FN_freqrange.vcf.gz")
-        shell("gunzip {wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}/{wildcards.sname}_{wildcards.tnsetting}_FP_freqrange.vcf.gz")
+        shell("gunzip {wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}_freqrange/{wildcards.sname}_{wildcards.tnsetting}_FN_freqrange.vcf.gz")
+        shell("gunzip {wildcards.workingdir}/{wildcards.stype}/rtgeval/{wildcards.tnsetting}_freqrange/{wildcards.sname}_{wildcards.tnsetting}_FP_freqrange.vcf.gz")
 
 

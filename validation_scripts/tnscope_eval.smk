@@ -80,8 +80,8 @@ rule tnscope_vcffilter:
     output:
         somatic_n = "{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_somatic_w_normal_{tnsetting}.vcf",
         somatic = "{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_somatic_{tnsetting}.vcf",
-        withfilters = "{workingdir}/{stype}/tnscope/{sname}_{tnsetting}_somatic_w_normal_w_filters.vcf",
-        somatic_freqrange = "{workingdir}/{stype}/tnscope/{sname}_{tnsetting}_somatic_freqrange.vcf"
+        withfilters = "{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_{tnsetting}_somatic_w_normal_w_filters.vcf",
+        somatic_freqrange = "{workingdir}/{stype}/tnscope/{tnsetting}/{sname}_{tnsetting}_somatic_freqrange.vcf"
     run:
         vcfname = os.path.basename(f"{input.tnscopevcf_ml}")
         vcfname = vcfname.replace(".vcf", "")
@@ -93,9 +93,9 @@ rule tnscope_vcffilter:
                         f"{params.bcftools} filter -s lowAD -e 'FORMAT/AD[0:1] < 3' {wildcards.workingdir}/{params.outputdir}/{vcfname}_likelyartifact7.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_lowad8.vcf ;",
                         f"{params.bcftools} filter -s MLrejected -e 'INFO/ML_PROB<0.37' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_lowad8.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf ;",
                         f"{params.bcftools} filter -i 'FILTER=\"PASS\"' {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf > {output.somatic_n} ;",
-                        f"cp {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf {output.withfilters}",
-                        f"{params.bcftools} filter -i '(FORMAT/AD[0:1]*100)/(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.low_thresh} & (FORMAT/AD[0:1]*100)/(FORMAT/AD[0:0]+FORMAT/AD[0:1]) <= {params.high_thresh}' {output.somatic_n}", f"> {output.somatic_freqrange} ;",
-                        f"{params.bcftools} view -s {tumorname} {output.somatic_n} > {output.somatic}"] 
+                        f"cp {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf {output.withfilters} ;",
+                        f"{params.bcftools} view -s {tumorname} {output.somatic_n} > {output.somatic} ;",
+                        f"{params.bcftools} filter -i '(FORMAT/AD[0:1]*100)/(FORMAT/AD[0:0]+FORMAT/AD[0:1]) >= {params.low_thresh} & (FORMAT/AD[0:1]*100)/(FORMAT/AD[0:0]+FORMAT/AD[0:1]) <= {params.high_thresh}' {output.somatic}", f"> {output.somatic_freqrange}"] 
         shell_command = " ".join(shell_command)
         print(shell_command)      
         shell(shell_command)
