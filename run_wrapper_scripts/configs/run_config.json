@@ -1,0 +1,36 @@
+{
+    "start":
+    {
+        "logloc": "/medstore/results/wgs_somatic/wrapper_logs"
+    },
+    "dmx_stats_files":
+    {
+        "primary": "demuxer.json",
+        "secondary": "Stats/Stats.json"
+    },
+    "samplesheet_locs":
+    {
+        "primary": "/seqstore/instruments/novaseq_687_gc/Demultiplexdir/[runid]",
+        "secondary": "/seqstore/instruments/novaseq_687_gc/[runid]"
+    },
+    "analysis":
+    {
+        "allowed_pipelines": ["03"],
+        "allowed_projects": ["GMS-AL", "GMS-BT"]
+    },
+    "project_paths":
+    {
+        "GMS-AL":
+        {
+            "igvuser": "barncancer",
+            "ivauser": "barncancer",
+            "resultpath": "/seqstore/webfolders/wgs/barncancer/"
+        },
+        "GMS-BT":
+        {
+            "igvuser": "barncancer",
+            "ivauser": "barncancer",
+            "resultpath": "/seqstore/webfolders/wgs/barncancer/"
+        }
+    }
+}
