@@ -18,12 +18,13 @@ rule tnscope:
     singularity:
         pipeconfig["singularities"]["sentieon"]["sing"]
     output:
-        "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn.vcf"
+        tnscope = "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn.vcf",
+        tnscope_bam = "{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam"
     shell:
         "{params.sentieon} driver -t {params.threads} -r {params.reference} "
             "-i {input.tumorbam} -q {input.tumortable} -i {input.normalbam} -q {input.normaltable} "
-            "--algo TNscope --tumor_sample {params.tumorname} --normal_sample {params.normalname} "
-            "{params.callsettings} {output}"
+            "--algo TNscope --tumor_sample {params.tumorname} --normal_sample {params.normalname} --bam_output {output.tnscope_bam} "
+            "{params.callsettings} {output.tnscope}"
 
 rule tnscope_modelfilter:
     input:

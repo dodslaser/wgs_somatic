@@ -11,4 +11,4 @@ rule ballele_plot:
     output:
         "{workingdir}/{stype}/reports/{sname}_baf.igv"
     run:
-        plot_freq("{input}", "{output}", "{params.dbsnp}")
+        plot_freq(f"{input}", f"{output}", f"{params.dbsnp}")

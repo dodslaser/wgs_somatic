@@ -18,8 +18,8 @@ rule filter_canvas_somatic:
         shell("gunzip {input}")
         shell("grep -v 'Canvas:REF' {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_somatic_CNV.vcf > {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf")
         shell("{params.annotate} -v {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf -g {params.annotate_ref} -o {wildcards.workingdir}/{wildcards.stype}/canvas/")
-        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf.xlsx", "{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic.vcf.xlsx")
-        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf", "{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic.vcf")
+        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf.xlsx", f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic.vcf.xlsx")
+        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf", f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic.vcf")
 
 rule filter_canvas_germline:
     input:
@@ -34,8 +34,8 @@ rule filter_canvas_germline:
         shell("gunzip {input}")
         shell("grep -v 'Canvas:REF' {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_germline_CNV.vcf > {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf")
         shell("{params.annotate} -v {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf -g {params.annotate_ref} -o {wildcards.workingdir}/{wildcards.stype}/canvas/")
-        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf.xlsx", "{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline.vcf.xlsx")
-        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf", "{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline.vcf")
+        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf.xlsx", f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline.vcf.xlsx")
+        os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf", f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline.vcf")
 
 rule canvas_somatic:
     input:
@@ -52,7 +52,8 @@ rule canvas_somatic:
         genomedir = pipeconfig["singularities"]["canvas"]["reference"],
         kmerfile = pipeconfig["singularities"]["canvas"]["kmerfile"],
         run_py = pipeconfig["singularities"]["canvas"]["tool_path"],
-        filter13 = pipeconfig["singularities"]["canvas"]["filter13"]
+        filter13 = pipeconfig["singularities"]["canvas"]["filter13"],
+        samplename = sampleconfig["tumorname"]
     singularity:
         pipeconfig["singularities"]["canvas"]["sing"]
     output:
@@ -76,7 +77,8 @@ rule canvas_germline:
         genomedir = pipeconfig["singularities"]["canvas"]["reference"],
         kmerfile = pipeconfig["singularities"]["canvas"]["kmerfile"],
         run_py = pipeconfig["singularities"]["canvas"]["tool_path"],
-        filter13 = pipeconfig["singularities"]["canvas"]["filter13"]
+        filter13 = pipeconfig["singularities"]["canvas"]["filter13"],
+        samplename = sampleconfig["normalname"]
     singularity:
         pipeconfig["singularities"]["canvas"]["sing"]
     output:
