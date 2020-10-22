@@ -10,13 +10,13 @@ def get_rev_pattern(wcs):
 def format_fwd(wcs):
     fastq = fastq_dict[f"{wcs.stype}"]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["rev"]
     if fastq.endswith(".fasterq"):
-        fastq = fastq.replace(".fasterq", "fastq.gz")
+        fastq = fastq.replace(".fasterq", ".fastq.gz")
     return fastq
 
 def format_rev(wcs):
     fastq = fastq_dict[f"{wcs.stype}"]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["fwd"]
     if fastq.endswith(".fasterq"):
-        fastq = fastq.replace(".fasterq", "fastq.gz")
+        fastq = fastq.replace(".fasterq", ".fastq.gz")
     return fastq
 
 def get_samplename(wcs):
