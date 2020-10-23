@@ -4,7 +4,7 @@
 
 Ideas:
 
-Just anothEr Wholegenome aNalysiS -- JEWNS
+Just anothEr Wholegenome aNalysis for detection of Somatic variants -- JEWNS
 
 WOPR - junior
 
