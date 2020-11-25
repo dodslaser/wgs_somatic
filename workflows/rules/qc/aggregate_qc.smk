@@ -15,4 +15,4 @@ rule excel_qc:
     output:
         "{workingdir}/qc_report/{tumorname}_qc_stats.xlsx"
     run:
-        create_excel_main(f"{input.tumorcov}, {input.normalcov}, {input.tumordedup}, {input.normaldedup}, {input.tumorvcf}, {input.normalvcf}, {input.tumorcanvas}, {output}") 
+        create_excel_main(f"{input.tumorcov}", f"{input.normalcov}", f"{input.tumordedup}", f"{input.normaldedup}", f"{input.tumorvcf}", f"{input.normalvcf}", f"{input.tumorcanvas}", f"{output}") 

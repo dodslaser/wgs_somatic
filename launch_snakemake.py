@@ -188,6 +188,15 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
         binddir_string = ""
         for binddir in binddirs:
             source = binddirs[binddir]["source"]
+            if not analysisdict["reference"] in source:
+                if not "petagene" in source:
+                #print("Wrong reference")
+                #print(f"analysisdict_reference: {analysisdict['reference']}")
+                #print(f"source: {source}")
+            #elif not "petagene" in source:    
+               # print("not petegene")
+                #print(f"source: {source}")
+                    continue
             destination = binddirs[binddir]["destination"]
             logger(f"preparing binddir variable {binddir} source: {source} destination: {destination}")
             binddir_string = f"{binddir_string}{source}:{destination},"
@@ -196,7 +205,7 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
             for tumorfastqdir in analysisdict["tumorfastqs"]:
                 binddir_string = f"{binddir_string}{tumorfastqdir},"
         binddir_string = f"{binddir_string}{output}"
-
+        print(binddir_string)
 
 
         ###################################################################
