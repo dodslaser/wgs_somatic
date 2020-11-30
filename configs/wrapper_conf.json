@@ -35,8 +35,8 @@
         },
         "canvasfiles_hg19":
         {
-            "source": "/medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/",
-            "destination": "/canvasfiles"
+            "source": "/medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta",
+            "destination": "/medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta"
         },
         "canvassequence_hg19":
         {
