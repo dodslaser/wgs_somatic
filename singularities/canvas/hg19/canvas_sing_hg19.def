@@ -6,6 +6,11 @@ Stage: build
 %files
     /apps/bio/dependencies/wgs_somatic/petasuite-cloud-edition-1.2.6p10-1.x86_64.rpm /opt
     Canvas-1.40.0.1613.master_x64.tar.gz
+    /medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/filter13.bed /database
+    /medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa /database
+    /medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa.fai /database
+    /medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/GenomeSize.xml /database
+    /medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/kmer.fa /database
     # /apps/bio/dependencies/wgs_somatic/hg19/canvas/canvasfiles/filter13.bed /database
     # /apps/bio/dependencies/wgs_somatic/hg19/canvas/canvasfiles/genome.fa /database
     # /apps/bio/dependencies/wgs_somatic/hg19/canvas/canvasfiles/genome.fa.fai /database

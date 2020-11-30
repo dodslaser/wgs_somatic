@@ -18,9 +18,9 @@
             "sing": "singularities/canvas/hg19/canvas_hg19.simg",
             "dll": "/Canvas-1.40.0.1613+master_x64/Canvas.dll",
             "tool_path": "/canvas/run_canvas.py",
-            "reference": "/canvasfiles",
-            "kmerfile": "/canvasfiles/kmer.fa",
-            "filter13": "/canvasfiles/filter13.bed"
+            "reference": "/medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta",
+            "kmerfile": "/medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/kmer.fa",
+            "filter13": "/medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/filter13.bed"
         }
     },
     "rules":
