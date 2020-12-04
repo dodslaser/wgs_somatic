@@ -21,6 +21,7 @@ rule tnscope:
         tnscope = "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn.vcf",
         tnscope_bam = "{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam"
     shell:
+        "echo $HOSTNAME;"
         "{params.sentieon} driver -t {params.threads} -r {params.reference} "
             "-i {input.tumorbam} -q {input.tumortable} -i {input.normalbam} -q {input.normaltable} "
             "--algo TNscope --tumor_sample {params.tumorname} --normal_sample {params.normalname} --bam_output {output.tnscope_bam} "
@@ -39,6 +40,7 @@ rule tnscope_modelfilter:
     output:
         "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn_ML.vcf"
     shell:
+        "echo $HOSTNAME;"
         "{params.sentieon} driver -t {params.threads} -r {params.reference} "
             "--algo TNModelApply -m {params.modelpath} -v {input.tnscopevcf} {output}"
 

@@ -61,6 +61,7 @@ rule canvas_somatic:
         "{workingdir}/{stype}/canvas/{sname}_somatic_CNV_observed.seg",
         "{workingdir}/{stype}/canvas/{sname}_somatic_CNV_called.seg"
     shell:
+        "echo $HOSTNAME;"
         "{params.run_py} --genomeversion {params.genomeversion} --bam {input.bamfile} --normal_vcf {input.germline_snv_vcf} --o {wildcards.workingdir}/{wildcards.stype}/canvas/ -t TN --samplename {wildcards.sname} --wgscovfile {input.normal_wgscov} --ycovfile {input.normal_ycov} --somatic_vcf {input.somatic_vcf} --referencedir {params.genomedir} --kmerfile {params.kmerfile} --canvasdll {params.dll} --filterfile {params.filter13}"
 
 rule canvas_germline:
@@ -86,4 +87,5 @@ rule canvas_germline:
         "{workingdir}/{stype}/canvas/{sname}_germline_CNV_observed.seg",
         "{workingdir}/{stype}/canvas/{sname}_germline_CNV_called.seg"
     shell:
+        "echo $HOSTNAME;"
         "{params.run_py} --genomeversion {params.genomeversion} --bam {input.bamfile} --normal_vcf {input.germline_snv_vcf} --o {wildcards.workingdir}/{wildcards.stype}/canvas/ -t germline --samplename {wildcards.sname} --wgscovfile {input.normal_wgscov} --ycovfile {input.normal_ycov} --referencedir {params.genomedir} --kmerfile {params.kmerfile} --canvasdll {params.dll} --filterfile {params.filter13}"
