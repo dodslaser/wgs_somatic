@@ -1,0 +1,3 @@
+[submodule "workflows/scripts/annotate_manta_canvas"]
+	path = workflows/scripts/annotate_manta_canvas
+	url = git@github.com:ClinicalGenomicsGBG/annotate_manta_canvas
