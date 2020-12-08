@@ -21,6 +21,7 @@ rule tnscope:
         tnscope = "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn.vcf",
         tnscope_bam = "{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam"
     shell:
+        "echo $HOSTNAME;"
         "{params.sentieon} driver -t {params.threads} -r {params.reference} "
             "-i {input.tumorbam} -q {input.tumortable} -i {input.normalbam} -q {input.normaltable} "
             "--algo TNscope --tumor_sample {params.tumorname} --normal_sample {params.normalname} --bam_output {output.tnscope_bam} "
@@ -39,6 +40,7 @@ rule tnscope_modelfilter:
     output:
         "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn_ML.vcf"
     shell:
+        "echo $HOSTNAME;"
         "{params.sentieon} driver -t {params.threads} -r {params.reference} "
             "--algo TNModelApply -m {params.modelpath} -v {input.tnscopevcf} {output}"
 
@@ -59,7 +61,7 @@ rule tnscope_vcffilter:
                         f"{params.bcftools} annotate -x FILTER/triallelic_site {wildcards.workingdir}/{params.outputdir}/{vcfname}_lowqual1.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_triallelic2.vcf ;",
                         f"{params.bcftools} annotate -x FILTER/alt_allele_in_normal {wildcards.workingdir}/{params.outputdir}/{vcfname}_triallelic2.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_altalleleinnormal4.vcf ;",
                         f"{params.bcftools} filter -s uncertainAF -e 'FORMAT/AF[0]<0.045 && FORMAT/AD[0:1]<4' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_altalleleinnormal4.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_uncertainaf6.vcf ;",
-                        f"{params.bcftools} filter -s likely_artifact -e 'FORMAT/AF[0]<0.1 && FORMAT/AF[1]>0.6' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_uncertainaf6.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_likelyartifact7.vcf ;",
+                        f"{params.bcftools} filter -s likely_artifact -e 'FORMAT/AF[0]<0.1 && FORMAT/AF[1]>0.06' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_uncertainaf6.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_likelyartifact7.vcf ;",
                         f"{params.bcftools} filter -s lowAD -e 'FORMAT/AD[0:1] < 3' {wildcards.workingdir}/{params.outputdir}/{vcfname}_likelyartifact7.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_lowad8.vcf ;",
                         f"{params.bcftools} filter -s MLrejected -e 'INFO/ML_PROB<0.37' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_lowad8.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf ;",
                         f"{params.bcftools} filter -i 'FILTER=\"PASS\"' {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf > {output.somatic_n} ;",

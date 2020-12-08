@@ -1,0 +1,6 @@
+[submodule "workflows/scripts/annotate_manta_canvas"]
+	path = workflows/scripts/annotate_manta_canvas
+	url = git@github.com:ClinicalGenomicsGBG/annotate_manta_canvas
+[submodule "workflows/scripts/b_allele_igv_plot"]
+	path = workflows/scripts/b_allele_igv_plot
+	url = git@github.com:ClinicalGenomicsGBG/b_allele_igv_plot

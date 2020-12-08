@@ -10,13 +10,13 @@ def get_rev_pattern(wcs):
 def format_fwd(wcs):
     fastq = fastq_dict[f"{wcs.stype}"]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["rev"]
     if fastq.endswith(".fasterq"):
-        fastq = fastq.replace(".fasterq", "fastq.gz")
+        fastq = fastq.replace(".fasterq", ".fastq.gz")
     return fastq
 
 def format_rev(wcs):
     fastq = fastq_dict[f"{wcs.stype}"]["fastqpair_patterns"][f"{wcs.fastqpattern}"]["fwd"]
     if fastq.endswith(".fasterq"):
-        fastq = fastq.replace(".fasterq", "fastq.gz")
+        fastq = fastq.replace(".fasterq", ".fastq.gz")
     return fastq
 
 def get_samplename(wcs):
@@ -44,6 +44,7 @@ rule mapping:
     output:
         "{workingdir}/{stype}/mapping/{fastqpattern}.bam"
     shell:
+        "echo $HOSTNAME;"
         "{params.sentieon} bwa mem "
             "-M -R '@RG\\tID:{wildcards.fastqpattern}\\tSM:{params.samplename}\\tPL:ILLUMINA' "
             "-t {params.threads} {params.referencegenome} {params.fwd_fmt} {params.rev_fmt} "
@@ -62,6 +63,7 @@ rule dedup:
     singularity:
         pipeconfig["singularities"]["sentieon"]["sing"]
     shell:
+        "echo $HOSTNAME;"
         "shellbamfiles=$(echo {input.bamfiles} | sed 's/ / -i /g') ;"
         "{params.sentieon} driver -t {params.threads} "
             "-i $shellbamfiles "
@@ -90,6 +92,7 @@ rule realign_mapping:
         referencegenome = pipeconfig["singularities"]["sentieon"]["reference"],
         mills = pipeconfig["singularities"]["sentieon"]["mills"]
     shell:
+        "echo $HOSTNAME;"
         "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo Realigner -k {params.mills} {output}"
 
 rule baserecal:
@@ -106,4 +109,5 @@ rule baserecal:
     output:
         "{workingdir}/{stype}/recal/{sname}_RECAL_DATA.TABLE"
     shell:
+        "echo $HOSTNAME;"
         "{params.sentieon} driver -t {params.threads} -r {params.referencegenome} -i {input} --algo QualCal -k {params.mills} -k {params.dbsnp} {output}"
