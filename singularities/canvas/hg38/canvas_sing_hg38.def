@@ -6,6 +6,12 @@ Stage: build
 %files
     /apps/bio/dependencies/wgs_somatic/petasuite-cloud-edition-1.2.6p10-1.x86_64.rpm /opt
     Canvas-1.40.0.1613.master_x64.tar.gz
+    /apps/bio/dependencies/wgs_somatic/hg38/canvas/canvasfiles/filter13.bed /database
+    /apps/bio/dependencies/wgs_somatic/hg38/canvas/canvasfiles/genome.fa /database
+    /apps/bio/dependencies/wgs_somatic/hg38/canvas/canvasfiles/genome.fa.fai /database
+    /apps/bio/dependencies/wgs_somatic/hg38/canvas/canvasfiles/GenomeSize.xml /database
+    /apps/bio/dependencies/wgs_somatic/hg38/canvas/canvasfiles/kmer.fa /database
+
 
 %post
     # Install python3 and other requirements for git and pip3
@@ -25,8 +31,10 @@ Stage: build
     yum install -y git.x86_64
 
     # Pull Down CanvasRepo
-    git clone https://mathiasbio@github.com/ClinicalGenomicsGBG/canvas.git
-
+    git clone https://alvaralmstedt@github.com/ClinicalGenomicsGBG/canvas.git
+    #git clone git@github.com:ClinicalGenomicsGBG/canvas.git
+    #gh repo clone ClinicalGenomicsGBG/canvas
+       
     # Install dotnet
     rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
     yum update -y
@@ -37,6 +45,7 @@ Stage: build
     # change permissions on canvasdir
     chown -R 775 /Canvas-1.40.0.1613+master_x64/
     chmod +x /Canvas-1.40.0.1613+master_x64/tabix
+    chmod +x /Canvas-1.40.0.1613+master_x64/CanvasPedigreeCaller/bedGraphToBigWig
 
 %environment
     # below will be set with bind during execute

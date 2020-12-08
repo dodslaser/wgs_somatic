@@ -16,6 +16,7 @@ rule dnascope:
     output:
         "{workingdir}/{stype}/dnascope/{sname}_DNAscope.vcf"
     shell:
+        "echo $HOSTNAME;"
         "{params.sentieon} driver -t {params.threads} -r {params.reference} "
             "-i {input} --algo DNAscope -d {params.dbsnp} "
             "--var_type snp,indel --model {params.model} {params.callsettings} {output}"
@@ -33,6 +34,7 @@ rule dnascope_modelfilter:
     output:
         "{workingdir}/{stype}/dnascope/{sname}_DNAscope_modelfiltered.vcf"
     shell:
+        "echo $HOSTNAME;"
         "{params.sentieon} driver -t {params.threads} -r {params.reference} --algo DNAModelApply --model {params.model} -v {input} {output}"
 
 rule dnascope_vcffilter:
