@@ -6,11 +6,17 @@ Stage: build
 %files
     /apps/bio/dependencies/wgs_somatic/petasuite-cloud-edition-1.2.6p10-1.x86_64.rpm /opt
     Canvas-1.40.0.1613.master_x64.tar.gz
-    /apps/bio/dependencies/wgs_somatic/hg38/canvas/filter13.bed /database
-    /apps/bio/dependencies/wgs_somatic/hg38/canvas/genome.fa /database
-    /apps/bio/dependencies/wgs_somatic/hg38/canvas/genome.fa.fai /database
-    /apps/bio/dependencies/wgs_somatic/hg38/canvas/GenomeSize.xml /database
-    /apps/bio/dependencies/wgs_somatic/hg38/canvas/kmer.fa /database
+    /medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/filter13.bed /database
+    /medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa /database
+    /medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/genome.fa.fai /database
+    /medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/GenomeSize.xml /database
+    /medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta/kmer.fa /database
+    # /apps/bio/dependencies/wgs_somatic/hg19/canvas/canvasfiles/filter13.bed /database
+    # /apps/bio/dependencies/wgs_somatic/hg19/canvas/canvasfiles/genome.fa /database
+    # /apps/bio/dependencies/wgs_somatic/hg19/canvas/canvasfiles/genome.fa.fai /database
+    # /apps/bio/dependencies/wgs_somatic/hg19/canvas/canvasfiles/GenomeSize.xml /database
+    # /apps/bio/dependencies/wgs_somatic/hg19/canvas/canvasfiles/kmer.fa /database
+
 
 %post
     # Install python3 and other requirements for git and pip3
@@ -30,7 +36,8 @@ Stage: build
     yum install -y git.x86_64
 
     # Pull Down CanvasRepo
-    git clone https://mathiasbio@github.com/ClinicalGenomicsGBG/canvas.git
+    git clone https://alvaralmstedt@github.com/ClinicalGenomicsGBG/canvas.git
+    #git clone https://mathiasbio@github.com/ClinicalGenomicsGBG/canvas.git
 
     # Install dotnet
     rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
@@ -39,6 +46,10 @@ Stage: build
 
     # Install Canvas 
     tar -zxvf Canvas-1.40.0.1613.master_x64.tar.gz
+    # change permissions to canvasdir
+    chown -R 775 /Canvas-1.40.0.1613+master_x64/
+    chmod +x /Canvas-1.40.0.1613+master_x64/tabix
+    chmod +x /Canvas-1.40.0.1613+master_x64/CanvasPedigreeCaller/bedGraphToBigWig
 
 %environment
     # below will be set with bind during execute

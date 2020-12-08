@@ -98,8 +98,8 @@ for tumorfastqdir in tumorfastqdirs:
                 fastqpair_pattern = os.path.basename(tumor_rev_fastq).replace(revpattern, "")
                 fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = tumor_rev_fastq 
 
-wildcard_constraints:
-    sname="[^_]*_[^_]*_[^_]*"
+#wildcard_constraints:
+#    sname="[^_]*_[^_]*_[^_]*"
 
 ###########################################################
 # Defining Non Cluster Rules
