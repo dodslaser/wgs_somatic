@@ -43,6 +43,8 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
         # Write InputArgs to logfile
         config = read_wrapperconf()
         commandlogs = config["commandlogs"]
+        if not os.path.exists(commandlogs):
+            os.makedirs(commandlogs)
         command = f"{sys.argv[0]}"
         current_date = time.strftime("%Y-%m-%d")
         commandlog = f"{commandlogs}/commands_{current_date}.log"
