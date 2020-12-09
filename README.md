@@ -23,7 +23,7 @@ WOPR - junior
 
  > \#!/apps/bio/software/anaconda2/envs/wgs_somatic/bin/python
 
- If you are on medair you should be able to just pull down this repository, and install singularities with the recipes in the singularity-dir (or simply copy from an existing repo). Submodules need to be installed after cloning the repo to be able to run. `$ git submodule update --init --recursive`
+ If you are on medair you should be able to just pull down this repository. Submodules need to be installed after cloning the repo to be able to run. `$ git submodule update --init --recursive` You shouldn't have to build singularity images since paths to them are specified in the configs but if you would like to build them, you can use the definition files in the singularity subfolders.
 
  Or you can just use an already set-up repository! Such as here:
  `/apps/bio/repos/wgs_somatic`
