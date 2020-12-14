@@ -17,5 +17,7 @@ singularities/canvas/hg19/Canvas-1.40.0.1613.master_x64.tar.gz
 singularities/canvas/hg38/Canvas-1.40.0.1613.master_x64.tar.gz
 workflows/scripts/__pycache__/
 workflows/scripts/b_allele_igv_plot/__pycache__/
+logfiles/*
+!logfiles/.gitkeep
 logfiles/commandlogs/*
 !logfiles/commandlogs/.gitkeep
