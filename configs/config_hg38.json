@@ -70,7 +70,7 @@
         },
         "ballele_plot":
         {
-            "dbsnp": "/apps/bio/dependencies/wgs_somatic/hg38/sentieon/Homo_sapiens_assembly38.dbsnp138.vcf.gz"
+            "dbsnp": "/apps/bio/dependencies/wgs_somatic/hg38/sentieon/Homo_sapiens_assembly38.dbsnp138.vcf.gz",
             "hg38ref": "yes"
         },
        "generate_tdf":
