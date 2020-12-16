@@ -79,7 +79,8 @@
         },
         "ballele_plot":
         {
-            "dbsnp": "/apps/bio/dependencies/wgs_somatic/hg19/sentieon/dbsnp_138.b37.vcf.gz"
+            "dbsnp": "/apps/bio/dependencies/wgs_somatic/hg19/sentieon/dbsnp_138.b37.vcf.gz",
+            "hg38ref": "no"
         },
        "generate_tdf":
         {
