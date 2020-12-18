@@ -4,8 +4,7 @@
 [submodule "workflows/scripts/b_allele_igv_plot"]
 	path = workflows/scripts/b_allele_igv_plot
 	url = git@github.com:ClinicalGenomicsGBG/b_allele_igv_plot
-        branch = dev
-[submodule "workflows/scripts/canvas_to_interpreter"]
+        [submodule "workflows/scripts/canvas_to_interpreter"]
 	path = workflows/scripts/canvas_to_interpreter
 	url = git@github.com:ClinicalGenomicsGBG/canvas_to_interpreter
 [submodule "workflows/scripts/alissa_connector_upload"]
