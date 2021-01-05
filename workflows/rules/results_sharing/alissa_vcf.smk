@@ -10,4 +10,4 @@ rule alissa_vcf:
         "{workingdir}/{sname}_somatic_refseq3kfilt_Alissa.vcf"
     run:
         shell("cp {input} {output}")
-        vcf_conversion({output})
+        vcf_conversion(output)
