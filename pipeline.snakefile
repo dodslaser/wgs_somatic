@@ -130,7 +130,7 @@ include:        "workflows/rules/qc/aggregate_qc.smk"
 include:        "workflows/rules/results_sharing/share_to_igv.smk"
 include:        "workflows/rules/results_sharing/share_to_resultdir.smk"
 include:        "workflows/rules/results_sharing/upload_to_iva.smk"
-
+include:        "workflows/rules/results_sharing/alissa_vcf.smk"
 
 
 if reference == "hg38":
