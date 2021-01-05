@@ -5,6 +5,7 @@
 
 
 def vcf_conversion(vcf):
+    vcf = str(vcf)
     vcf_file = open(vcf, "rt")
     data = vcf_file.read()
     data = data.replace('AFDP', 'DP')
