@@ -182,5 +182,5 @@ rule all:
         get_igv_input,
         upload_somatic_iva,
         upload_germline_iva,
-        expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir),
-        alissa_vcf_conversion
+        expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir)#,
+        #alissa_vcf_conversion
