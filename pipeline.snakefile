@@ -175,10 +175,12 @@ def upload_somatic_iva(wildcards):
     return []
 
 def yearly_stats(wildcards):
-    yearly_stats = config["yearly_stats"]
+    with open("configs/wrapper_conf.json", 'r') as configfile:
+        config_data = json.load(configfile)
+    yearly_stats = open(config_data["yearly_stats"], "wt")
     date_time = time.strftime("%Y-%m-%d-%H-%M-%S")
     yearly_stats.write(tumorname + normalname + date_time)
-    
+    yearly_stats.close()
 
 rule all:
     input:
