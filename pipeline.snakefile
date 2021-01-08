@@ -174,8 +174,8 @@ def upload_somatic_iva(wildcards):
             return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
     return []
 
-def alissa_vcf_conversion(wildcards):
-    return expand("{workingdir}/{sname}_somatic_refseq3kfilt_Alissa.vcf", workingdir=workingdir, sname=tumorid)
+#def alissa_vcf_conversion(wildcards):
+#    return expand("{workingdir}/{sname}_somatic_refseq3kfilt_Alissa.vcf", workingdir=workingdir, sname=tumorid)
 
 rule all:
     input:
