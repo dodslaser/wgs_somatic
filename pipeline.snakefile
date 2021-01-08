@@ -174,9 +174,16 @@ def upload_somatic_iva(wildcards):
             return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
     return []
 
+def yearly_stats(wildcards):
+    yearly_stats = config["yearly_stats"]
+    date_time = time.strftime("%Y-%m-%d-%H-%M-%S")
+    yearly_stats.write(tumorname + normalname + date_time)
+    
+
 rule all:
     input:
         get_igv_input,
         upload_somatic_iva,
         upload_germline_iva,
-        expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir)
+        expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir),
+        yearly_stats
