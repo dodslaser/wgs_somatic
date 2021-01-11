@@ -6,7 +6,7 @@ from workflows.scripts.vcf_conversion import vcf_conversion
 
 rule alissa_vcf:
     input:
-        "{workingdir}/{sname}_somatic_refseq3kfilt.vcf"
+        "{workingdir}/tumor/tnscope/{sname}_somatic_refseq3kfilt.vcf"
     output:
         "{workingdir}/{sname}_somatic_refseq3kfilt_Alissa.vcf"
     run:
