@@ -174,18 +174,17 @@ def upload_somatic_iva(wildcards):
             return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
     return []
 
-def yearly_stats(wildcards):
-    with open("configs/wrapper_conf.json", 'r') as configfile:
-        config_data = json.load(configfile)
-    yearly_stats = open(config_data["yearly_stats"], "a")
-    date_time = time.strftime("%Y-%m-%d-%H-%M-%S")
-    yearly_stats.write("Tumor ID: " + tumorname + " Normal ID: " + normalname + " Date and Time: " + date_time + "\n")
-    yearly_stats.close()
+#def yearly_stats(wildcards):
+#    with open("configs/wrapper_conf.json", 'r') as configfile:
+#        config_data = json.load(configfile)
+#    yearly_stats = open(config_data["yearly_stats"], "a")
+#    date_time = time.strftime("%Y-%m-%d-%H-%M-%S")
+#    yearly_stats.write("Tumor ID: " + tumorname + " Normal ID: " + normalname + " Date and Time: " + date_time + "\n")
+#    yearly_stats.close()
 
 rule all:
     input:
         get_igv_input,
         upload_somatic_iva,
         upload_germline_iva,
-        expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir),
-        yearly_stats
+        expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir)
