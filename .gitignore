@@ -21,3 +21,4 @@ logfiles/*
 !logfiles/.gitkeep
 logfiles/commandlogs/*
 !logfiles/commandlogs/.gitkeep
+!logfiles/README.md
