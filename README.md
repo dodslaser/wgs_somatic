@@ -49,28 +49,32 @@ Depending on whether you have GMS samples or WNB (Susanne's samples), you start 
 
 * GMS Sample
 
-`$ ./launch_snakemake.py \  
---runnormal <ID of sequencing run, e.g. 200616_A00689_0144_BHFNK2DSXY> \  
---runtumor <ID of sequencing run, e.g. 200616_A00689_0144_BHFNK2DSXY> \  
---outputdir <Output directory, e.g. /seqstore/webfolders/wgs/barncancer/hg38/DNA66246> \  
---normalsample <Name of normal sample, e.g. DNA66245> \  
---normalfastqs <path to directory containing normal fastqs, e.g. /seqstore/hcp_backed_up_data/local_wgs/barncancer/DNA66245> \  
---tumorsample <Name of tumor sample, e.g. DNA66246> \  
---tumorfastqs <path to directory containing tumor fastqs, e.g. /seqstore/hcp_backed_up_data/local_wgs/barncancer/DNA66246> \  
---igvuser barncancer_hg38 \  
---hg38ref yes`  
+```
+$ ./launch_snakemake.py \  
+    --runnormal <ID of sequencing run, e.g. 200616_A00689_0144_BHFNK2DSXY> \  
+    --runtumor <ID of sequencing run, e.g. 200616_A00689_0144_BHFNK2DSXY> \  
+    --outputdir <Output directory, e.g. /seqstore/webfolders/wgs/barncancer/hg38/DNA66246> \  
+    --normalsample <Name of normal sample, e.g. DNA66245> \  
+    --normalfastqs <path to directory containing normal fastqs, e.g. /seqstore/hcp_backed_up_data/local_wgs/barncancer/DNA66245> \  
+    --tumorsample <Name of tumor sample, e.g. DNA66246> \  
+    --tumorfastqs <path to directory containing tumor fastqs, e.g. /seqstore/hcp_backed_up_data/local_wgs/barncancer/DNA66246> \  
+    --igvuser barncancer_hg38 \  
+    --hg38ref yes
+``` 
 
 * WNB (Susanne's samples)
 
-`$ ./launch_snakemake.py \  
---runnormal <ID of sequencing run> \  
---runtumor <ID of sequencing run> \  
---outputdir <Output directory, e.g. /seqstore/webfolders/wgs/neuroblastom/<tumor-sample-name> \  
---normalsample <Name of normal sample> \  
---normalfastqs <path to directory containing normal fastqs> \  
---tumorsample <Name of tumor sample> \  
---tumorfastqs <path to directory containing tumor fastqs> \  
---igvuser susanne.fransson \`
+```
+$ ./launch_snakemake.py \  
+    --runnormal <ID of sequencing run> \  
+    --runtumor <ID of sequencing run> \  
+    --outputdir <Output directory, e.g. /seqstore/webfolders/wgs/neuroblastom/<tumor-sample-name> \  
+    --normalsample <Name of normal sample> \  
+    --normalfastqs <path to directory containing normal fastqs> \  
+    --tumorsample <Name of tumor sample> \  
+    --tumorfastqs <path to directory containing tumor fastqs> \  
+    --igvuser susanne.fransson \
+```
 
 
 For hg38ref, write 'yes' if you want this option. If you want to use hg19, simply don't use hg38ref argument.
