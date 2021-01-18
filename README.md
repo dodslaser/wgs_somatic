@@ -17,13 +17,81 @@ WOPR - junior
 
  The pipeline takes as input-data fastqfiles from a TUMOR and a NORMAL sample and generates a group of result and QC-files. The results contain Somatic AND Germline variantcalls of SNVs and InDels, as well as Structural Variants (SVs) and Copy Number Variants (CNVs) -- to provide the possibility of discovering both cancer pre-disposition variants but with a primary focus towards acquired mutations. 
 
- ### How to run:
+### How to install:
+
+1. Clone the repository
+
+`$ git clone https://github.com/ClinicalGenomicsGBG/wgs_somatic`
+
+2. Install submodules
+
+`$ git submodule update --init --recursive`
+
+Submodules used are annotate\_manta\_canvas, b\_allele\_igv\_plot, canvas\_to\_interpreter and alissa\_connector\_upload. They can all be foundat [CGG](https://github.com/ClinicalGenomicsGBG).
+
+
+
+You shouldn't have to build singularity images since paths to them are specified in the configs but if you would like to build them, you can use the definition files in the singularity subfolders.
+
+Singularity images are located here: /apps/bio/singularities/wgs\_somatic/
+
+### How to run:
+
+1. Start a screen
+
+2. Load anaconda2 
+
+`$ module load anaconda2`
+
+3. Activate conda environment
+
+`$ source activate wgs_somatic`
+
+4. Run launch\_snakemake.py
+
+Depending on whether you have GMS samples or WNB (Susanne's samples), you start the pipeline either by:
+
+* GMS Sample
+
+```
+$ ./launch_snakemake.py \  
+    --runnormal <ID of sequencing run, e.g. 200616_A00689_0144_BHFNK2DSXY> \  
+    --runtumor <ID of sequencing run, e.g. 200616_A00689_0144_BHFNK2DSXY> \  
+    --outputdir <Output directory, e.g. /seqstore/webfolders/wgs/barncancer/hg38/DNA66246> \  
+    --normalsample <Name of normal sample, e.g. DNA66245> \  
+    --normalfastqs <path to directory containing normal fastqs, e.g. /seqstore/hcp_backed_up_data/local_wgs/barncancer/DNA66245> \  
+    --tumorsample <Name of tumor sample, e.g. DNA66246> \  
+    --tumorfastqs <path to directory containing tumor fastqs, e.g. /seqstore/hcp_backed_up_data/local_wgs/barncancer/DNA66246> \  
+    --igvuser barncancer_hg38 \  
+    --hg38ref yes
+``` 
+
+* WNB (Susanne's samples)
+
+```
+$ ./launch_snakemake.py \  
+    --runnormal <ID of sequencing run> \  
+    --runtumor <ID of sequencing run> \  
+    --outputdir <Output directory, e.g. /seqstore/webfolders/wgs/neuroblastom/<tumor-sample-name> \  
+    --normalsample <Name of normal sample> \  
+    --normalfastqs <path to directory containing normal fastqs> \  
+    --tumorsample <Name of tumor sample> \  
+    --tumorfastqs <path to directory containing tumor fastqs> \  
+    --igvuser susanne.fransson \
+```
+
+
+For hg38ref, write 'yes' if you want this option. If you want to use hg19, simply don't use hg38ref argument.
+
+
+
 
  Need to be on medair because python environment is hard-coded in launch_snakemake.py, also some tools in the snakemake workflow is hardcoded to install-locations on medair, and finally some dependencies such as references and databases are on medair.
 
  > \#!/apps/bio/software/anaconda2/envs/wgs_somatic/bin/python
 
- If you are on medair you should be able to just pull down this repository, and install singularities with the recipes in the singularity-dir (or simply copy from an existing repo).
+
+
 
  Or you can just use an already set-up repository! Such as here:
  `/apps/bio/repos/wgs_somatic`
@@ -73,3 +141,7 @@ WOPR - junior
 
  * Analyse all samples in the project with hg38 (nearly done)
  * Calculate sensitivity and precision with artificial truthset (nearly done)
+
+### Yearly statistics
+
+After running the pipeline for the first time, a yearly\_statistics text file is created in the repo. Every time the pipeline is run, sample name and date/time is added to this text file.
