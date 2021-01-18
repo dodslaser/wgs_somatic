@@ -31,6 +31,8 @@ WOPR - junior
 
 You shouldn't have to build singularity images since paths to them are specified in the configs but if you would like to build them, you can use the definition files in the singularity subfolders.
 
+Singularity images are located here: /apps/bio/singularities/wgs\_somatic/
+
 ### How to run:
 
 1. Start a screen
