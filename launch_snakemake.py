@@ -42,7 +42,7 @@ def yearly_stats(tumorname, normalname):
     #yearly_stats = open(config_data["yearly_stats"], "a")
     yearly_stats = "yearly_stats.txt"
     if not os.path.exists(yearly_stats):
-        os.mknod(yearly_stats)
+        os.mknod(yearly_stats, stat.S_IRWXG)
     yearly_stats = open(yearly_stats, "a")
     date_time = time.strftime("%Y-%m-%d-%H-%M-%S")
     yearly_stats.write("Tumor ID: " + tumorname + " Normal ID: " + normalname + " Date and Time: " + date_time + "\n")
