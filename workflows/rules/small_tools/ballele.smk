@@ -7,8 +7,9 @@ rule ballele_plot:
     input:
         "{workingdir}/{stype}/dnascope/{sname}_germline.vcf"
     params:
-        dbsnp = pipeconfig["rules"]["ballele_plot"]["dbsnp"]
+        dbsnp = pipeconfig["rules"]["ballele_plot"]["dbsnp"],
+        hg38ref = pipeconfig["rules"]["ballele_plot"]["hg38ref"]
     output:
         "{workingdir}/{stype}/reports/{sname}_baf.igv"
     run:
-        plot_freq(f"{input}", f"{output}", f"{params.dbsnp}")
+        plot_freq(f"{input}", f"{output}", f"{params.dbsnp}", f"{params.hg38ref}")

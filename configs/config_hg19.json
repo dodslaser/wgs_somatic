@@ -4,7 +4,7 @@
     {
         "sentieon":
         {
-            "sing": "singularities/sentieon/hg19/sentieon_peta_201911_hg19.simg",
+            "sing": "/apps/bio/singularities/wgs_somatic/sentieon_peta_201911_hg19.simg",
             "tool_path": "/sentieon-genomics-201911/bin/sentieon",
             "reference": "/databases/hs37d5.fa",
             "mills": "/databases/Mills_and_1000G_gold_standard.indels.b37.vcf.gz",
@@ -15,7 +15,7 @@
         },
         "canvas":
         {
-            "sing": "singularities/canvas/hg19/canvas_hg19.simg",
+            "sing": "/apps/bio/singularities/wgs_somatic/canvas_hg19.simg",
             "dll": "/Canvas-1.40.0.1613+master_x64/Canvas.dll",
             "tool_path": "/canvas/run_canvas.py",
             "reference": "/medstore/External_References/Canvas_CLC_HG19_Dataset/hs37d5/Homo_sapiens/UCSC/hg19/Sequence/WholeGenomeFasta",
@@ -79,7 +79,8 @@
         },
         "ballele_plot":
         {
-            "dbsnp": "/apps/bio/dependencies/wgs_somatic/hg19/sentieon/dbsnp_138.b37.vcf.gz"
+            "dbsnp": "/apps/bio/dependencies/wgs_somatic/hg19/sentieon/dbsnp_138.b37.vcf.gz",
+            "hg38ref": "no"
         },
        "generate_tdf":
         {

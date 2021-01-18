@@ -13,8 +13,15 @@ singularities/sentieon/hg38/sentieon_peta_201911_hg38_old.simg
 .vscode/
 __pycache__/
 igv.log
-logfiles/
 singularities/canvas/hg19/Canvas-1.40.0.1613.master_x64.tar.gz
 singularities/canvas/hg38/Canvas-1.40.0.1613.master_x64.tar.gz
 workflows/scripts/__pycache__/
 workflows/scripts/b_allele_igv_plot/__pycache__/
+logfiles/*
+!logfiles/.gitkeep
+logfiles/commandlogs/*
+!logfiles/commandlogs/.gitkeep
+<<<<<<< HEAD
+!logfiles/README.md
+yearly_stats.txt
+

@@ -2,14 +2,14 @@ __default__:
     queue: wgs.q
     threads: 20
     excl: excl=1
-    name: "SMK-WGS-{rule}_{wildcards.sname}"
-    output: "SMK-WGS-{rule}_{wildcards.sname}.stdout"
-    error: "SMK-WGS-{rule}_{wildcards.sname}.stderr"
+    name: "WS-{rule}_{wildcards.sname}"
+    output: "WS-{rule}_{wildcards.sname}.stdout"
+    error: "WS-{rule}_{wildcards.sname}.stderr"
 
 mapping:
-    name: "SMK-WGS-{rule}_{wildcards.fastqpattern}"
-    output: "SMK-WGS-{rule}_{wildcards.fastqpattern}.stdout"
-    error: "SMK-WGS-{rule}_{wildcards.fastqpattern}.stderr"
+    name: "WS-{rule}_{wildcards.fastqpattern}"
+    output: "WS-{rule}_{wildcards.fastqpattern}.stdout"
+    error: "WS-{rule}_{wildcards.fastqpattern}.stderr"
     threads: 20
 
 rtgtools_eval:

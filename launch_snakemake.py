@@ -9,6 +9,7 @@ import time
 import traceback
 from shutil import copyfile
 import subprocess
+import stat 
 
 def read_ivaconf():
     with open("configs/ingenuity.json", 'r') as configfile:
@@ -37,12 +38,26 @@ def logger(message, logfile=False):
         logfile.write(f"{get_time()}: {message}" + "\n")
     print(message)
 
+def yearly_stats(tumorname, normalname):
+    #config_data = read_wrapperconf()
+    #yearly_stats = open(config_data["yearly_stats"], "a")
+    yearly_stats = "yearly_stats.txt"
+    if not os.path.exists(yearly_stats):
+        os.mknod(yearly_stats)
+        os.chmod(yearly_stats, stat.S_IRWXU|stat.S_IRWXG|stat.S_IRWXO)
+    yearly_stats = open(yearly_stats, "a")
+    date_time = time.strftime("%Y-%m-%d-%H-%M-%S")
+    yearly_stats.write("Tumor ID: " + tumorname + " Normal ID: " + normalname + " Date and Time: " + date_time + "\n")
+    yearly_stats.close()
+
 def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, tumorname, tumorfastqs, ivauser=False, igvuser=False, hg38ref=False, starttype=False):
     try:
         ################################################################
         # Write InputArgs to logfile
         config = read_wrapperconf()
         commandlogs = config["commandlogs"]
+        #if not os.path.exists(commandlogs):
+        #    os.makedirs(commandlogs)
         command = f"{sys.argv[0]}"
         current_date = time.strftime("%Y-%m-%d")
         commandlog = f"{commandlogs}/commands_{current_date}.log"
@@ -244,3 +259,4 @@ if __name__ == '__main__':
     parser.add_argument('-stype', '--starttype', nargs='?', help='write forcestart if you want to ignore fastqs', required=False)
     args = parser.parse_args()
     analysis_main(args, args.runnormal, args.runtumor, args.outputdir, args.normalsample, args.normalfastqs, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser, args.hg38ref, args.starttype)
+    yearly_stats(args.tumorsample, args.normalsample)
