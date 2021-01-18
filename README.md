@@ -139,3 +139,7 @@ For hg38ref, write 'yes' if you want this option. If you want to use hg19, simpl
 
  * Analyse all samples in the project with hg38 (nearly done)
  * Calculate sensitivity and precision with artificial truthset (nearly done)
+
+### Yearly statistics
+
+After running the pipeline for the first time, a yearly\_statistics text file is created in the repo. Every time the pipeline is run, sample name and date/time is added to this text file.
