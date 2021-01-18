@@ -9,6 +9,7 @@ import time
 import traceback
 from shutil import copyfile
 import subprocess
+import stat 
 
 def read_ivaconf():
     with open("configs/ingenuity.json", 'r') as configfile:
@@ -42,7 +43,8 @@ def yearly_stats(tumorname, normalname):
     #yearly_stats = open(config_data["yearly_stats"], "a")
     yearly_stats = "yearly_stats.txt"
     if not os.path.exists(yearly_stats):
-        os.mknod(yearly_stats, stat.S_IRWXG)
+        os.mknod(yearly_stats)
+        os.chmod(yearly_stats, stat.S_IRWXU|stat.S_IRWXG|stat.S_IRWXO)
     yearly_stats = open(yearly_stats, "a")
     date_time = time.strftime("%Y-%m-%d-%H-%M-%S")
     yearly_stats.write("Tumor ID: " + tumorname + " Normal ID: " + normalname + " Date and Time: " + date_time + "\n")
