@@ -271,3 +271,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     analysis_main(args, args.runnormal, args.runtumor, args.outputdir, args.normalsample, args.normalfastqs, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser, args.hg38ref, args.starttype)
     yearly_stats(args.tumorsample, args.normalsample)
+    petagene_compress_bam(args.outputdir, args.tumorname)
