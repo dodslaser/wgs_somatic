@@ -50,6 +50,17 @@ def yearly_stats(tumorname, normalname):
     yearly_stats.write("Tumor ID: " + tumorname + " Normal ID: " + normalname + " Date and Time: " + date_time + "\n")
     yearly_stats.close()
 
+def petagene_compress_bam(outputdir, tumorname):
+    config = read_wrapperconf()
+    logger(f"Starting petagene compression on bamfiles for sample {outputdir}")
+    queue = config["petagene"]["queue"]
+    threads = config["petagene"]["threads"]
+    qsub_script = config["petagene"]["qsub_script"]
+    standardout = f"{outputdir}/logs/{tumorname}_petagene_compression_standardout.txt"
+    standarderr = f"{outputdir}/logs/{tumorname}_petagene_compression_standarderr.txt"
+    qsub_args = ["qsub", "-N", f"WS-petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script]
+    subprocess.call(qsub_args, shell=False)
+
 def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, tumorname, tumorfastqs, ivauser=False, igvuser=False, hg38ref=False, starttype=False):
     try:
         ################################################################
