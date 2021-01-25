@@ -44,5 +44,11 @@
             "destination": "/Sequence"
         }
     }
+    "petagene":
+    {
+        "threads": 40,
+        "queue": "batch.q@hoth.medair.lcl",
+        "qsub_script": "petagene_compress.sh"
+    }
 }
 
