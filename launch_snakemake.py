@@ -58,7 +58,7 @@ def petagene_compress_bam(outputdir, tumorname):
     qsub_script = config["petagene"]["qsub_script"]
     standardout = f"{outputdir}/logs/{tumorname}_petagene_compression_standardout.txt"
     standarderr = f"{outputdir}/logs/{tumorname}_petagene_compression_standarderr.txt"
-    qsub_args = ["qsub", "-N", f"WS-petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, outputdir]
+    qsub_args = ["qsub", "-N", f"WS-{tumorname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, outputdir]
     subprocess.call(qsub_args, shell=False)
 
 def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, tumorname, tumorfastqs, ivauser=False, igvuser=False, hg38ref=False, starttype=False):
