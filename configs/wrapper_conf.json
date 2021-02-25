@@ -6,6 +6,12 @@
     "hg38conf": "config_hg38.json",
     "hg19conf": "config_hg19.json",
     "clusterconf": "cluster.yaml",
+    "petagene":
+    {
+        "threads": 40,
+        "queue": "batch.q@hoth.medair.lcl",
+        "qsub_script": "petagene_compress.sh"
+    },
     "singularitybinddirs":
     {
         "petagene":
@@ -45,4 +51,3 @@
         }
     }
 }
-
