@@ -67,9 +67,67 @@ gene_list = []
 for gene in genelist:
     gene_list.append(gene.rstrip("\n"))
 #print(gene_list)
+# pattern to search for with an "or" between each gene
 pattern = '|'.join(gene_list)
 # search for patterns of the genes in the genelist in certain column
-print(df.loc[df['DEL/DUP Genecrossings'].str.contains(pattern, na=False)])
+column_patterns = df.loc[df['DEL/DUP Genecrossings'].str.contains(pattern, na=False)]['DEL/DUP Genecrossings']
+
+
+# create new column Genelist to contain genes from genelist that exist in certain columns
+df['Genelist'] = ""
+
+# appending genes found to Genelist column
+for gene in gene_list:
+    for row_of_genes in column_patterns:
+        if gene in row_of_genes:
+            #print(gene)
+            #print(row_of_genes)
+            #print(int(df[df['DEL/DUP Genecrossings']==row_of_genes].index.values))
+            index_value = int(df[df['DEL/DUP Genecrossings']==row_of_genes].index.values)
+            df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ', '
+
+print(df)
+
+
+
+
+
+
+
+
+#print [gene for gene in gene_list if(gene in df['DEL/DUP Genecrossings'])]
+
+#for row_of_genes in df['DEL/DUP Genecrossings']:
+#    if [gene for gene in gene_list if gene in row_of_genes]:
+#        print(gene)
+
+
+
+#matches = [gene for gene in gene_list if gene in df['DEL/DUP Genecrossings']]
+#print(matches)
+
+#for row_of_genes in df['DEL/DUP Genecrossings']:
+#    #print(row_of_genes)
+#    matches = [gene for gene in gene_list if gene in row_of_genes]
+#    print(matches)
+#    if any(gene in row_of_genes for gene in gene_list):
+        #print(gene)
+#        print(row_of_genes)
+    #for gene in gene_list:
+     #   if gene in row_of_genes:
+     #       print(gene)
+     #       print(row_of_genes)
+
+
+
+
+#df.loc[df['DEL/DUP Genecrossings'].str.contains(pattern, na=False), 'Genelist'] = 'hej ' #+ df['Genelist'].astype(str)
+
+#print(df['Genelist'])
+
+
+
+
 
 
 
