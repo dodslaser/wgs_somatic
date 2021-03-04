@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 
 df = pd.read_excel (r'/home/xshang/ws_manta-test/hanna_test_DNA70280_201023_AHCW35DSXY_somatic_mantaSV.vcf.xlsx')
 #print (df[['ID','MATEID']].dropna())
@@ -66,93 +67,84 @@ genelist = genelist.readlines()
 gene_list = []
 for gene in genelist:
     gene_list.append(gene.rstrip("\n"))
+# remove duplicates 
+gene_list = list(set(gene_list))
 #print(gene_list)
 # pattern to search for with an "or" between each gene
 pattern = '|'.join(gene_list)
 # search for patterns of the genes in the genelist in certain column
-column_patterns = df.loc[df['DEL/DUP Genecrossings'].str.contains(pattern, na=False)]['DEL/DUP Genecrossings']
+column_patterns_genecrossings = df.loc[df['DEL/DUP Genecrossings'].str.contains(pattern, na=False)]['DEL/DUP Genecrossings']
+column_patterns_geneinfo1 = df.loc[df['GeneInfo 1'].str.contains(pattern, na=False)]['GeneInfo 1']
+column_patterns_geneinfo2 = df.loc[df['GeneInfo 2'].str.contains(pattern, na=False)]['GeneInfo 2']
 
 
 # create new column Genelist to contain genes from genelist that exist in certain columns
 df['Genelist'] = ""
 
+# function to find only whole words, otherwise it would find gene AR in XXARXX
+def find_only_whole_word(search_string, input_string):
+  # Create a raw string with word boundaries from the user's input_string
+  raw_search_string = r"\b" + search_string + r"\b"
+
+  match_output = re.search(raw_search_string, input_string)
+
+  no_match_was_found = ( match_output is None )
+  if no_match_was_found:
+    return False
+  else:
+    return True
+
+# function appending genes found to Genelist column
+def append_genes(col_patterns, col):
+    for gene in gene_list:
+        for row_of_genes in col_patterns:
+            if gene in row_of_genes:
+                #print(gene)
+                #print(row_of_genes)
+                #print(int(df[df['DEL/DUP Genecrossings']==row_of_genes].index.values))
+                if find_only_whole_word(gene, row_of_genes) == True:
+                    index_value = int(df[col==row_of_genes].index.values)
+                    df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ', '
+    return df
+append_genes(column_patterns_genecrossings, df['DEL/DUP Genecrossings'])
+append_genes(column_patterns_geneinfo1, df['GeneInfo 1'])
+append_genes(column_patterns_geneinfo2, df['GeneInfo 2'])
+
 # appending genes found to Genelist column
-for gene in gene_list:
-    for row_of_genes in column_patterns:
-        if gene in row_of_genes:
-            #print(gene)
-            #print(row_of_genes)
-            #print(int(df[df['DEL/DUP Genecrossings']==row_of_genes].index.values))
-            index_value = int(df[df['DEL/DUP Genecrossings']==row_of_genes].index.values)
-            df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ', '
+#for gene in gene_list:
+#    for row_of_genes in column_patterns_geneinfo1:
+#        if gene in row_of_genes:
+#            print(gene)
+#            print(row_of_genes)
+#            #print(int(df[df['DEL/DUP Genecrossings']==row_of_genes].index.values))
+#            index_value = int(df[df['GeneInfo 1']==row_of_genes].index.values)
+#            df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ', '
+
+
+#print(df)
+
+
+
+
+
+#test_text = 'LOC107985235:XR_001738322.1 (-6745) | ARPC5:NM_001270439.2 (+6028)'
+#bla = 'ARPC5'
+#print(find_only_whole_word(bla, test_text))
+
+#regex=re.compile(r"\bbla\b")
+#print(regex.findall(bla, test_text))
+
+
+# appending genes found to Genelist column
+#for gene in gene_list:
+#    for row_of_genes in column_patterns_geneinfo1:
+#        if gene in row_of_genes:
+#            print(gene)
+#            print(row_of_genes)
+#            if find_only_whole_word(gene, row_of_genes) == True:
+#
+#            #print(int(df[df['DEL/DUP Genecrossings']==row_of_genes].index.values))
+#                index_value = int(df[df['GeneInfo 1']==row_of_genes].index.values)
+#                df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ', '
 
 print(df)
-
-
-
-
-
-
-
-
-#print [gene for gene in gene_list if(gene in df['DEL/DUP Genecrossings'])]
-
-#for row_of_genes in df['DEL/DUP Genecrossings']:
-#    if [gene for gene in gene_list if gene in row_of_genes]:
-#        print(gene)
-
-
-
-#matches = [gene for gene in gene_list if gene in df['DEL/DUP Genecrossings']]
-#print(matches)
-
-#for row_of_genes in df['DEL/DUP Genecrossings']:
-#    #print(row_of_genes)
-#    matches = [gene for gene in gene_list if gene in row_of_genes]
-#    print(matches)
-#    if any(gene in row_of_genes for gene in gene_list):
-        #print(gene)
-#        print(row_of_genes)
-    #for gene in gene_list:
-     #   if gene in row_of_genes:
-     #       print(gene)
-     #       print(row_of_genes)
-
-
-
-
-#df.loc[df['DEL/DUP Genecrossings'].str.contains(pattern, na=False), 'Genelist'] = 'hej ' #+ df['Genelist'].astype(str)
-
-#print(df['Genelist'])
-
-
-
-
-
-
-
-
-#print(df[['GeneInfo 1','GeneInfo 2', 'DEL/DUP Genecrossings']])
-
-
-#print(df['GeneInfo 1'].str.contains("RRNAD"))
-
-#print(genelist)
-#df['Genelist'] = 'NO'
-#for gene in genelist:
-    #print(gene)
-    #print(df['DEL/DUP Genecrossings'].str.contains(gene, na=False))
-    #df.loc[df['DEL/DUP Genecrossings'].str.contains(gene, na=False), 'Genelist'] = "YES"
-
-#print(df['Genelist'])
-
-
-
-#df["Example"] = df["Name"].str.extract("(LB|RB)")[0] + " category"
-
-#df['NEWcolumn']='NO'
-#df.loc[df['COLUMN_to_Check'].str.contains(pattern), 'NEWcolumn'] = 'YES'
-
-
-#Search_for_These_values = ['PEA', 'DEF', 'XYZ'] #creating list
-#pattern = '|'.join(Search_for_These_values)
