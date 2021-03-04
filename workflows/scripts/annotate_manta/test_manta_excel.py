@@ -104,47 +104,19 @@ def append_genes(col_patterns, col):
                 #print(int(df[df['DEL/DUP Genecrossings']==row_of_genes].index.values))
                 if find_only_whole_word(gene, row_of_genes) == True:
                     index_value = int(df[col==row_of_genes].index.values)
-                    df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ', '
+                    df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ' '
     return df
+
 append_genes(column_patterns_genecrossings, df['DEL/DUP Genecrossings'])
 append_genes(column_patterns_geneinfo1, df['GeneInfo 1'])
 append_genes(column_patterns_geneinfo2, df['GeneInfo 2'])
 
-# appending genes found to Genelist column
-#for gene in gene_list:
-#    for row_of_genes in column_patterns_geneinfo1:
-#        if gene in row_of_genes:
-#            print(gene)
-#            print(row_of_genes)
-#            #print(int(df[df['DEL/DUP Genecrossings']==row_of_genes].index.values))
-#            index_value = int(df[df['GeneInfo 1']==row_of_genes].index.values)
-#            df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ', '
-
-
-#print(df)
+for row in df['Genelist']:
+    row = ' '.join(set(row.split()))
+    #df.loc[row,'Genelist'] = row
+    #print(row)
 
 
 
-
-
-#test_text = 'LOC107985235:XR_001738322.1 (-6745) | ARPC5:NM_001270439.2 (+6028)'
-#bla = 'ARPC5'
-#print(find_only_whole_word(bla, test_text))
-
-#regex=re.compile(r"\bbla\b")
-#print(regex.findall(bla, test_text))
-
-
-# appending genes found to Genelist column
-#for gene in gene_list:
-#    for row_of_genes in column_patterns_geneinfo1:
-#        if gene in row_of_genes:
-#            print(gene)
-#            print(row_of_genes)
-#            if find_only_whole_word(gene, row_of_genes) == True:
-#
-#            #print(int(df[df['DEL/DUP Genecrossings']==row_of_genes].index.values))
-#                index_value = int(df[df['GeneInfo 1']==row_of_genes].index.values)
-#                df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ', '
 
 print(df)
