@@ -2,15 +2,15 @@ import pandas as pd
 import re
 
 df = pd.read_excel (r'/home/xshang/ws_manta-test/hanna_test_DNA70280_201023_AHCW35DSXY_somatic_mantaSV.vcf.xlsx')
-#print (df[['ID','MATEID']].dropna())
+
 
 # drops rows with NA in columns ID and/or MATEID
 df = df.dropna(subset=['ID','MATEID'])
-#print(df)
+
 
 # this part of the script removes duplicates (translocations from both directions)
 
-#print(df[['ID','MATEID']])
+
 #row_indices_b = []
 #row_indices_a = []
 row_indices = []
@@ -38,8 +38,6 @@ for a in df['ID']:
 #print(row_indices_a)
 #print(row_indices)
 
-# prints pairs only once, with (a,b)
-#print([tup for tup in row_indices if tup[0] < tup[1]])
 
 # get pair only once (a,b) and remove the same pair (b,a)
 a_b_pairs = [tup for tup in row_indices if tup[0] < tup[1]]
@@ -111,11 +109,14 @@ append_genes(column_patterns_genecrossings, df['DEL/DUP Genecrossings'])
 append_genes(column_patterns_geneinfo1, df['GeneInfo 1'])
 append_genes(column_patterns_geneinfo2, df['GeneInfo 2'])
 
-for row in df['Genelist']:
-    row = ' '.join(set(row.split()))
-    #df.loc[row,'Genelist'] = row
-    #print(row)
 
+# remove duplicates in Genelist column
+for ind in df.index: 
+     #print(df['Genelist'][ind])
+     #row = df['Genelist'][ind]
+     #row = ' '.join(set(row.split()))
+     #df['Genelist'][ind] = row
+     df['Genelist'][ind] = ' '.join(set(df['Genelist'][ind].split()))
 
 
 
