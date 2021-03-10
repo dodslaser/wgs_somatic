@@ -2,10 +2,10 @@ import pandas as pd
 import re
 
 df = pd.read_excel (r'/home/xshang/ws_manta-test/hanna_test_DNA70280_201023_AHCW35DSXY_somatic_mantaSV.vcf.xlsx')
-
-
-# drops rows with NA in columns ID and/or MATEID
-df = df.dropna(subset=['ID','MATEID'])
+# keep original df
+#df_orig = df
+# drops rows with NA in columns ID. MATEID can be NA if not a translocation
+df = df.dropna(subset=['ID'])
 
 
 # this part of the script removes duplicates (translocations from both directions)
@@ -50,6 +50,8 @@ remove_indices = [i[1] for i in a_b_pairs]
 
 df.drop(remove_indices, 0, inplace=True)
 #print(df[['ID','MATEID']])
+
+
 
 #print(df)
 
@@ -118,6 +120,33 @@ for ind in df.index:
      #df['Genelist'][ind] = row
      df['Genelist'][ind] = ' '.join(set(df['Genelist'][ind].split()))
 
+#print(df)
 
 
-print(df)
+
+
+
+
+# this part of the script extracts allele frequencies from PR/SR
+
+
+# extract variants only supported by both PR and SR
+df = df.loc[df['FORMAT'] == 'PR:SR']
+
+
+#print(df.iloc[:, 31])
+
+# name of normal sample is in column name
+normal_sample = df.columns[31]
+
+# add column for normal PR
+df[normal_sample + ':PR'] = ""
+
+# for row in column that contains PR/SR info for normal, fetch PR
+for row in df.iloc[:, 31]:   
+    print(re.split('[,:]', row)[0])
+    print(df.loc[df[normal_sample] == row].index.values)
+
+#print(df)
+
+
