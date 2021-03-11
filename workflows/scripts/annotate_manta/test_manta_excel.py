@@ -139,14 +139,56 @@ df = df.loc[df['FORMAT'] == 'PR:SR']
 # name of normal sample is in column name
 normal_sample = df.columns[31]
 
-# add column for normal PR
+# add columns for PR/SR for normal sample
 df[normal_sample + ':PR'] = ""
+df[normal_sample + ':PR-alt'] = ""
+df[normal_sample + ':SR'] = ""
+df[normal_sample + ':SR-alt'] = ""
+df['TOTAL alt (N)'] = ""
+df['TOTAL VAF (N)'] = ""
 
-# for row in column that contains PR/SR info for normal, fetch PR
+# for row in column that contains PR/SR info for normal, add info to new columns
 for row in df.iloc[:, 31]:   
-    print(re.split('[,:]', row)[0])
-    print(df.loc[df[normal_sample] == row].index.values)
+    #print(re.split('[,:]', row)[0])
+    #print(df.loc[df[normal_sample] == row].index.values)
+    row_index = int(df.loc[df[normal_sample] == row].index.values)
+    PR = int(re.split('[,:]', row)[0])
+    PR_alt = int(re.split('[,:]', row)[1])
+    SR = int(re.split('[,:]', row)[2])
+    SR_alt = int(re.split('[,:]', row)[3])
+    df.at[row_index, normal_sample + ':PR'] = PR
+    df.at[row_index, normal_sample + ':PR-alt'] = PR_alt
+    df.at[row_index, normal_sample + ':SR'] = SR
+    df.at[row_index, normal_sample + ':SR-alt'] =  SR_alt
+    df.at[row_index, 'TOTAL alt (N)'] = PR_alt + SR_alt
+    df.at[row_index, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
-#print(df)
+# name of tumor sample is in column name
+tumor_sample = df.columns[32]
+
+# add columns for PR/SR for tumor sample
+df[tumor_sample + ':PR'] = ""
+df[tumor_sample + ':PR-alt'] = ""
+df[tumor_sample + ':SR'] = ""
+df[tumor_sample + ':SR-alt'] = ""
+df['TOTAL alt (T)'] = ""
+df['TOTAL VAF (T)'] = ""
+
+# for row in column that contains PR/SR info for tumor, add info to new columns
+for row in df.iloc[:, 32]:
+    row_index = int(df.loc[df[tumor_sample] == row].index.values)
+    PR = int(re.split('[,:]', row)[0])
+    PR_alt = int(re.split('[,:]', row)[1])
+    SR = int(re.split('[,:]', row)[2])
+    SR_alt = int(re.split('[,:]', row)[3])
+    df.at[row_index, tumor_sample + ':PR'] = PR
+    df.at[row_index, tumor_sample + ':PR-alt'] = PR_alt
+    df.at[row_index, tumor_sample + ':SR'] = SR
+    df.at[row_index, tumor_sample + ':SR-alt'] =  SR_alt
+    df.at[row_index, 'TOTAL alt (T)'] = PR_alt + SR_alt
+    df.at[row_index, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
+
+
+print(df)
 
 
