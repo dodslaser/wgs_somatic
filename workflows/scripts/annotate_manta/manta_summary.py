@@ -70,16 +70,16 @@ def manta_summary(mantaSV_vcf, mantaSV_summary):
 
     # function to find only whole words, otherwise it would find gene AR in XXARXX
     def find_only_whole_word(search_string, input_string):
-    # Create a raw string with word boundaries from the user's input_string
-    raw_search_string = r"\b" + search_string + r"\b"
+        # Create a raw string with word boundaries from the user's input_string
+        raw_search_string = r"\b" + search_string + r"\b"
 
-    match_output = re.search(raw_search_string, input_string)
+        match_output = re.search(raw_search_string, input_string)
 
-    no_match_was_found = ( match_output is None )
-    if no_match_was_found:
-        return False
-    else:
-        return True
+        no_match_was_found = ( match_output is None )
+        if no_match_was_found:
+            return False
+        else:
+            return True
 
     # function appending genes found to Genelist column
     def append_genes(col_patterns, col):
