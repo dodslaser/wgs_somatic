@@ -9,7 +9,8 @@ import time
 import traceback
 from shutil import copyfile
 import subprocess
-import stat 
+import stat
+#from snakemake import snakemake
 
 def read_ivaconf():
     with open("configs/ingenuity.json", 'r') as configfile:
@@ -245,15 +246,40 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
         snakemake_args = f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{tumorid}_config.json --dag | dot -Tsvg > {samplelogs}/dag_{current_date}.svg"
         # >>>>>>>>>>>> Create Dag of pipeline
         subprocess.run(snakemake_args, shell=True, env=my_env) # CREATE DAG
+
         snakemake_args = f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{tumorid}_config.json --use-singularity --singularity-args '-e --bind {binddir_string}' --cluster-config configs/cluster.yaml --cluster \"qsub -S /bin/bash -pe mpi {{cluster.threads}} -q {{cluster.queue}} -N {{cluster.name}} -o {samplelogs}/{{cluster.output}} -e {samplelogs}/{{cluster.error}} -l {{cluster.excl}}\" --jobs 999 --latency-wait 60 --directory {scriptdir} &>> {samplelog}"
         # >>>>>>>>>>>> Start pipeline
         subprocess.run(snakemake_args, shell=True, env=my_env) # Shellscript pipeline
+
+#hanna testing below
+#        cluster_args = ' '.join(['qsub', '-S', '/bin/bash', '-pe',
+#                                 'mpi', '{cluster.threads}',
+#                                 '-q', '{cluster.queue}',
+#                                 '-N', '{cluster.name}',
+#                                 '-o', os.path.join(samplelogs, '{cluster.output}'),
+#                                 '-e', os.path.join(samplelogs, '{cluster.error}'),
+#                                 '-l', '{cluster.excl}']) 
+
+#        result_ok = snakemake(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'pipeline.snakefile'),
+#                    workdir=scriptdir,
+#                    use_singularity=True,
+#                    singularity_args=f'--bind {binddir_string}',
+#                    configfiles=[f'{runconfigs}/{tumorid}_config.json'],
+#                    cluster=cluster_args,
+#                    cluster_config=[os.path.join(os.path.dirname(os.path.abspath(__file__)), 'configs', 'cluster.yaml')],
+#                    nodes=999,
+#                    max_jobs_per_second=999,
+#                    latency_wait=60,
+#                    force_incomplete=True)
+                     
+        #return result_ok
+#hanna testing above
 
     except Exception as e:
         tb = traceback.format_exc()
         logger(f"Error in script:")
         logger(f"{e} Traceback: {tb}")
-
+        sys.exit(1)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
