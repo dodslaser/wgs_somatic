@@ -48,8 +48,7 @@ rule manta_somatic:
         "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV.vcf",
         "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx",
         "{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf",
-        "{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf",
-        "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV_Summary.xlsx"
+        "{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf"
     run:
         if not os.path.isfile(f"{wildcards.workingdir}/{wildcards.stype}/manta/runWorkflow.py"):
             shell("{params.mantaconf} --tumorBam={input.tumorbam} --normalBam={input.normalbam} --referenceFasta {params.reference} --runDir {wildcards.workingdir}/{wildcards.stype}/manta/") # Preparing Manta
@@ -62,7 +61,11 @@ rule manta_somatic:
         shell("grep -e '^#' -e 'MantaBND:' {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_MantaBNDs.vcf")
         shell("grep -v 'MantaBND:' {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_MantaNOBNDs.vcf")
         shell("{params.annotate} -v {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf -g {params.annotate_ref} -o {wildcards.workingdir}/{wildcards.stype}/manta")
-        manta_summary("{workingdir}/{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx", "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV_Summary.xlsx")
 
-
-
+rule manta_summary:
+    input:
+        "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx"
+    output:
+        "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV_Summary.xlsx"
+    run:
+        manta_summary(input, output)
