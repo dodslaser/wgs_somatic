@@ -189,6 +189,7 @@ for row in df.iloc[:, 32]:
     df.at[row_index, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
 
-print(df)
+#print(df)
 
 
+df.to_excel(r'/home/xshang/ws_manta-test/output.xlsx') 
