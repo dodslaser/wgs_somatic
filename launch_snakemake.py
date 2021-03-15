@@ -255,6 +255,9 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
         logger(f"{e} Traceback: {tb}")
         sys.exit(1)
 
+    yearly_stats(args.tumorsample, args.normalsample)
+    petagene_compress_bam(args.outputdir, args.tumorsample)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-rn', '--runnormal', nargs='?', help='the sequencing run the normalsample was sequenced in', required=True)
@@ -270,5 +273,5 @@ if __name__ == '__main__':
     parser.add_argument('-stype', '--starttype', nargs='?', help='write forcestart if you want to ignore fastqs', required=False)
     args = parser.parse_args()
     analysis_main(args, args.runnormal, args.runtumor, args.outputdir, args.normalsample, args.normalfastqs, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser, args.hg38ref, args.starttype)
-    yearly_stats(args.tumorsample, args.normalsample)
-    petagene_compress_bam(args.outputdir, args.tumorsample)
+    #yearly_stats(args.tumorsample, args.normalsample)
+    #petagene_compress_bam(args.outputdir, args.tumorsample)
