@@ -253,7 +253,7 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
         tb = traceback.format_exc()
         logger(f"Error in script:")
         logger(f"{e} Traceback: {tb}")
-
+        sys.exit(1)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
