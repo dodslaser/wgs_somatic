@@ -68,4 +68,4 @@ rule manta_summary:
     output:
         "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV_Summary.xlsx"
     run:
-        manta_summary(input, output)
+        manta_summary(input, output, tumorname, normalname)
