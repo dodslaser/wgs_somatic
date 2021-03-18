@@ -1,7 +1,8 @@
 import pandas as pd
 import re
-
-df = pd.read_excel (r'/home/xshang/ws_manta-test/hanna_test_DNA70280_201023_AHCW35DSXY_somatic_mantaSV.vcf.xlsx')
+import openpyxl
+df = pd.read_excel('/home/xshang/ws_manta-test/hanna_test_DNA70280_201023_AHCW35DSXY_somatic_mantaSV.vcf.xlsx',engine='openpyxl')
+#df = pd.read_excel (r'/home/xshang/ws_manta-test/hanna_test_DNA70280_201023_AHCW35DSXY_somatic_mantaSV.vcf.xlsx')
 # keep original df
 #df_orig = df
 # drops rows with NA in columns ID. MATEID can be NA if not a translocation
@@ -76,7 +77,7 @@ pattern = '|'.join(gene_list)
 column_patterns_genecrossings = df.loc[df['DEL/DUP Genecrossings'].str.contains(pattern, na=False)]['DEL/DUP Genecrossings']
 column_patterns_geneinfo1 = df.loc[df['GeneInfo 1'].str.contains(pattern, na=False)]['GeneInfo 1']
 column_patterns_geneinfo2 = df.loc[df['GeneInfo 2'].str.contains(pattern, na=False)]['GeneInfo 2']
-
+#print(column_patterns_genecrossings)
 
 # create new column Genelist to contain genes from genelist that exist in certain columns
 df['Genelist'] = ""
@@ -98,11 +99,16 @@ def find_only_whole_word(search_string, input_string):
 def append_genes(col_patterns, col):
     for gene in gene_list:
         for row_of_genes in col_patterns:
+            #print(row_of_genes)
             if gene in row_of_genes:
                 #print(gene)
                 #print(row_of_genes)
                 #print(int(df[df['DEL/DUP Genecrossings']==row_of_genes].index.values))
                 if find_only_whole_word(gene, row_of_genes) == True:
+                    #print(df[col==row_of_genes].index.values)
+                    #print(len(df[col==row_of_genes].index.values))
+                    #OM TVÅ RADER ÄR SAMMA I DEN KOLUMNEN SÅ ÄR index.values TVÅ SIFFROR
+                    #print(gene)
                     index_value = int(df[col==row_of_genes].index.values)
                     df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ' '
     return df
@@ -111,6 +117,7 @@ append_genes(column_patterns_genecrossings, df['DEL/DUP Genecrossings'])
 append_genes(column_patterns_geneinfo1, df['GeneInfo 1'])
 append_genes(column_patterns_geneinfo2, df['GeneInfo 2'])
 
+#print(df)
 
 # remove duplicates in Genelist column
 for ind in df.index: 
@@ -137,6 +144,7 @@ df = df.loc[df['FORMAT'] == 'PR:SR']
 #print(df.iloc[:, 31])
 
 # name of normal sample is in column name
+#DET ÄR INTE ALLTID KOLUMN 31... MÅSTE FÅ namnet på kolumnen på annat sätt
 normal_sample = df.columns[31]
 
 # add columns for PR/SR for normal sample
@@ -146,6 +154,10 @@ df[normal_sample + ':SR'] = ""
 df[normal_sample + ':SR-alt'] = ""
 df['TOTAL alt (N)'] = ""
 df['TOTAL VAF (N)'] = ""
+
+#print(df.iloc[:, normal_sample])
+print(df.iloc[:, 31])
+print(df[normal_sample])
 
 # for row in column that contains PR/SR info for normal, add info to new columns
 for row in df.iloc[:, 31]:   
@@ -192,4 +204,5 @@ for row in df.iloc[:, 32]:
 #print(df)
 
 
-df.to_excel(r'/home/xshang/ws_manta-test/output.xlsx') 
+#df.to_excel(r'/home/xshang/ws_manta-test/output.xlsx') 
+
