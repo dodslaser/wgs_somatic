@@ -3,7 +3,7 @@ import re
 import openpyxl
 import os
 
-def manta_summary(mantaSV_vcf, mantaSV_summary):
+def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
     
     df = pd.read_excel(str(mantaSV_vcf),engine='openpyxl')
 
@@ -133,52 +133,52 @@ def manta_summary(mantaSV_vcf, mantaSV_summary):
 
 
     # name of normal sample is in column name
-    normal_sample = df.columns[31]
-    print(normal_sample)
+    #normal_sample = normalname
+    #print(normal_sample)   
     # add columns for PR/SR for normal sample
-    df[normal_sample + ':PR'] = ""
-    df[normal_sample + ':PR-alt'] = ""
-    df[normal_sample + ':SR'] = ""
-    df[normal_sample + ':SR-alt'] = ""
+    df[normalname + ':PR'] = ""
+    df[normalname + ':PR-alt'] = ""
+    df[normalname + ':SR'] = ""
+    df[normalname + ':SR-alt'] = ""
     df['TOTAL alt (N)'] = ""
     df['TOTAL VAF (N)'] = ""
 
     # for row in column that contains PR/SR info for normal, add info to new columns
-    for row in df.iloc[:, 31]:   
-        row_index = int(df.loc[df[normal_sample] == row].index.values)
+    for row in df[normalname]:   
+        row_index = int(df.loc[df[normalname] == row].index.values)
         PR = int(re.split('[,:]', row)[0])
         PR_alt = int(re.split('[,:]', row)[1])
         SR = int(re.split('[,:]', row)[2])
         SR_alt = int(re.split('[,:]', row)[3])
-        df.at[row_index, normal_sample + ':PR'] = PR
-        df.at[row_index, normal_sample + ':PR-alt'] = PR_alt
-        df.at[row_index, normal_sample + ':SR'] = SR
-        df.at[row_index, normal_sample + ':SR-alt'] =  SR_alt
+        df.at[row_index, normalname + ':PR'] = PR
+        df.at[row_index, normalname + ':PR-alt'] = PR_alt
+        df.at[row_index, normalname + ':SR'] = SR
+        df.at[row_index, normalname + ':SR-alt'] =  SR_alt
         df.at[row_index, 'TOTAL alt (N)'] = PR_alt + SR_alt
         df.at[row_index, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
     # name of tumor sample is in column name
-    tumor_sample = df.columns[32]
+    #tumor_sample = df.columns[32]
 
     # add columns for PR/SR for tumor sample
-    df[tumor_sample + ':PR'] = ""
-    df[tumor_sample + ':PR-alt'] = ""
-    df[tumor_sample + ':SR'] = ""
-    df[tumor_sample + ':SR-alt'] = ""
+    df[tumorname + ':PR'] = ""
+    df[tumorname + ':PR-alt'] = ""
+    df[tumorname + ':SR'] = ""
+    df[tumorname + ':SR-alt'] = ""
     df['TOTAL alt (T)'] = ""
     df['TOTAL VAF (T)'] = ""
 
     # for row in column that contains PR/SR info for tumor, add info to new columns
-    for row in df.iloc[:, 32]:
-        row_index = int(df.loc[df[tumor_sample] == row].index.values)
+    for row in df[tumorname]:
+        row_index = int(df.loc[df[tumorname] == row].index.values)
         PR = int(re.split('[,:]', row)[0])
         PR_alt = int(re.split('[,:]', row)[1])
         SR = int(re.split('[,:]', row)[2])
         SR_alt = int(re.split('[,:]', row)[3])
-        df.at[row_index, tumor_sample + ':PR'] = PR
-        df.at[row_index, tumor_sample + ':PR-alt'] = PR_alt
-        df.at[row_index, tumor_sample + ':SR'] = SR
-        df.at[row_index, tumor_sample + ':SR-alt'] =  SR_alt
+        df.at[row_index, tumorname + ':PR'] = PR
+        df.at[row_index, tumorname + ':PR-alt'] = PR_alt
+        df.at[row_index, tumorname + ':SR'] = SR
+        df.at[row_index, tumorname + ':SR-alt'] =  SR_alt
         df.at[row_index, 'TOTAL alt (T)'] = PR_alt + SR_alt
         df.at[row_index, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
