@@ -1,9 +1,11 @@
 import pandas as pd
 import re
-
+import openpyxl
+import os
 
 def manta_summary(mantaSV_vcf, mantaSV_summary):
-    df = pd.read_excel (mantaSV_vcf)
+    
+    df = pd.read_excel(str(mantaSV_vcf),engine='openpyxl')
 
     # drops rows with NA in columns ID. MATEID can be NA if not a translocation
     df = df.dropna(subset=['ID'])
@@ -38,15 +40,19 @@ def manta_summary(mantaSV_vcf, mantaSV_summary):
 
     df.drop(remove_indices, 0, inplace=True)
 
-
-
+    #print(df)
+    #for col in df.columns: 
+    #    print(col)
 
 
 
     # this part of the script highlights genes from the gene list
 
     # open the genelist
-    genelist = open("genelist.txt", "r")
+    genelist="/workflows/scripts/annotate_manta/genelist.txt"
+    genelist=os.getcwd()+genelist
+
+    genelist = open(genelist, "r")
 
     genelist = genelist.readlines()
 
@@ -63,7 +69,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary):
     column_patterns_genecrossings = df.loc[df['DEL/DUP Genecrossings'].str.contains(pattern, na=False)]['DEL/DUP Genecrossings']
     column_patterns_geneinfo1 = df.loc[df['GeneInfo 1'].str.contains(pattern, na=False)]['GeneInfo 1']
     column_patterns_geneinfo2 = df.loc[df['GeneInfo 2'].str.contains(pattern, na=False)]['GeneInfo 2']
-
+    #print(column_patterns_genecrossings.index.values)
 
     # create new column Genelist to contain genes from genelist that exist in certain columns
     df['Genelist'] = ""
@@ -80,22 +86,34 @@ def manta_summary(mantaSV_vcf, mantaSV_summary):
             return False
         else:
             return True
-
+    
     # function appending genes found to Genelist column
     def append_genes(col_patterns, col):
         for gene in gene_list:
             for row_of_genes in col_patterns:
                 if gene in row_of_genes:
+                    #print(gene)
                     if find_only_whole_word(gene, row_of_genes) == True:
-                        index_value = int(df[col==row_of_genes].index.values)
-                        df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ' '
+                        #print(df[col==row_of_genes].index.values)
+                        #print(len(df[col==row_of_genes].index.values))
+                        #print(gene)
+                        if len(df[col==row_of_genes].index.values) > 1:
+                            #print(df[col==row_of_genes].index.values[0])
+                            for rowno in df[col==row_of_genes].index.values:
+                                #print(rowno)
+                                index_value=int(rowno)
+                                df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ' '
+
+                        else:
+                            index_value = int(df[col==row_of_genes].index.values)
+                            df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ' '
         return df
 
     append_genes(column_patterns_genecrossings, df['DEL/DUP Genecrossings'])
     append_genes(column_patterns_geneinfo1, df['GeneInfo 1'])
     append_genes(column_patterns_geneinfo2, df['GeneInfo 2'])
 
-
+    #print(df)
     # remove duplicates in Genelist column
     for ind in df.index: 
         df['Genelist'][ind] = ' '.join(set(df['Genelist'][ind].split()))
@@ -116,7 +134,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary):
 
     # name of normal sample is in column name
     normal_sample = df.columns[31]
-
+    print(normal_sample)
     # add columns for PR/SR for normal sample
     df[normal_sample + ':PR'] = ""
     df[normal_sample + ':PR-alt'] = ""
@@ -165,5 +183,4 @@ def manta_summary(mantaSV_vcf, mantaSV_summary):
         df.at[row_index, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
 
-
-    df.to_excel(mantaSV_summary) 
+    df.to_excel(str(mantaSV_summary),engine='openpyxl')
