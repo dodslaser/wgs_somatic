@@ -1,6 +1,7 @@
 # vim: syntax=python tabstop=4 expandtab
 # # coding: utf-8
 import os
+from workflows.scripts.annotate_manta.manta_summary import manta_summary
 
 rule manta_germline:
     input:
