@@ -63,6 +63,9 @@ manta_somatic:
 manta_germline:
     threads: 20
 
+manta_summary:
+    threads: 4
+
 cutadapt:
     queue: wgs.q
     threads:  1
