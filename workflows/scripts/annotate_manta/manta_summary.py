@@ -40,9 +40,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
 
     df.drop(remove_indices, 0, inplace=True)
 
-    #print(df)
-    #for col in df.columns: 
-    #    print(col)
+    
 
 
 
@@ -69,7 +67,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
     column_patterns_genecrossings = df.loc[df['DEL/DUP Genecrossings'].str.contains(pattern, na=False)]['DEL/DUP Genecrossings']
     column_patterns_geneinfo1 = df.loc[df['GeneInfo 1'].str.contains(pattern, na=False)]['GeneInfo 1']
     column_patterns_geneinfo2 = df.loc[df['GeneInfo 2'].str.contains(pattern, na=False)]['GeneInfo 2']
-    #print(column_patterns_genecrossings.index.values)
+    
 
     # create new column Genelist to contain genes from genelist that exist in certain columns
     df['Genelist'] = ""
@@ -92,15 +90,13 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
         for gene in gene_list:
             for row_of_genes in col_patterns:
                 if gene in row_of_genes:
-                    #print(gene)
+                    
                     if find_only_whole_word(gene, row_of_genes) == True:
-                        #print(df[col==row_of_genes].index.values)
-                        #print(len(df[col==row_of_genes].index.values))
-                        #print(gene)
+                        
                         if len(df[col==row_of_genes].index.values) > 1:
-                            #print(df[col==row_of_genes].index.values[0])
+                            
                             for rowno in df[col==row_of_genes].index.values:
-                                #print(rowno)
+                                
                                 index_value=int(rowno)
                                 df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ' '
 
@@ -113,7 +109,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
     append_genes(column_patterns_geneinfo1, df['GeneInfo 1'])
     append_genes(column_patterns_geneinfo2, df['GeneInfo 2'])
 
-    #print(df)
+    
     # remove duplicates in Genelist column
     for ind in df.index: 
         df['Genelist'][ind] = ' '.join(set(df['Genelist'][ind].split()))
@@ -132,9 +128,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
 
 
 
-    # name of normal sample is in column name
-    #normal_sample = normalname
-    #print(normal_sample)   
+       
     # add columns for PR/SR for normal sample
     df[normalname + ':PR'] = ""
     df[normalname + ':PR-alt'] = ""
@@ -157,8 +151,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
         df.at[row_index, 'TOTAL alt (N)'] = PR_alt + SR_alt
         df.at[row_index, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
-    # name of tumor sample is in column name
-    #tumor_sample = df.columns[32]
+    
 
     # add columns for PR/SR for tumor sample
     df[tumorname + ':PR'] = ""
