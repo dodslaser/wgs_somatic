@@ -248,15 +248,17 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
         snakemake_args = f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{tumorid}_config.json --use-singularity --singularity-args '-e --bind {binddir_string}' --cluster-config configs/cluster.yaml --cluster \"qsub -S /bin/bash -pe mpi {{cluster.threads}} -q {{cluster.queue}} -N {{cluster.name}} -o {samplelogs}/{{cluster.output}} -e {samplelogs}/{{cluster.error}} -l {{cluster.excl}}\" --jobs 999 --latency-wait 60 --directory {scriptdir} &>> {samplelog}"
         # >>>>>>>>>>>> Start pipeline
         subprocess.run(snakemake_args, shell=True, env=my_env) # Shellscript pipeline
-
+        
     except Exception as e:
         tb = traceback.format_exc()
         logger(f"Error in script:")
         logger(f"{e} Traceback: {tb}")
         sys.exit(1)
 
-    yearly_stats(args.tumorsample, args.normalsample)
-    #petagene_compress_bam(args.outputdir, args.tumorsample)
+    if os.path.isfile(f"{output}/reporting/workflow_finished.txt"):
+        # these functions are only executed if snakemake workflow has finished successfully
+        yearly_stats(args.tumorsample, args.normalsample)
+        petagene_compress_bam(args.outputdir, args.tumorsample)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -273,5 +275,3 @@ if __name__ == '__main__':
     parser.add_argument('-stype', '--starttype', nargs='?', help='write forcestart if you want to ignore fastqs', required=False)
     args = parser.parse_args()
     analysis_main(args, args.runnormal, args.runtumor, args.outputdir, args.normalsample, args.normalfastqs, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser, args.hg38ref, args.starttype)
-    #yearly_stats(args.tumorsample, args.normalsample)
-    #petagene_compress_bam(args.outputdir, args.tumorsample)
