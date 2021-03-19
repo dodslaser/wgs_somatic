@@ -1,6 +1,7 @@
 # vim: syntax=python tabstop=4 expandtab
 # # coding: utf-8
 import os
+from workflows.scripts.annotate_manta.manta_summary import manta_summary
 
 rule manta_germline:
     input:
@@ -73,6 +74,12 @@ rule manta_somatic:
         shell("grep -v 'MantaBND:' {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_MantaNOBNDs.vcf")
         shell("{params.annotate} -v {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf -g {params.annotate_ref} -o {wildcards.workingdir}/{wildcards.stype}/manta")
 
-
+rule manta_summary:
+    input:
+        "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx"
+    output:
+        "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV_Summary.xlsx"
+    run:
+        manta_summary(input, output, tumorname, normalname)
 
 
