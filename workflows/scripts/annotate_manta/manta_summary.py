@@ -138,18 +138,32 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
     df['TOTAL VAF (N)'] = ""
 
     # for row in column that contains PR/SR info for normal, add info to new columns
-    for row in df[normalname]:   
-        row_index = int(df.loc[df[normalname] == row].index.values)
+    for row in df[normalname]:
         PR = int(re.split('[,:]', row)[0])
         PR_alt = int(re.split('[,:]', row)[1])
         SR = int(re.split('[,:]', row)[2])
         SR_alt = int(re.split('[,:]', row)[3])
-        df.at[row_index, normalname + ':PR'] = PR
-        df.at[row_index, normalname + ':PR-alt'] = PR_alt
-        df.at[row_index, normalname + ':SR'] = SR
-        df.at[row_index, normalname + ':SR-alt'] =  SR_alt
-        df.at[row_index, 'TOTAL alt (N)'] = PR_alt + SR_alt
-        df.at[row_index, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
+        #print(row)   
+        
+        #print(row_index)
+        if len(df.loc[df[normalname] == row].index.values) > 1:
+            for rown in df.loc[df[normalname] == row].index.values:
+                ind_val=int(rown)
+                df.at[ind_val, normalname + ':PR'] = PR
+                df.at[ind_val, normalname + ':PR-alt'] = PR_alt
+                df.at[ind_val, normalname + ':SR'] = SR
+                df.at[ind_val, normalname + ':SR-alt'] =  SR_alt
+                df.at[ind_val, 'TOTAL alt (N)'] = PR_alt + SR_alt
+                df.at[ind_val, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
+        
+        else:
+            row_index = int(df.loc[df[normalname] == row].index.values)
+            df.at[row_index, normalname + ':PR'] = PR
+            df.at[row_index, normalname + ':PR-alt'] = PR_alt
+            df.at[row_index, normalname + ':SR'] = SR
+            df.at[row_index, normalname + ':SR-alt'] =  SR_alt
+            df.at[row_index, 'TOTAL alt (N)'] = PR_alt + SR_alt
+            df.at[row_index, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
     
 
@@ -163,17 +177,30 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
 
     # for row in column that contains PR/SR info for tumor, add info to new columns
     for row in df[tumorname]:
-        row_index = int(df.loc[df[tumorname] == row].index.values)
+        
         PR = int(re.split('[,:]', row)[0])
         PR_alt = int(re.split('[,:]', row)[1])
         SR = int(re.split('[,:]', row)[2])
         SR_alt = int(re.split('[,:]', row)[3])
-        df.at[row_index, tumorname + ':PR'] = PR
-        df.at[row_index, tumorname + ':PR-alt'] = PR_alt
-        df.at[row_index, tumorname + ':SR'] = SR
-        df.at[row_index, tumorname + ':SR-alt'] =  SR_alt
-        df.at[row_index, 'TOTAL alt (T)'] = PR_alt + SR_alt
-        df.at[row_index, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
+        
+        
+        if len(df.loc[df[tumorname] == row].index.values) > 1:
+            for rown in df.loc[df[tumorname] == row].index.values:
+                ind_val=int(rown)
+                df.at[ind_val, tumorname + ':PR'] = PR
+                df.at[ind_val, tumorname + ':PR-alt'] = PR_alt
+                df.at[ind_val, tumorname + ':SR'] = SR
+                df.at[ind_val, tumorname + ':SR-alt'] =  SR_alt
+                df.at[ind_val, 'TOTAL alt (N)'] = PR_alt + SR_alt
+                df.at[ind_val, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
+        else:
+            row_index = int(df.loc[df[tumorname] == row].index.values)
+            df.at[row_index, tumorname + ':PR'] = PR
+            df.at[row_index, tumorname + ':PR-alt'] = PR_alt
+            df.at[row_index, tumorname + ':SR'] = SR
+            df.at[row_index, tumorname + ':SR-alt'] =  SR_alt
+            df.at[row_index, 'TOTAL alt (T)'] = PR_alt + SR_alt
+            df.at[row_index, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
 
     df.to_excel(str(mantaSV_summary),engine='openpyxl')
