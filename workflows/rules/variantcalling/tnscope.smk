@@ -64,7 +64,9 @@ rule tnscope_vcffilter:
                         f"{params.bcftools} filter -s likely_artifact -e 'FORMAT/AF[0]<0.1 && FORMAT/AF[1]>0.06' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_uncertainaf6.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_likelyartifact7.vcf ;",
                         f"{params.bcftools} filter -s lowAD -e 'FORMAT/AD[0:1] < 3' {wildcards.workingdir}/{params.outputdir}/{vcfname}_likelyartifact7.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_lowad8.vcf ;",
                         f"{params.bcftools} filter -s MLrejected -e 'INFO/ML_PROB<0.37' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_lowad8.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf ;",
-                        f"{params.bcftools} filter -i 'FILTER=\"PASS\"' {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf > {output.somatic_n} ;",
+                        f"{params.bcftools} filter -s 'orientation_bias' -e 'FMT/FOXOG[0] == 1' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_mladjusted9.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_foxogadj.vcf ;",
+                        f"{params.bcftools} filter -s 'strand_bias' -e 'SOR > 3' -m + {wildcards.workingdir}/{params.outputdir}/{vcfname}_foxogadj.vcf", f"> {wildcards.workingdir}/{params.outputdir}/{vcfname}_strandbiasadj.vcf ;",
+                        f"{params.bcftools} filter -i 'FILTER=\"PASS\"' {wildcards.workingdir}/{params.outputdir}/{vcfname}_strandbiasadj.vcf > {output.somatic_n} ;",
                         f"{params.bcftools} view -s {tumorname} {output.somatic_n} > {output.somatic}"]
         shell_command = " ".join(shell_command)
         print(shell_command)      
