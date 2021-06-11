@@ -260,7 +260,7 @@ def analysis_main(args, runnormal, runtumor, output, normalname, normalfastqs, t
     if os.path.isfile(f"{output}/reporting/workflow_finished.txt"):
         # these functions are only executed if snakemake workflow has finished successfully
         yearly_stats(args.tumorsample, args.normalsample)
-       # petagene_compress_bam(args.outputdir, args.tumorsample)
+        petagene_compress_bam(args.outputdir, args.tumorsample)
 
 
 if __name__ == '__main__':
