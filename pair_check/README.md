@@ -1,5 +1,7 @@
 # Pair check
 
+In the pipeline, a pair check is done to make sure that tumor and normal samples come from the same patient. Script [determine_match.py](https://github.com/ClinicalGenomicsGBG/wgs_somatic/blob/master/workflows/scripts/determine_match.py) is used for this.
+
 “SNVs Only” vcf:s for tumor and normal (outputs from DNAScope) are used to determine match for pair-check. (“{workingdir}/{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf”)
  
 Tumor vcf:
