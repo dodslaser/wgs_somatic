@@ -1,5 +1,7 @@
 # Pair check
 
+## Determine match
+
 In the pipeline, a pair check is done to make sure that tumor and normal samples come from the same patient. Script [determine_match.py](https://github.com/ClinicalGenomicsGBG/wgs_somatic/blob/master/workflows/scripts/determine_match.py) is used for this.
 
 “SNVs Only” vcf:s for tumor and normal (outputs from DNAScope) are used to determine match for pair-check. (“{workingdir}/{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf”)
@@ -10,4 +12,9 @@ For each chromosome, starting from position 200k, dbsnp labeled variants are ext
 Normal vcf:
 For each chromosome, starting from position 200k, dbsnp labeled variants are extracted. 40k variants are extracted from one chromosome until it switches to the next chromosome. In total, 800k dbsnp labeled variants are added to a list.
  
-Each variant in the list of tumor variants that exists in the list of normal variants is labeled as a match and each variant that does not exist is labeled as a mismatch. If the match fraction is >=0.95, the match status between the tumor and normal samples will be “match”. If the match fraction is <0.95 but >=0.85, the match status will be “warning match lower than expected”. If the match fraction is <0.85, the match status will be “error, large mismatch”. 
+Each variant in the list of tumor variants that exists in the list of normal variants is labeled as a match and each variant that does not exist is labeled as a mismatch. If the match fraction is >=0.95, the match status between the tumor and normal samples will be “match”. If the match fraction is <0.95 but >=0.85, the match status will be “warning match lower than expected”. If the match fraction is <0.85, the match status will be “error, large mismatch”.
+
+## Validation of pair check
+
+To validate the pair check, script [determine_match.py](https://github.com/ClinicalGenomicsGBG/wgs_somatic/blob/master/workflows/scripts/determine_match.py) was run on 55 known pairs of tumor/normal (all samples available up until 2021-05-31), 55 known mismatch pairs (tumor vcf from one patient and normal vcf from another patient) and 55 pairs of family members (vcf from one family member as "tumor vcf" and vcf from another family member as "normal vcf"). See files [ws_parcheck_match.xlsx](ADD LINK TO FILE), [ws_parcheck_nonmatch.xlsx](ADD LINK TO FILE) and [ws_parcheck_family.xlsx](ADD LINK TO FILE) to see which samples have been used for the three groups and the match fraction for each pair. For family, "i" means index, "f" means father, "m" means mother and "s" means sibling. 
+ 
