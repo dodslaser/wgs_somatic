@@ -77,7 +77,7 @@ def determine_match(normalvcf, tumorvcf, numvariants):
 
     if match_fraction >= float(0.95):
         match_dict["match_status"] = "match"
-    elif match_fraction >= float(0.85):
+    elif match_fraction >= float(0.90):
         match_dict["match_status"] = "warning match lower than expected"
     else:
         match_dict["match_status"] = "error, large mismatch"
