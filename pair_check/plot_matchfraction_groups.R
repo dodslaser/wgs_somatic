@@ -30,7 +30,7 @@ match_fractions <- full_join(match_fractions, family %>% dplyr::select(`Match Fr
 
 
 
-ggplot(match_fractions, aes(`Match Fraction`, dnorm)) +
+pl_all <- ggplot(match_fractions, aes(`Match Fraction`, dnorm)) +
   geom_point(aes(color = Group)) +
   scale_x_continuous(breaks = seq(0,1,by=0.05)) + 
   ylab("Probability density") +
@@ -54,9 +54,11 @@ ggplot(match_fractions, aes(`Match Fraction`, dnorm)) +
   geom_vline(xintercept = mean(family$`Match Fraction`)-3*sd(family$`Match Fraction`), linetype="dotted", color = "red") # three sd from mean
 
 
+pdf("groups_match_fraction.pdf", width = 15, height = 7.5)
+plot(pl_all)
+dev.off()
 
-
-ggplot(match, aes(`Match Fraction`, dnorm)) +
+pl_match <- ggplot(match, aes(`Match Fraction`, dnorm)) +
   geom_point(color = "green4") +
   ylab("Probability density") +
   geom_vline(xintercept = mean(match$`Match Fraction`)+sd(match$`Match Fraction`), linetype="dotted", color = "green4") + # one sd from mean
@@ -66,8 +68,12 @@ ggplot(match, aes(`Match Fraction`, dnorm)) +
   geom_vline(xintercept = mean(match$`Match Fraction`)+3*sd(match$`Match Fraction`), linetype="dotted", color = "green4") + # three sd from mean
   geom_vline(xintercept = mean(match$`Match Fraction`)-3*sd(match$`Match Fraction`), linetype="dotted", color = "green4")  # three sd from mean
 
+pdf("match_plot.pdf", width = 15, height = 7.5)
+plot(pl_match)
+dev.off()
 
-ggplot(no_match, aes(`Match Fraction`, dnorm)) +
+
+pl_mismatch <- ggplot(no_match, aes(`Match Fraction`, dnorm)) +
   geom_point(color = "blue") +
   ylab("Probability density") +
   geom_vline(xintercept = mean(no_match$`Match Fraction`)+sd(no_match$`Match Fraction`), linetype="dotted", color = "blue") + # one sd from mean
@@ -77,8 +83,12 @@ ggplot(no_match, aes(`Match Fraction`, dnorm)) +
   geom_vline(xintercept = mean(no_match$`Match Fraction`)+3*sd(no_match$`Match Fraction`), linetype="dotted", color = "blue") + # three sd from mean
   geom_vline(xintercept = mean(no_match$`Match Fraction`)-3*sd(no_match$`Match Fraction`), linetype="dotted", color = "blue")  # three sd from mean
 
+pdf("mismatch_plot.pdf", width = 15, height = 7.5)
+plot(pl_mismatch)
+dev.off()
 
-ggplot(family, aes(`Match Fraction`, dnorm)) +
+
+pl_family <- ggplot(family, aes(`Match Fraction`, dnorm)) +
   geom_point(color = "red") +
   ylab("Probability density") +
   geom_vline(xintercept = mean(family$`Match Fraction`)+sd(family$`Match Fraction`), linetype="dotted", color = "red") + # one sd from mean
@@ -88,4 +98,9 @@ ggplot(family, aes(`Match Fraction`, dnorm)) +
   geom_vline(xintercept = mean(family$`Match Fraction`)+3*sd(family$`Match Fraction`), linetype="dotted", color = "red") + # three sd from mean
   geom_vline(xintercept = mean(family$`Match Fraction`)-3*sd(family$`Match Fraction`), linetype="dotted", color = "red")  # three sd from mean
 
+
+
+pdf("family_plot.pdf", width = 15, height = 7.5)
+plot(pl_family)
+dev.off()
 
