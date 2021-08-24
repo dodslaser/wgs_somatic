@@ -112,7 +112,7 @@ include:        "workflows/tn_workflow.smk"
 
 ########################################
 # Mapping
-include:        "workflows/rules/mapping/generate_tdf.smk"
+#include:        "workflows/rules/mapping/generate_tdf.smk"
 
 #########################################
 # VariantCalling
