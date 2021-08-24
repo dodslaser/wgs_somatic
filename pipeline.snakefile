@@ -143,6 +143,8 @@ if reference == "hg38":
     include:    "workflows/rules/variantcalling/manta_hg38.smk"
     # Coverage
     include:    "workflows/rules/qc/coverage_hg38.smk"
+    # Generate tdf
+    include:    "workflows/rules/mapping/generate_tdf_hg38.smk"
 else:
     ###########################################################
     # HG19 rules
@@ -153,6 +155,8 @@ else:
     include:        "workflows/rules/variantcalling/manta.smk"
     # Coverage
     include:        "workflows/rules/qc/coverage.smk"
+    # Generate tdf
+    include:    "workflows/rules/mapping/generate_tdf.smk"
 
 def get_igv_input(wildcards):
     if igvuser:
