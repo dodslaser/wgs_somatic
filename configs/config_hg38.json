@@ -75,7 +75,7 @@
         },
        "generate_tdf":
         {
-            "tdfgen": "/apps/bio/dependencies/wgs_somatic/IGVTools/IGV_2.10.3"
+            "tdfgen": "/seqstore/webfolders/IGVTools/igvtools.jar" 
         },
         "canvas":
         {
