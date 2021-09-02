@@ -75,7 +75,7 @@
         },
        "generate_tdf":
         {
-            "tdfgen": "/seqstore/webfolders/IGVTools/igvtools.jar"
+            "tdfgen": "/seqstore/webfolders/IGVTools/igvtools.jar" 
         },
         "canvas":
         {
