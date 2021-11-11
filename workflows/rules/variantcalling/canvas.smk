@@ -4,7 +4,7 @@ import os
 from workflows.scripts.gender import calc_gender
 from workflows.scripts.create_segfile import create_seg
 from workflows.scripts.fix_sexploidyfile import mod_sex_vcf
-
+'''
 rule filter_canvas_somatic:
     input:
         "{workingdir}/{stype}/canvas/{sname}_somatic_CNV.vcf.gz"
@@ -20,7 +20,7 @@ rule filter_canvas_somatic:
         shell("{params.annotate} -v {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf -g {params.annotate_ref} -o {wildcards.workingdir}/{wildcards.stype}/canvas/")
         os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf.xlsx", f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic.vcf.xlsx")
         os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic_noref.vcf", f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_somatic.vcf")
-
+'''
 rule filter_canvas_germline:
     input:
         "{workingdir}/{stype}/canvas/{sname}_germline_CNV.vcf.gz"
@@ -36,7 +36,7 @@ rule filter_canvas_germline:
         shell("{params.annotate} -v {wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf -g {params.annotate_ref} -o {wildcards.workingdir}/{wildcards.stype}/canvas/")
         os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf.xlsx", f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline.vcf.xlsx")
         os.rename(f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline_noref.vcf", f"{wildcards.workingdir}/{wildcards.stype}/canvas/{wildcards.sname}_CNV_germline.vcf")
-
+'''
 rule canvas_somatic:
     input:
         germline_snv_vcf = expand("{workingdir}/{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
@@ -63,7 +63,7 @@ rule canvas_somatic:
     shell:
         "echo $HOSTNAME;"
         "{params.run_py} --genomeversion {params.genomeversion} --bam {input.bamfile} --normal_vcf {input.germline_snv_vcf} --o {wildcards.workingdir}/{wildcards.stype}/canvas/ -t TN --samplename {wildcards.sname} --wgscovfile {input.normal_wgscov} --ycovfile {input.normal_ycov} --somatic_vcf {input.somatic_vcf} --referencedir {params.genomedir} --kmerfile {params.kmerfile} --canvasdll {params.dll} --filterfile {params.filter13}"
-
+''' 
 rule canvas_germline:
     input:
         germline_snv_vcf = expand("{workingdir}/{stype}/dnascope/{sname}_germline_SNVsOnly.recode.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
