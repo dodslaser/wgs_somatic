@@ -107,7 +107,7 @@ if tumorfastqdirs:
 if tumorid:
     localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
 else: 
-    localrules: all, normalonly_workflow
+    localrules: all, upload_to_iva, share_to_igv, share_to_resultdir, normalonly_workflow
 ###########################################################
 
 ########################################
@@ -136,10 +136,12 @@ if tumorid:
 #########################################
 # ResultSharing:
 include:        "workflows/rules/results_sharing/share_to_igv.smk"
+include:        "workflows/rules/results_sharing/share_to_resultdir.smk"
+include:        "workflows/rules/results_sharing/upload_to_iva.smk"
 if tumorid:
     #include:        "workflows/rules/results_sharing/share_to_igv.smk"
-    include:        "workflows/rules/results_sharing/share_to_resultdir.smk"
-    include:        "workflows/rules/results_sharing/upload_to_iva.smk"
+    #include:        "workflows/rules/results_sharing/share_to_resultdir.smk"
+    #include:        "workflows/rules/results_sharing/upload_to_iva.smk"
     include:        "workflows/rules/results_sharing/alissa_vcf.smk"
 
 
