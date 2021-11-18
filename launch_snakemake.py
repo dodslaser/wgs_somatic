@@ -170,7 +170,7 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
         if tumorname:
             tumorid = '_'.join([tumorname, date, chip])
         else:
-            tumorid = False
+            tumorid = None
 
         samplelogs = f"{output}/logs"
         if not os.path.isdir(samplelogs):
@@ -202,6 +202,7 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
         analysisdict["normalname"] = normalname 
         analysisdict["normalid"] = normalid
         analysisdict["normalfastqs"] = [normalfastqs]
+        #if tumorname:
         analysisdict["tumorname"] = tumorname
         analysisdict["tumorid"] = tumorid
         analysisdict["tumorfastqs"] = [tumorfastqs]

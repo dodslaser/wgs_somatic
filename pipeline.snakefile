@@ -107,7 +107,7 @@ if tumorfastqdirs:
 if tumorid:
     localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
 else: 
-    localrules: all, upload_to_iva, share_to_igv, share_to_resultdir, normalonly_workflow
+    localrules: all, upload_to_iva, share_to_igv, share_to_resultdir, excel_qc, normalonly_workflow
 ###########################################################
 
 ########################################
@@ -116,9 +116,6 @@ if tumorid:
     include:        "workflows/tn_workflow.smk"
 else:
     include:        "workflows/normalonly_workflow.smk"
-########################################
-# Mapping
-#include:        "workflows/rules/mapping/generate_tdf.smk"
 
 #########################################
 # VariantCalling
@@ -130,8 +127,9 @@ include:        "workflows/rules/variantcalling/canvas.smk"
 
 #########################################
 # QC
-if tumorid:
-    include:        "workflows/rules/qc/aggregate_qc.smk"
+include:        "workflows/rules/qc/aggregate_qc.smk"
+#if tumorid:
+#    include:        "workflows/rules/qc/aggregate_qc.smk"
 
 #########################################
 # ResultSharing:
