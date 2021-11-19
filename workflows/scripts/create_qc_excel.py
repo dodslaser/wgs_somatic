@@ -97,65 +97,71 @@ def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdic
     row += 1
     worksheet.write(row, 0, "TUMOR/NORMAL MATCH-CHECK", cellformat["section"])
     row += 1
-    if "ERROR" in match_dict["match_status"]:
-        worksheet.write(row, 0, "Error occurred", cellformat["error"])
-    else:
-        headerrow = row
-        statrow = row + 1
-        column_num = 0
-        for stat in match_dict:
-            worksheet.write(headerrow, column_num, stat, cellformat["header"])
-            if stat == "match_status" or stat == "match_fraction":
-                if "warning" in match_dict["match_status"]:
-                    style = "warning"
-                elif "error" in match_dict["match_status"]:
-                    style = "error"
+    if match_dict:
+        if "ERROR" in match_dict["match_status"]:
+            worksheet.write(row, 0, "Error occurred", cellformat["error"])
+        else:
+            headerrow = row
+            statrow = row + 1
+            column_num = 0
+            for stat in match_dict:
+                worksheet.write(headerrow, column_num, stat, cellformat["header"])
+                if stat == "match_status" or stat == "match_fraction":
+                    if "warning" in match_dict["match_status"]:
+                        style = "warning"
+                    elif "error" in match_dict["match_status"]:
+                        style = "error"
+                    else:
+                        style = "pass"
+                    worksheet.write(statrow, column_num, match_dict[stat], cellformat[style])
                 else:
-                    style = "pass"
-                worksheet.write(statrow, column_num, match_dict[stat], cellformat[style])
-            else:
-                worksheet.write(statrow, column_num, match_dict[stat])
+                    worksheet.write(statrow, column_num, match_dict[stat])
                 
-            column_num += 1
+                column_num += 1
     row += 4
     worksheet.write(row, 0, "CANVAS-STATS", cellformat["section"])
     worksheet.write(row, 1, tumorname, cellformat["tumorname"])
     row += 1
-    for key in canvasdict:
-        worksheet.write(row, 0, key, cellformat["header"])
-        worksheet.write(row, 1, canvasdict[key])
-        row += 1
+    if canvasdict:
+        for key in canvasdict:
+            worksheet.write(row, 0, key, cellformat["header"])
+            worksheet.write(row, 1, canvasdict[key])
+            row += 1
 
     excelfile.close()
 
-def create_excel_main(tumorcov, normalcov, tumordedup, normaldedup, tumorvcf, normalvcf, canvasvcf, output):
-    tumorcovfile = os.path.basename(tumorcov)
-    tumorname = tumorcovfile.replace("_WGScov.tsv", "")
+def create_excel_main(tumorcov='', normalcov='', tumordedup='', normaldedup='', tumorvcf='', normalvcf='', canvasvcf='', output=''):
+    if tumorcov:
+        tumorcovfile = os.path.basename(tumorcov)
+        tumorname = tumorcovfile.replace("_WGScov.tsv", "")
     normalcovfile = os.path.basename(normalcov)
     normalname = normalcovfile.replace("_WGScov.tsv", "")
     statsdict = {}
-    statsdict = extract_stats(tumorcov, "coverage",  "tumor", statsdict)
+    if tumorcov:
+        statsdict = extract_stats(tumorcov, "coverage",  "tumor", statsdict)
+        statsdict = extract_stats(tumordedup, "dedup",  "tumor", statsdict)
+        canvas_dict = get_canvas_tumorinfo(canvasvcf)
+        match_dict = determine_match(normalvcf, tumorvcf, 400000)
     statsdict = extract_stats(normalcov, "coverage", "normal", statsdict)
-    statsdict = extract_stats(tumordedup, "dedup",  "tumor", statsdict)
     statsdict = extract_stats(normaldedup, "dedup", "normal", statsdict)
-    canvas_dict = get_canvas_tumorinfo(canvasvcf)
-    match_dict = determine_match(normalvcf, tumorvcf, 400000)
 
     if not output.endswith(".xlsx"):
         output = f"{output}.xlsx"
 
-    create_excel(statsdict, output, normalname, tumorname, match_dict, canvas_dict)
-
+    if tumorcov:
+        create_excel(statsdict, output, normalname, tumorname, match_dict, canvas_dict)
+    else:
+        create_excel(statsdict, output, normalname, tumorname='', match_dict='', canvasdict='')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-tc', '--tumorcov', nargs='?', help='Sentieon WGS cov file from tumorbam', required=True)
+    parser.add_argument('-tc', '--tumorcov', nargs='?', help='Sentieon WGS cov file from tumorbam', required=False)
     parser.add_argument('-nc', '--normalcov', nargs='?', help='Sentieon WGS cov file from normalbam', required=True)
-    parser.add_argument('-td', '--tumordedup', nargs='?', help='Sentieon dedup-stats for tumorbam', required=True)
+    parser.add_argument('-td', '--tumordedup', nargs='?', help='Sentieon dedup-stats for tumorbam', required=False)
     parser.add_argument('-nd', '--normaldedup', nargs='?', help='Sentieon dedup-stats for normalbam', required=True)
-    parser.add_argument('-tv', '--tumorvcf', nargs='?', help='Tumor Germlinecalls', required=True)
+    parser.add_argument('-tv', '--tumorvcf', nargs='?', help='Tumor Germlinecalls', required=False)
     parser.add_argument('-nv', '--normalvcf', nargs='?', help='Normal Germlinecalls', required=True)
-    parser.add_argument('-cv', '--canvasvcf', nargs='?', help='Somatic Canvas VCF', required=True)
+    parser.add_argument('-cv', '--canvasvcf', nargs='?', help='Somatic Canvas VCF', required=False)
     parser.add_argument('-o', '--output', nargs='?', help='fullpath to file to be created (xlsx will be appended if not written)', required=True)
     args = parser.parse_args()
     create_excel_main(args.tumorcov, args.normalcov, args.tumordedup, args.normaldedup, args.tumorvcf, args.normalvcf, args.canvasvcf, args.output)

@@ -11,8 +11,8 @@ rule normalonly_workflow:
         expand("{workingdir}/{stype}/canvas/{sname}_{vartype}_CNV_observed.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
         expand("{workingdir}/{stype}/canvas/{sname}_{vartype}_CNV_called.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
         expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir,  sname=normalid, stype=sampleconfig[normalname]["stype"]),
-        expand("{workingdir}/{stype}/dnascope/{sname}_germline_refseq3kfilt.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])#,
-        #"{workingdir}/reporting/shared_result_files.txt"
+        expand("{workingdir}/{stype}/dnascope/{sname}_germline_refseq3kfilt.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+        "{workingdir}/reporting/shared_result_files.txt"
     output:
         "{workingdir}/reporting/workflow_finished.txt"
     run:
