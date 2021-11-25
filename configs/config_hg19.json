@@ -124,6 +124,10 @@
             "clcref": "clc://server/CLC_References/homo_sapiens/sequence/hg19/Homo_sapiens_sequence_hg19",
             "clcivadir": "clc://server/CLC_Data_Folders/Admin/Mathias/Trashcan/IVA_waitingroom",
             "clcivadir_servpath": "/medstore/CLC_Data_Folders/Admin/Mathias/Trashcan/IVA_waitingroom"
+        },
+        "convert_to_alissaformat":
+        {
+            "converter": "/apps/bio/repos/wgs_somatic/workflows/scripts/canvas_to_interpreter/canvasvcf_to_interpreter.py",
         }
     }
 }
