@@ -92,3 +92,15 @@ rule canvas_germline:
     shell:
         "echo $HOSTNAME;"
         "{params.run_py} --genomeversion {params.genomeversion} --bam {input.bamfile} --normal_vcf {input.germline_snv_vcf} --o {wildcards.workingdir}/{wildcards.stype}/canvas/ -t germline --samplename {wildcards.sname} --wgscovfile {input.normal_wgscov} --ycovfile {input.normal_ycov} --referencedir {params.genomedir} --kmerfile {params.kmerfile} --canvasdll {params.dll} --filterfile {params.filter13}"
+
+
+rule convert_to_alissaformat:
+    input:
+        germline_cnv_vcf = expand("{workingdir}/{stype}/canvas/{sname}_CNV_germline.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
+    params:
+        converter = pipeconfig["rules"]["convert_to_alissaformat"]["converter"]
+        referencegenome = pipeconfig["referencegenome"]
+    output:
+        "{workingdir}/{stype}/canvas/{sname}_CNV_germline_alissaformat.vcf"
+    run:
+        shell(f"{params.python} {params.converter} -l -q {input} {output} {referencegenome}")
