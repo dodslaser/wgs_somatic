@@ -115,7 +115,7 @@
         },
         "convert_to_alissaformat":
         {
-            "converter": "/apps/bio/repos/wgs_somatic/workflows/scripts/canvas_to_interpreter/canvasvcf_to_interpreter.py",
+            "converter": "/apps/bio/repos/wgs_somatic/workflows/scripts/canvas_to_interpreter/canvasvcf_to_interpreter.py"
         }
     }
 }
