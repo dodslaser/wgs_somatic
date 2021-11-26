@@ -115,7 +115,8 @@
         },
         "convert_to_alissaformat":
         {
-            "converter": "/apps/bio/repos/wgs_somatic/workflows/scripts/canvas_to_interpreter/canvasvcf_to_interpreter.py"
+            "python": "/apps/bio/software/anaconda2/envs/sentieon_py/bin/python",
+            "converter": "workflows/scripts/canvas_to_interpreter/canvasvcf_to_interpreter.py"
         }
     }
 }

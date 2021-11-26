@@ -98,9 +98,10 @@ rule convert_to_alissaformat:
     input:
         germline_cnv_vcf = expand("{workingdir}/{stype}/canvas/{sname}_CNV_germline.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
     params:
+        python = pipeconfig["rules"]["convert_to_alissaformat"]["python"],
         converter = pipeconfig["rules"]["convert_to_alissaformat"]["converter"],
         referencegenome = pipeconfig["referencegenome"]
     output:
         "{workingdir}/{stype}/canvas/{sname}_CNV_germline_alissaformat.vcf"
     run:
-        shell(f"{params.python} {params.converter} -l -q {input} {output} {referencegenome}")
+        shell(f"{params.python} {params.converter} -l -q {input} {output} {params.referencegenome}")
