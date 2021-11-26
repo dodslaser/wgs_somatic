@@ -105,3 +105,26 @@ rule convert_to_alissaformat:
         "{workingdir}/{stype}/canvas/{sname}_CNV_germline_alissaformat.vcf"
     run:
         shell(f"{params.python} {params.converter} -l -q {input} {output} {params.referencegenome}")
+
+
+rule merge_snvs_cnvs:
+    input:
+        snvs = expand("{workingdir}/{stype}/dnascope/{sname}_germline_refseq3kfilt.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]), 
+        cnvs = expand("{workingdir}/{stype}/canvas/{sname}_CNV_germline_alissaformat.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
+    params:
+        bgzip = pipeconfig["rules"]["merge_snvs_cnvs"]["bgzip"],
+        bcftools = pipeconfig["rules"]["merge_snvs_cnvs"]["bcftools"]
+    output:
+        "{workingdir}/{stype}/dnascope/{sname}_SNV_CNV_germline.vcf.gz"
+    run:
+        # bgzip CNVcalls
+        if not os.path.isfile(f"{input.cnvs}.gz"):
+            shell(f"{params.bgzip} --stdout {input.cnvs} > {input.cnvs}.gz")
+        # bgzip SNVcalls
+        if not os.path.isfile(f"{input.snvs}.gz"):
+            shell(f"{params.bgzip} --stdout {input.snvs} > {input.snvs}.gz")
+        # index 
+        shell(f"{params.bcftools} index -f {input.snvs}.gz")
+        shell(f"{params.bcftools} index -f {input.cnvs}.gz")
+        # merge calls
+        shell(f"{params.bcftools} concat --allow-overlaps {input.snvs}.gz {input.cnvs}.gz -Oz -o {output}")
