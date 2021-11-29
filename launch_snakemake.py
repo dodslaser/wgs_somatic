@@ -273,12 +273,13 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
         logger(f"Error in script:")
         logger(f"{e} Traceback: {tb}")
         sys.exit(1)
-    if tumorname:
-        if os.path.isfile(f"{output}/reporting/workflow_finished.txt"):
+    if os.path.isfile(f"{output}/reporting/workflow_finished.txt"):
+        if tumorname:
             # these functions are only executed if snakemake workflow has finished successfully
             yearly_stats(args.tumorsample, args.normalsample)
             petagene_compress_bam(args.outputdir, args.tumorsample)
-
+        else:
+            yearly_stats(tumorname = 'None', normalname = args.normalsample)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
