@@ -109,13 +109,13 @@ rule convert_to_alissaformat:
 
 rule merge_snvs_cnvs:
     input:
-        snvs = expand("{workingdir}/{stype}/dnascope/{sname}_germline_refseq3kfilt.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]), 
-        cnvs = expand("{workingdir}/{stype}/canvas/{sname}_CNV_germline_alissaformat.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
+        snvs = expand("{workingdir}/{stype}/dnascope/{sname}_germline_refseq3kfilt.vcf", workingdir=workingdir, stype=sampleconfig[normalname]["stype"], sname=normalid, hgX=reference), 
+        cnvs = expand("{workingdir}/{stype}/canvas/{sname}_CNV_germline_alissaformat.vcf", workingdir=workingdir, stype=sampleconfig[normalname]["stype"], sname=normalid, hgX=reference)
     params:
         bgzip = pipeconfig["rules"]["merge_snvs_cnvs"]["bgzip"],
         bcftools = pipeconfig["rules"]["merge_snvs_cnvs"]["bcftools"]
     output:
-        "{workingdir}/{stype}/dnascope/{sname}_SNV_CNV_germline.vcf.gz"
+        "{workingdir}/{stype}/dnascope/{sname}_{hgX}_SNV_CNV_germline.vcf.gz"
     run:
         # bgzip CNVcalls
         if not os.path.isfile(f"{input.cnvs}.gz"):
