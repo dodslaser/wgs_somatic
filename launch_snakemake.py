@@ -280,6 +280,7 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
             petagene_compress_bam(args.outputdir, args.tumorsample)
         else:
             yearly_stats(tumorname = 'None', normalname = args.normalsample)
+            petagene_compress_bam(args.outputdir, tumorname = args.normalsample)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
