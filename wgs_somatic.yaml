@@ -156,6 +156,7 @@ dependencies:
     - biopython==1.77
     - click==7.1.2
     - cutadapt==2.10
+    - dnaio==0.4.4
     - pysam==0.15.4
     - pyvcf==0.6.8
     - sample-sheet==0.12.0
@@ -164,5 +165,6 @@ dependencies:
     - terminaltables==3.1.0
     - vcfpy==0.13.0
     - xlsxwriter==1.2.8
+    - xopen==0.8.4
 prefix: /apps/bio/software/anaconda2/envs/wgs_somatic
 

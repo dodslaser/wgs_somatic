@@ -83,40 +83,44 @@ for normalfastqdir in normalfastqdirs:
                 fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = normal_rev_fastq
 
 # Prepare Tumor Fastq Variables
-for tumorfastqdir in tumorfastqdirs:
-    for fwdpattern in fwdpatterns:
-        tumor_fwd_fastqs = glob.glob(f"{tumorfastqdir}/*{fwdpattern}")
-        if tumor_fwd_fastqs:
-            for tumor_fwd_fastq in tumor_fwd_fastqs:
-                fastqpair_pattern = os.path.basename(tumor_fwd_fastq).replace(fwdpattern, "")
-                fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern] = {}
-                fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = tumor_fwd_fastq
-    for revpattern in revpatterns:
-        tumor_rev_fastqs = glob.glob(f"{tumorfastqdir}/*{revpattern}")
-        if tumor_rev_fastqs:
-            for tumor_rev_fastq in tumor_rev_fastqs:
-                fastqpair_pattern = os.path.basename(tumor_rev_fastq).replace(revpattern, "")
-                fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = tumor_rev_fastq 
+if tumorfastqdirs:
+    for tumorfastqdir in tumorfastqdirs:
+        for fwdpattern in fwdpatterns:
+            tumor_fwd_fastqs = glob.glob(f"{tumorfastqdir}/*{fwdpattern}")
+            if tumor_fwd_fastqs:
+                for tumor_fwd_fastq in tumor_fwd_fastqs:
+                    fastqpair_pattern = os.path.basename(tumor_fwd_fastq).replace(fwdpattern, "")
+                    fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern] = {}
+                    fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = tumor_fwd_fastq
+        for revpattern in revpatterns:
+            tumor_rev_fastqs = glob.glob(f"{tumorfastqdir}/*{revpattern}")
+            if tumor_rev_fastqs:
+                for tumor_rev_fastq in tumor_rev_fastqs:
+                    fastqpair_pattern = os.path.basename(tumor_rev_fastq).replace(revpattern, "")
+                    fastq_dict["tumor"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = tumor_rev_fastq 
 
 #wildcard_constraints:
 #    sname="[^_]*_[^_]*_[^_]*"
 
 ###########################################################
 # Defining Non Cluster Rules
-localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
+if tumorid:
+    localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
+else: 
+    localrules: all, upload_to_iva, share_to_igv, share_to_resultdir, excel_qc, normalonly_workflow
 ###########################################################
 
 ########################################
 # Workflows
-include:        "workflows/tn_workflow.smk"
-
-########################################
-# Mapping
-#include:        "workflows/rules/mapping/generate_tdf.smk"
+if tumorid:
+    include:        "workflows/tn_workflow.smk"
+else:
+    include:        "workflows/normalonly_workflow.smk"
 
 #########################################
 # VariantCalling
-include:        "workflows/rules/variantcalling/tnscope.smk"
+if tumorid:
+    include:        "workflows/rules/variantcalling/tnscope.smk"
 include:        "workflows/rules/variantcalling/dnascope.smk"
 include:        "workflows/rules/small_tools/ballele.smk"
 include:        "workflows/rules/variantcalling/canvas.smk"
@@ -124,13 +128,19 @@ include:        "workflows/rules/variantcalling/canvas.smk"
 #########################################
 # QC
 include:        "workflows/rules/qc/aggregate_qc.smk"
+#if tumorid:
+#    include:        "workflows/rules/qc/aggregate_qc.smk"
 
 #########################################
 # ResultSharing:
 include:        "workflows/rules/results_sharing/share_to_igv.smk"
 include:        "workflows/rules/results_sharing/share_to_resultdir.smk"
 include:        "workflows/rules/results_sharing/upload_to_iva.smk"
-include:        "workflows/rules/results_sharing/alissa_vcf.smk"
+if tumorid:
+    #include:        "workflows/rules/results_sharing/share_to_igv.smk"
+    #include:        "workflows/rules/results_sharing/share_to_resultdir.smk"
+    #include:        "workflows/rules/results_sharing/upload_to_iva.smk"
+    include:        "workflows/rules/results_sharing/alissa_vcf.smk"
 
 
 if reference == "hg38":
@@ -179,8 +189,9 @@ def upload_somatic_iva(wildcards):
     return []
 
 def alissa_vcf_conversion(wildcards):
-    return expand("{workingdir}/{sname}_somatic_refseq3kfilt_Alissa.vcf", workingdir=workingdir, sname=tumorid)
-
+    if tumorid:
+        return expand("{workingdir}/{sname}_somatic_refseq3kfilt_Alissa.vcf", workingdir=workingdir, sname=tumorid)
+    return []
 rule all:
     input: 
         get_igv_input,

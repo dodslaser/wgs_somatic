@@ -67,6 +67,10 @@ $ ./launch_snakemake.py \
 
 For hg38ref, write 'yes' if you want this option. If you want to use hg19, simply don't use hg38ref argument.
 
+
+If you want to run pipeline for normal only (run only germline steps of pipeline), simply don't use arguments runtumor, tumorsample and tumorfastqs.
+
+
  Runnormal and runtumor is only used to create a unique samplename based on the sequencing run the data comes from. Could probably be done in a better way.
 
 
