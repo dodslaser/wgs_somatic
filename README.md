@@ -25,7 +25,7 @@ WOPR - junior
 
 2. Install submodules
 
-`$ git submodule update --init --recursive`
+`$ git submodule update --init --recursive --remote`
 
 Submodules used are annotate\_manta\_canvas, b\_allele\_igv\_plot, canvas\_to\_interpreter and alissa\_connector\_upload. They can all be foundat [CGG](https://github.com/ClinicalGenomicsGBG).
 
