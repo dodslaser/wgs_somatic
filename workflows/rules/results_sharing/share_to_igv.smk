@@ -23,17 +23,26 @@ if tumorid:
             expand("{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
         params:
             updateigv = pipeconfig["rules"]["share_to_igv"]["updateigv"],
-            igvdatadir = pipeconfig["rules"]["share_to_igv"]["igvdatadir"]
+            igvdatadir = pipeconfig["rules"]["share_to_igv"]["igvdatadir"],
+            bgzip = pipeconfig["rules"]["share_to_igv"]["bgzip"],
+            bcftools = pipeconfig["rules"]["share_to_igv"]["bcftools"]
         output:
             "{workingdir}/reporting/shared_igv_files.txt" 
         run:
             igvsharedir = f"{params.igvdatadir}/{igvuser}/"
             for sharefile in input:
                 print(sharefile)
+                if sharefile.endswith(".vcf"):
+                    if not os.path.isfile(f"{sharefile}.gz"):
+                        shell(f"{params.bgzip} {sharefile}")
+                        shell(f"{params.bcftools} index -f {sharefile}.gz")
+                        sharefile = f"{sharefile}.gz"
                 link_sharefile = os.path.abspath(sharefile)
                 shell("ln -sf {link_sharefile} {igvsharedir}")
                 if sharefile.endswith("REALIGNED.bam"):
                     shell("ln -sf {link_sharefile}.bai {igvsharedir}")
+                if sharefile.endswith(".vcf.gz"):
+                    shell("ln -sf {link_sharefile}.csi {igvsharedir}")
             shell("{params.updateigv}")
             shell("echo {input} >> {output}")
 
@@ -51,16 +60,25 @@ else:
             expand("{workingdir}/{stype}/reports/{sname}_baf.igv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
         params:
             updateigv = pipeconfig["rules"]["share_to_igv"]["updateigv"],
-            igvdatadir = pipeconfig["rules"]["share_to_igv"]["igvdatadir"]
+            igvdatadir = pipeconfig["rules"]["share_to_igv"]["igvdatadir"],
+            bgzip = pipeconfig["rules"]["share_to_igv"]["bgzip"],
+            bcftools = pipeconfig["rules"]["share_to_igv"]["bcftools"]
         output:
             "{workingdir}/reporting/shared_igv_files.txt"
         run:
             igvsharedir = f"{params.igvdatadir}/{igvuser}/"
             for sharefile in input:
                 print(sharefile)
+                if sharefile.endswith(".vcf"):
+                    if not os.path.isfile(f"{sharefile}.gz"):
+                        shell(f"{params.bgzip} {sharefile}")
+                        shell(f"{params.bcftools} index -f {sharefile}.gz")
+                        sharefile = f"{sharefile}.gz"
                 link_sharefile = os.path.abspath(sharefile)
                 shell("ln -sf {link_sharefile} {igvsharedir}")
                 if sharefile.endswith("REALIGNED.bam"):
                     shell("ln -sf {link_sharefile}.bai {igvsharedir}")
+                if sharefile.endswith(".vcf.gz"):
+                    shell("ln -sf {link_sharefile}.csi {igvsharedir}")
             shell("{params.updateigv}")
             shell("echo {input} >> {output}")
