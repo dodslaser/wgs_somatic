@@ -34,7 +34,7 @@ if tumorid:
                 print(sharefile)
                 if sharefile.endswith(".vcf"):
                     if not os.path.isfile(f"{sharefile}.gz"):
-                        shell(f"{params.bgzip} {sharefile}")
+                        shell(f"{params.bgzip} --stdout {sharefile} > {sharefile}.gz")
                     shell(f"{params.bcftools} index -f {sharefile}.gz")
                     sharefile = os.path.abspath(f"{sharefile}.gz")
                 link_sharefile = os.path.abspath(sharefile)
@@ -71,7 +71,7 @@ else:
                 print(sharefile)
                 if sharefile.endswith(".vcf"):
                     if not os.path.isfile(f"{sharefile}.gz"):
-                        shell(f"{params.bgzip} {sharefile}")
+                        shell(f"{params.bgzip} --stdout {sharefile} > {sharefile}.gz")
                     shell(f"{params.bcftools} index -f {sharefile}.gz")
                     sharefile = os.path.abspath(f"{sharefile}.gz")
                 link_sharefile = os.path.abspath(sharefile)
