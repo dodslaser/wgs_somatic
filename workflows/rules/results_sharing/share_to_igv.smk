@@ -35,8 +35,8 @@ if tumorid:
                 if sharefile.endswith(".vcf"):
                     if not os.path.isfile(f"{sharefile}.gz"):
                         shell(f"{params.bgzip} {sharefile}")
-                        shell(f"{params.bcftools} index -f {sharefile}.gz")
-                        sharefile = f"{sharefile}.gz"
+                    shell(f"{params.bcftools} index -f {sharefile}.gz")
+                    sharefile = os.path.abspath(f"{sharefile}.gz")
                 link_sharefile = os.path.abspath(sharefile)
                 shell("ln -sf {link_sharefile} {igvsharedir}")
                 if sharefile.endswith("REALIGNED.bam"):
@@ -72,8 +72,8 @@ else:
                 if sharefile.endswith(".vcf"):
                     if not os.path.isfile(f"{sharefile}.gz"):
                         shell(f"{params.bgzip} {sharefile}")
-                        shell(f"{params.bcftools} index -f {sharefile}.gz")
-                        sharefile = f"{sharefile}.gz"
+                    shell(f"{params.bcftools} index -f {sharefile}.gz")
+                    sharefile = os.path.abspath(f"{sharefile}.gz")
                 link_sharefile = os.path.abspath(sharefile)
                 shell("ln -sf {link_sharefile} {igvsharedir}")
                 if sharefile.endswith("REALIGNED.bam"):
