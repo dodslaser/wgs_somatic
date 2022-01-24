@@ -6,9 +6,16 @@ import os
 import re
 import glob
 import yaml
+from datetime import datetime
 
-from definitions import CONFIG_PATH, ROOT_DIR
+from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext
+from helpers import setup_logger
+
+
+logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
+#logger.info(f'hej')
+
 
 def look_for_runs(root_path):
     found_paths = glob.glob(os.path.join(root_path, '*'))
@@ -51,6 +58,15 @@ def wrapper():
         # Check if run has been previously analysed
         if Rctx.run_name in previous_runs:
             continue
+
+        # Register start time
+        start_time = datetime.now()
+        logger.info(f'Started {Rctx.run_name} at {start_time}')
+
+        # Write run name to previously analysed list to ensure no double-running
+        with open(previous_runs_file_path, 'a') as prev:
+            logger.info(f'Writing {Rctx.run_name} to previous runs list.')
+            print(Rctx.run_name, file=prev)
 
 
 if __name__ == '__main__':
