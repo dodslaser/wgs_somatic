@@ -1,6 +1,7 @@
 #!/apps/bio/software/anaconda2/envs/wgs_somatic/bin/python
 import yaml
 import json
+import logging
 
 def read_config(configpath):
     with open(configpath, 'r') as configfile:
@@ -21,3 +22,21 @@ def read_passconfig():
     with open("/root/password_config.json", 'r') as configfile:
         config_data = json.load(configfile)
         return config_data
+
+def setup_logger(name, log_path=None):
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+
+    stream_handle = logging.StreamHandler()
+    stream_handle.setLevel(logging.DEBUG)
+    stream_handle.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s'))
+    logger.addHandler(stream_handle)
+
+    if log_path:
+        file_handle = logging.FileHandler(log_path, 'a')
+        file_handle.setLevel(logging.DEBUG)
+        file_handle.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s'))
+        logger.addHandler(file_handle)
+
+    return logger
+
