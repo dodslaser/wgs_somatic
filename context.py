@@ -8,3 +8,19 @@ class RunContext:
         self.run_flowcell = self.run_name.split('_')[-1]
         self.run_tag = '_'.join([self.run_date, self.run_flowcell])
         #self.samplesheet_path = os.path.join(run_path, 'SampleSheet.csv')
+        self.demultiplex_summary_path = os.path.join(run_path, 'demuxer.json')
+
+    @property
+    def demultiplex_complete(self):
+        return os.path.exists(self.demultiplex_summary_path)
+
+#    def add_sample_context(self, Sctx):
+#        self.sample_contexts.append(Sctx)
+#
+#    def remove_sample_context(self, sample_id):
+#        for i, Sctx in self.sample_contexts:
+#            if Sctx.sample_id == sample_id:
+#                break
+#        else:
+#            return
+#        self.sample_contexts.pop(i)
