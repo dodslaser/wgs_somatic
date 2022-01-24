@@ -7,9 +7,10 @@ import re
 import glob
 import yaml
 from datetime import datetime
+import json
 
 from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
-from context import RunContext
+from context import RunContext, SampleContext
 from helpers import setup_logger
 
 
@@ -67,6 +68,20 @@ def wrapper():
         with open(previous_runs_file_path, 'a') as prev:
             logger.info(f'Writing {Rctx.run_name} to previous runs list.')
             print(Rctx.run_name, file=prev)
+
+        # Read demultiplex stats file for sample names, fastq paths, and nr reads
+        with open(Rctx.demultiplex_summary_path, 'r') as inp:
+            demuxer_info = json.load(inp)
+
+        for sample_id, sample_info in demuxer_info['samples'].items():
+            logger.info(f'Setting up context for {sample_id}.')
+            #print(sample_id, sample_info)
+
+            # Setup Sample context class and add listed fastq paths and nr reads
+            Sctx = SampleContext(sample_id)
+            Sctx.add_fastq(sample_info['fastq_paths'])
+            #print(Sctx.fastqs)
+
 
 
 if __name__ == '__main__':
