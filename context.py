@@ -24,3 +24,15 @@ class RunContext:
 #        else:
 #            return
 #        self.sample_contexts.pop(i)
+
+
+
+class SampleContext:
+    def __init__(self, sample_id):
+        self.sample_id = sample_id
+        self.sample_name = self.sample_id.split('_')[0]
+        self.fastqs = []
+
+    def add_fastq(self, paths):
+        """Add fastq paths."""
+        self.fastqs.append({'fastq_paths': paths})
