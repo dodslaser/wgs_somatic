@@ -12,7 +12,7 @@ import json
 from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
 from helpers import setup_logger
-
+from Slims.slims import get_sample_slims_info, SlimsSample
 
 logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
 #logger.info(f'hej')
@@ -37,7 +37,7 @@ def wrapper():
     # Grab all available local run paths
     instrument_root_path = config['novaseq']['demultiplex_path']
     local_run_paths = look_for_runs(instrument_root_path)
-    #print(local_run_paths)
+    print(local_run_paths)
 
     # Read all previously analysed runs
     previous_runs_file = config['previous_runs_file_path']
@@ -51,7 +51,7 @@ def wrapper():
     # Loop through each run path and setup Run context class
     for run_path in local_run_paths:
         Rctx = RunContext(run_path)
-        #print(Rctx.run_path, Rctx.run_name, Rctx.run_date, Rctx.run_flowcell, Rctx.run_tag)
+        print(Rctx.run_path, Rctx.run_name, Rctx.run_date, Rctx.run_flowcell, Rctx.run_tag)
         # Check if demultiplexing is completed
         if not Rctx.demultiplex_complete:
             continue
@@ -82,6 +82,16 @@ def wrapper():
             Sctx.add_fastq(sample_info['fastq_paths'])
             #print(Sctx.fastqs)
 
+            # Query Slims for clinical information and add to sample context
+            logger.info(f'Fetching SLIMS info.')
+            get_sample_slims_info(Sctx)  # NOTE: Mod with slims info in-place
+
+            if not Sctx.slims_info:
+                logger.warning(f'No SLIMS info available!')
+                logger.warning(f'Sample will not be analysed.')
+                #sample_status['missing_slims'].append(Sctx)
+                continue
+            print(Sctx.slims_info)
 
 
 if __name__ == '__main__':

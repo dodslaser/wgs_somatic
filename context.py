@@ -31,6 +31,7 @@ class SampleContext:
     def __init__(self, sample_id):
         self.sample_id = sample_id
         self.sample_name = self.sample_id.split('_')[0]
+        self.slims_info = {}
         self.fastqs = []
 
     def add_fastq(self, paths):
