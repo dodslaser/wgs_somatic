@@ -134,6 +134,9 @@ def translate_slims_info(record):
     trio_id = record.cntn_cstm_trioID.value
     trio_role = record.cntn_cstm_trioRole.value
 
+    tumorNormalType = record.cntn_cstm_tumorNormalType.value
+    tumorNormalID = record.cntn_cstm_tumorNormalID.value
+
     tertiary_analysis = record.cntn_cstm_tertiaryAnalysis.value
 
     master = {
@@ -149,6 +152,8 @@ def translate_slims_info(record):
         'is_trio': is_trio,
         'trio_id': trio_id,
         'trio_role': trio_role,
+        'tumorNormalType': tumorNormalType,
+        'tumorNormalID': tumorNormalID,
         'secondary_analysis': pipeline_pks,
         'tertiary_analysis': tertiary_analysis
     }
