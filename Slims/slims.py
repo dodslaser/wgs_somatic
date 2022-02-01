@@ -2,7 +2,7 @@ import os
 import re
 
 from slims.slims import Slims
-from slims.criteria import is_one_of, equals, conjunction
+from slims.criteria import is_one_of, equals, conjunction, not_equals
 from slims.content import Status
 
 
@@ -62,6 +62,7 @@ class SlimsSample:
                 raise Exception('More than 1 DNA somehow.')
 
             if records:
+                #print(records)
                 self._dna = records[0]
 
         return self._dna
@@ -70,18 +71,27 @@ class SlimsSample:
     def fastq(self):
         if not self.run_tag:
             raise Exception('Can not fetch fastq without a set run tag.')
-
+        print(self.run_tag)
+        print(self.sample_name)
         if not self._fastq:
             records = slims.fetch('Content', conjunction()
                                   .add(equals('cntn_id', self.sample_name))
                                   .add(equals('cntn_fk_contentType', 22))
                                   .add(equals('cntn_cstm_runTag', self.run_tag)))
-
+            print(records) 
             if len(records) > 1:
                 raise Exception('More than 1 fastq somehow.')
 
             if records:
                 self._fastq = records[0]
+
+
+        # if sample_name has fastqs from additional sequencing runs - fetch those fastq objects
+        more_fastqs = slims.fetch('Content', conjunction()
+                                  .add(equals('cntn_id', self.sample_name))
+                                  .add(equals('cntn_fk_contentType', 22))
+                                  .add(not_equals('cntn_cstm_runTag', self.run_tag)))
+        print(more_fastqs)
 
         return self._fastq
 
@@ -160,13 +170,14 @@ def translate_slims_info(record):
     return master
 
 
-def get_sample_slims_info(Sctx):
+def get_sample_slims_info(Sctx, run_tag):
     """Query the slims API for relevant metadata given sample_name in samplesheet."""
-    SSample = SlimsSample(Sctx.sample_name)
+    SSample = SlimsSample(Sctx.sample_name, run_tag)
 
     if not SSample.dna:
         Sctx.slims_info = {}
         return
-
+#    print(SSample.dna)
+    print(SSample.fastq)
     Sctx.slims_info = translate_slims_info(SSample.dna)
     return
