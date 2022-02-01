@@ -37,7 +37,7 @@ def wrapper():
     # Grab all available local run paths
     instrument_root_path = config['novaseq']['demultiplex_path']
     local_run_paths = look_for_runs(instrument_root_path)
-    print(local_run_paths)
+    #print(local_run_paths)
 
     # Read all previously analysed runs
     previous_runs_file = config['previous_runs_file_path']
@@ -51,7 +51,7 @@ def wrapper():
     # Loop through each run path and setup Run context class
     for run_path in local_run_paths:
         Rctx = RunContext(run_path)
-        print(Rctx.run_path, Rctx.run_name, Rctx.run_date, Rctx.run_flowcell, Rctx.run_tag)
+        #print(Rctx.run_path, Rctx.run_name, Rctx.run_date, Rctx.run_flowcell, Rctx.run_tag)
         # Check if demultiplexing is completed
         if not Rctx.demultiplex_complete:
             continue
@@ -73,6 +73,11 @@ def wrapper():
         with open(Rctx.demultiplex_summary_path, 'r') as inp:
             demuxer_info = json.load(inp)
 
+        # Store info about samples to use for sending report emails
+        sample_status = {'missing_slims': [],
+                         'unset_WS': [],
+                         'approved': []}
+
         for sample_id, sample_info in demuxer_info['samples'].items():
             logger.info(f'Setting up context for {sample_id}.')
             #print(sample_id, sample_info)
@@ -84,15 +89,21 @@ def wrapper():
 
             # Query Slims for clinical information and add to sample context
             logger.info(f'Fetching SLIMS info.')
-            get_sample_slims_info(Sctx)  # NOTE: Mod with slims info in-place
+            get_sample_slims_info(Sctx, run_tag = Rctx.run_tag)  # NOTE: Mod with slims info in-place
 
             if not Sctx.slims_info:
                 logger.warning(f'No SLIMS info available!')
                 logger.warning(f'Sample will not be analysed.')
-                #sample_status['missing_slims'].append(Sctx)
+                sample_status['missing_slims'].append(Sctx)
                 continue
             print(Sctx.slims_info)
 
+            # NOTE: 54 is Slims internal primary key for wgs_somatic
+            if 54 not in Sctx.slims_info['secondary_analysis']:
+                sample_status['unset_WS'].append(Sctx)
+                continue
+
+#    print(sample_status)
 
 if __name__ == '__main__':
     try:
