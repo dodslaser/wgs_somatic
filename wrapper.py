@@ -12,7 +12,7 @@ import json
 from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
 from helpers import setup_logger
-from Slims.slims import get_sample_slims_info, SlimsSample
+from tools.slims import get_sample_slims_info, SlimsSample
 
 logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
 
