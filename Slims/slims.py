@@ -20,27 +20,6 @@ password = slims.password
 slims = Slims(instance, url, user, password)
 
 
-#class SlimsSequencing:
-#    def __init__(self, run_name, run_tag):
-#        self.run_name = run_name
-#        self.run_tag = run_tag
-#        self._sequencing = None
-#
-#    @property
-#    def sequencing(self):
-#        if not self._sequencing:
-#            records = slims.fetch('Content', conjunction()
-#                                  .add(equals('cntn_id', self.run_name))
-#                                  .add(equals('cntn_fk_contentType', 50))
-#                                  .add(equals('cntn_cstm_runTag', self.run_tag)))
-#
-#            if len(records) > 1:
-#                raise Exception('More than 1 sequencing somehow.')
-#
-#            if records:
-#                self._sequencing = records[0]
-#
-#        return self._sequencing
 
 class SlimsSample:
     def __init__(self, sample_name, run_tag=''):
@@ -91,29 +70,33 @@ class SlimsSample:
                                   .add(equals('cntn_id', self.sample_name))
                                   .add(equals('cntn_fk_contentType', 22))
                                   .add(not_equals('cntn_cstm_runTag', self.run_tag)))
+        # can find the run tags of fastqs from additional runs. can use this to find the fastqs in demultiplexdir or download them from hcp. need to cat fastqs from different runs before starting pipeline. or maybe it works without merging the fastqs first, need to check this...
         print(more_fastqs)
+        for fq in more_fastqs:
+            print(fq.cntn_cstm_runTag.value)
 
         return self._fastq
 
 
-    @property
-    def bioinformatics(self):
-        if not self.run_tag:
-            raise Exception('Can not fetch fastq without a set run tag.')
-
-        if not self._bioinformatics:
-            records = slims.fetch('Content', conjunction()
-                                  .add(equals('cntn_id', self.sample_name))
-                                  .add(equals('cntn_fk_contentType', 23))
-                                  .add(equals('cntn_cstm_runTag', self.run_tag)))
-
-            if len(records) > 1:
-                raise Exception('More than 1 bioinformatics somehow.')
-
-            if records:
-                self._bioinformatics = records[0]
-
-        return self._bioinformatics
+# Haven't used the bioinformatics property for anything yet. Might not need it. 
+#    @property
+#    def bioinformatics(self):
+#        if not self.run_tag:
+#            raise Exception('Can not fetch fastq without a set run tag.')
+#
+#        if not self._bioinformatics:
+#            records = slims.fetch('Content', conjunction()
+#                                  .add(equals('cntn_id', self.sample_name))
+#                                  .add(equals('cntn_fk_contentType', 23))
+#                                  .add(equals('cntn_cstm_runTag', self.run_tag)))
+#
+#            if len(records) > 1:
+#                raise Exception('More than 1 bioinformatics somehow.')
+#
+#            if records:
+#                self._bioinformatics = records[0]
+#
+#        return self._bioinformatics
 
 
 def translate_slims_info(record):
@@ -181,3 +164,20 @@ def get_sample_slims_info(Sctx, run_tag):
     print(SSample.fastq)
     Sctx.slims_info = translate_slims_info(SSample.dna)
     return
+
+
+
+# Can now get from slims:
+# Secondary analysis = wgs_somatic
+# Run ID for possible additional fastqs for DNA no. 
+# Tumor/Normal type
+# Tumor ID
+# Gender
+
+# Need to do:
+# Paired T+N comes from same run = start wgs_somatic
+# Paired T+N comes from different runs. Do nothing with the first sample - wait for its pair to run pipeline.
+# Sample has been sequenced before and has additional fastqs. Find them and merge fastqs. Might need to download from HCP. Start pipeline with correct pair. The other part of the pair could be in same run or previous run.
+# Tumor only. Flag in samplesheet? Info about this in slims?
+# Normal only. Flag in samplesheet? Info about this in slims?
+# Tumor has run as tumor only in a previous run. Normal comes in a later run and needs to be paired with its tumor and run as paired.

@@ -15,18 +15,15 @@ from helpers import setup_logger
 from Slims.slims import get_sample_slims_info, SlimsSample
 
 logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
-#logger.info(f'hej')
 
 
 def look_for_runs(root_path):
+# Look for runs in demultiplexdir
     found_paths = glob.glob(os.path.join(root_path, '*'))
     regex = '^[0-9]{6}_A00687_[0-9]{4}_.{10}$'
     return [path for path in found_paths if re.search(regex, os.path.basename(path))]
 
 
-# get root path from a config
-#root_path = "/seqstore/instruments/novaseq_687_gc/Demultiplexdir/"
-#print(look_for_runs(root_path))
 
 
 def wrapper():
