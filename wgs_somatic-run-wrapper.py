@@ -123,12 +123,23 @@ def wrapper():
             sample_status['approved'].append(Sctx)
 
     print(sample_status)
+    tumor_samples = []
+    normal_samples = []
     for category, contexts in sample_status.items():
-        print(category)
+        print(category) 
         for Sctx in contexts:
-            print(Sctx.sample_id, Sctx.slims_info['tumorNormalType'])
-
-
+            # if two samples have the same tumorNormalID and one is tumor and one is normal - start pipeline
+            print(Sctx.sample_id, Sctx.slims_info['tumorNormalType'], Sctx.slims_info['tumorNormalID'])
+        if category == 'approved':
+            for Sctx in contexts:
+                if Sctx.slims_info['tumorNormalType'] == 'tumor':
+                    tumor_samples.append(Sctx)
+                else:
+                    normal_samples.append(Sctx)
+    print('tumor')
+    print(tumor_samples)
+    print('normal')
+    print(normal_samples)
 
 if __name__ == '__main__':
     try:
