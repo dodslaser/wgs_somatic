@@ -50,14 +50,14 @@ class SlimsSample:
     def fastq(self):
         if not self.run_tag:
             raise Exception('Can not fetch fastq without a set run tag.')
-        print(self.run_tag)
-        print(self.sample_name)
+#        print(self.run_tag)
+#        print(self.sample_name)
         if not self._fastq:
             records = slims_connection.fetch('Content', conjunction()
                                   .add(equals('cntn_id', self.sample_name))
                                   .add(equals('cntn_fk_contentType', 22))
                                   .add(equals('cntn_cstm_runTag', self.run_tag)))
-            print(records) 
+#            print(records) 
             if len(records) > 1:
                 raise Exception('More than 1 fastq somehow.')
 
@@ -66,16 +66,16 @@ class SlimsSample:
 
 
         # if sample_name has fastqs from additional sequencing runs - fetch those fastq objects
-        more_fastqs = slims_connection.fetch('Content', conjunction()
-                                  .add(equals('cntn_id', self.sample_name))
-                                  .add(equals('cntn_fk_contentType', 22))
-                                  .add(not_equals('cntn_cstm_runTag', self.run_tag)))
+        #more_fastqs = slims_connection.fetch('Content', conjunction()
+         #                         .add(equals('cntn_id', self.sample_name))
+          #                        .add(equals('cntn_fk_contentType', 22))
+           #                       .add(not_equals('cntn_cstm_runTag', self.run_tag)))
         # can find the run tags of fastqs from additional runs. can use this to find the fastqs in demultiplexdir or download them from hcp. need to cat fastqs from different runs before starting pipeline. or maybe it works without merging the fastqs first, need to check this...
-        print(more_fastqs)
-        for fq in more_fastqs:
-            print(fq.cntn_cstm_runTag.value)
+        #print(more_fastqs)
+        #for fq in more_fastqs:
+         #   print(fq.cntn_cstm_runTag.value)
 
-        return self._fastq
+        #return self._fastq
 
 
 
@@ -139,9 +139,22 @@ def get_sample_slims_info(Sctx, run_tag):
         Sctx.slims_info = {}
         return
 #    print(SSample.dna)
-    print(SSample.fastq)
+#    print(SSample.fastq)
     Sctx.slims_info = translate_slims_info(SSample.dna)
     return
+
+
+def more_fastqs(Sctx, run_tag):
+    """If a sample name has fastqs from additional sequencing runs - fetch those fastq objects """
+    more_fastqs = slims_connection.fetch('Content', conjunction()
+                              .add(equals('cntn_id', Sctx.sample_name))
+                              .add(equals('cntn_fk_contentType', 22))
+                              .add(not_equals('cntn_cstm_runTag', run_tag)))
+        # can find the run tags of fastqs from additional runs. can use this to find the fastqs in demultiplexdir or download them from hcp. need to cat fastqs from different runs before starting pipeline. or maybe it works without merging the fastqs first, need to check this...
+    print('hej')
+    print(more_fastqs)
+    for fq in more_fastqs:
+        print(fq.cntn_cstm_runTag.value)
 
 
 

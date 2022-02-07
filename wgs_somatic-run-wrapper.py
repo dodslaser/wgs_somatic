@@ -12,7 +12,7 @@ import json
 from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
 from helpers import setup_logger
-from tools.slims import get_sample_slims_info, SlimsSample
+from tools.slims import get_sample_slims_info, SlimsSample, more_fastqs
 
 logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
 
@@ -94,6 +94,8 @@ def wrapper():
                 sample_status['missing_slims'].append(Sctx)
                 continue
             print(Sctx.slims_info)
+
+            more_fastqs(Sctx, run_tag = Rctx.run_tag)
 
             # NOTE: 54 is Slims internal primary key for wgs_somatic
             if 54 not in Sctx.slims_info['secondary_analysis']:
