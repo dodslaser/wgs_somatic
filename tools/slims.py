@@ -7,17 +7,17 @@ from slims.content import Status
 
 
 
-class slims:
+class slims_credentials:
     url = os.environ.get('SLIMS_URL')
     user = os.environ.get('SLIMS_USER')
     password = os.environ.get('SLIMS_PASSWORD')
 
 
 instance = 'wgs-somatic_query'
-url = slims.url
-user = slims.user
-password = slims.password
-slims = Slims(instance, url, user, password)
+url = slims_credentials.url
+user = slims_credentials.user
+password = slims_credentials.password
+slims_connection = Slims(instance, url, user, password)
 
 
 
@@ -33,7 +33,7 @@ class SlimsSample:
     @property
     def dna(self):
         if not self._dna:
-            records = slims.fetch('Content', conjunction()
+            records = slims_connection.fetch('Content', conjunction()
                                   .add(equals('cntn_id', self.sample_name))
                                   .add(equals('cntn_fk_contentType', 6)))
 
@@ -53,7 +53,7 @@ class SlimsSample:
         print(self.run_tag)
         print(self.sample_name)
         if not self._fastq:
-            records = slims.fetch('Content', conjunction()
+            records = slims_connection.fetch('Content', conjunction()
                                   .add(equals('cntn_id', self.sample_name))
                                   .add(equals('cntn_fk_contentType', 22))
                                   .add(equals('cntn_cstm_runTag', self.run_tag)))
@@ -66,7 +66,7 @@ class SlimsSample:
 
 
         # if sample_name has fastqs from additional sequencing runs - fetch those fastq objects
-        more_fastqs = slims.fetch('Content', conjunction()
+        more_fastqs = slims_connection.fetch('Content', conjunction()
                                   .add(equals('cntn_id', self.sample_name))
                                   .add(equals('cntn_fk_contentType', 22))
                                   .add(not_equals('cntn_cstm_runTag', self.run_tag)))
@@ -78,25 +78,6 @@ class SlimsSample:
         return self._fastq
 
 
-# Haven't used the bioinformatics property for anything yet. Might not need it. 
-#    @property
-#    def bioinformatics(self):
-#        if not self.run_tag:
-#            raise Exception('Can not fetch fastq without a set run tag.')
-#
-#        if not self._bioinformatics:
-#            records = slims.fetch('Content', conjunction()
-#                                  .add(equals('cntn_id', self.sample_name))
-#                                  .add(equals('cntn_fk_contentType', 23))
-#                                  .add(equals('cntn_cstm_runTag', self.run_tag)))
-#
-#            if len(records) > 1:
-#                raise Exception('More than 1 bioinformatics somehow.')
-#
-#            if records:
-#                self._bioinformatics = records[0]
-#
-#        return self._bioinformatics
 
 
 def translate_slims_info(record):
@@ -110,9 +91,9 @@ def translate_slims_info(record):
 
     investigator = 'CGG'  # NOTE: Needed?
 
-    department_record = slims.fetch_by_pk('ReferenceDataRecord', record.cntn_cstm_department.value)
+    department_record = slims_connection.fetch_by_pk('ReferenceDataRecord', record.cntn_cstm_department.value)
     department = department_record.rdrc_name.value  # Format KK
-    responder_records = [slims.fetch_by_pk('ReferenceDataRecord', pk) for
+    responder_records = [slims_connection.fetch_by_pk('ReferenceDataRecord', pk) for
                          pk in department_record.rdrc_cstm_responder.value]
     responder_emails = [rec.rdrc_cstm_email.value for rec in responder_records]
 
