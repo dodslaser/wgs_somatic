@@ -112,16 +112,22 @@ def wrapper():
 
             more_fastqs(Sctx, run_tag = Rctx.run_tag)
 
-        print(Rctx.sample_contexts)
+#        print(Rctx.sample_contexts)
 
         if not Rctx.sample_contexts:
             # If no samples set for wgs_somatic
             logger.info('No samples set for wgs_somatic. Skipping run.')
             continue
 
+        for Sctx in Rctx.sample_contexts:
+            sample_status['approved'].append(Sctx)
 
+    print(sample_status)
+    for category, contexts in sample_status.items():
+        print(category)
+        for Sctx in contexts:
+            print(Sctx.sample_id, Sctx.slims_info['tumorNormalType'])
 
-#    print(sample_status)
 
 
 if __name__ == '__main__':
