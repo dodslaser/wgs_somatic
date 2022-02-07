@@ -95,14 +95,34 @@ def wrapper():
                 continue
             print(Sctx.slims_info)
 
-            more_fastqs(Sctx, run_tag = Rctx.run_tag)
+
+
 
             # NOTE: 54 is Slims internal primary key for wgs_somatic
             if 54 not in Sctx.slims_info['secondary_analysis']:
                 sample_status['unset_WS'].append(Sctx)
                 continue
 
+
+            # Add sample context to run context list
+            logger.info(f'Adding sample context to list of contexts.')
+            Rctx.add_sample_context(Sctx)
+            print(Sctx)
+
+
+            more_fastqs(Sctx, run_tag = Rctx.run_tag)
+
+        print(Rctx.sample_contexts)
+
+        if not Rctx.sample_contexts:
+            # If no samples set for wgs_somatic
+            logger.info('No samples set for wgs_somatic. Skipping run.')
+            continue
+
+
+
 #    print(sample_status)
+
 
 if __name__ == '__main__':
     try:

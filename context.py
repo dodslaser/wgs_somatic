@@ -10,9 +10,14 @@ class RunContext:
         #self.samplesheet_path = os.path.join(run_path, 'SampleSheet.csv')
         self.demultiplex_summary_path = os.path.join(run_path, 'demuxer.json')
 
+        self.sample_contexts = []
+
     @property
     def demultiplex_complete(self):
         return os.path.exists(self.demultiplex_summary_path)
+
+    def add_sample_context(self, Sctx):
+        self.sample_contexts.append(Sctx)
 
 
 
