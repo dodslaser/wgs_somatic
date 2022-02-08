@@ -27,10 +27,10 @@ def setup_logger(name, log_path=None):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
 
-    stream_handle = logging.StreamHandler()
-    stream_handle.setLevel(logging.DEBUG)
-    stream_handle.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s'))
-    logger.addHandler(stream_handle)
+    #stream_handle = logging.StreamHandler()
+    #stream_handle.setLevel(logging.DEBUG)
+    #stream_handle.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s'))
+    #logger.addHandler(stream_handle)
 
     if log_path:
         file_handle = logging.FileHandler(log_path, 'a')
