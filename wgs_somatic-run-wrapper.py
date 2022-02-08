@@ -121,7 +121,7 @@ def wrapper():
 
         for Sctx in Rctx.sample_contexts:
             sample_status['approved'].append(Sctx)
-
+        runID = Rctx.run_name
     print(sample_status)
     tumor_samples = []
     normal_samples = []
@@ -134,12 +134,21 @@ def wrapper():
             for Sctx in contexts:
                 if Sctx.slims_info['tumorNormalType'] == 'tumor':
                     tumor_samples.append(Sctx)
-                else:
+                elif Sctx.slims_info['tumorNormalType'] == 'normal':
                     normal_samples.append(Sctx)
-    print('tumor')
-    print(tumor_samples)
-    print('normal')
-    print(normal_samples)
+                else:
+                    logger.info(f'Warning! {Sctx.slims_info["content_id"]} is not set as tumor or normal.')
+    #print('tumor')
+    #print(tumor_samples)
+    #print('normal')
+    #print(normal_samples)
+
+
+    # find tumor/normal pairs in the run and start pipeline
+    for t in tumor_samples:
+        for n in normal_samples:
+            if n.slims_info['tumorNormalID'] == t.slims_info['tumorNormalID']:
+                logger.info(f'Starting wgs_somatic for: \n Run: {runID} \n Tumor: {t.slims_info["content_id"]} \n Normal: {n.slims_info["content_id"]} ')
 
 if __name__ == '__main__':
     try:
