@@ -87,7 +87,7 @@ def wrapper():
             # Query Slims for clinical information and add to sample context
             logger.info(f'Fetching SLIMS info.')
             get_sample_slims_info(Sctx, run_tag = Rctx.run_tag)  # NOTE: Mod with slims info in-place
-
+            
             if not Sctx.slims_info:
                 logger.warning(f'No SLIMS info available!')
                 logger.warning(f'Sample will not be analysed.')
@@ -107,11 +107,10 @@ def wrapper():
             # Add sample context to run context list
             logger.info(f'Adding sample context to list of contexts.')
             Rctx.add_sample_context(Sctx)
-            print(Sctx)
+            #print(Sctx)
 
 
             more_fastqs(Sctx, run_tag = Rctx.run_tag)
-
 #        print(Rctx.sample_contexts)
 
         if not Rctx.sample_contexts:
@@ -146,9 +145,12 @@ def wrapper():
 
     # find tumor/normal pairs in the run and start pipeline
     for t in tumor_samples:
+#        print(t.fastqs)
         for n in normal_samples:
-            if n.slims_info['tumorNormalID'] == t.slims_info['tumorNormalID']:
+            if t.slims_info['tumorNormalID'] == n.slims_info['tumorNormalID']:
                 logger.info(f'Starting wgs_somatic for: \n Run: {runID} \n Tumor: {t.slims_info["content_id"]} \n Normal: {n.slims_info["content_id"]} ')
+    
+
 
 if __name__ == '__main__':
     try:
