@@ -12,7 +12,7 @@ import json
 from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
 from helpers import setup_logger
-from tools.slims import get_sample_slims_info, SlimsSample, more_fastqs
+from tools.slims import get_sample_slims_info, SlimsSample, more_fastqs, get_pair
 
 logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
 
@@ -114,7 +114,7 @@ def wrapper():
             if more_fqs_path:
                 print(more_fqs_path)
                 Sctx.add_fastq(more_fqs_path)
-
+            get_pair(Sctx, Rctx.run_tag)
 #        print(Rctx.sample_contexts)
 
         if not Rctx.sample_contexts:

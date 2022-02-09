@@ -127,8 +127,8 @@ def get_sample_slims_info(Sctx, run_tag):
     if not SSample.dna:
         Sctx.slims_info = {}
         return
-#    print(SSample.dna)
-#    print(SSample.fastq)
+    #print(SSample.dna)
+    #print(SSample.fastq)
     Sctx.slims_info = translate_slims_info(SSample.dna)
     return
 
@@ -155,6 +155,20 @@ def more_fastqs(Sctx, run_tag):
             fq_paths = json_info['fastq_paths']
             #print(fq_paths)
         return fq_paths
+
+def get_pair(Sctx, run_tag):
+    """If tumor and normal are sequenced in different runs - find the pairs """
+    get_sample_slims_info(Sctx, run_tag)
+    print(Sctx.slims_info)
+    print(Sctx.slims_info['tumorNormalID'])
+    pairs = slims_connection.fetch('Content', conjunction()
+                              .add(equals('cntn_fk_contentType', 6))
+                              .add(equals('cntn_cstm_tumorNormalID', Sctx.slims_info['tumorNormalID'])))
+    print('hej')
+    print(pairs)
+    for pair in pairs:
+        print(pair.cntn_cstm_tumorNormalType.value)
+        print(pair.cntn_id.value)
 
 # Can now get from slims:
 # Secondary analysis = wgs_somatic
