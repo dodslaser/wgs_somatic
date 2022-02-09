@@ -170,6 +170,15 @@ def get_pair(Sctx, run_tag):
         print(pair.cntn_cstm_tumorNormalType.value)
         print(pair.cntn_id.value)
 
+        part_of_pair_in_other_run = slims_connection.fetch('Content', conjunction()
+                              .add(equals('cntn_id', pair.cntn_id.value))
+                              .add(equals('cntn_fk_contentType', 22))
+                              .add(not_equals('cntn_cstm_runTag', run_tag)))
+
+        if part_of_pair_in_other_run:
+            for part in part_of_pair_in_other_run:
+                print(part.cntn_cstm_runTag.value)
+
 # Can now get from slims:
 # Secondary analysis = wgs_somatic
 # Run ID for possible additional fastqs for DNA no. 
