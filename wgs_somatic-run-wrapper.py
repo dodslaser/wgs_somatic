@@ -110,7 +110,9 @@ def wrapper():
             #print(Sctx)
 
 
-            more_fastqs(Sctx, run_tag = Rctx.run_tag)
+            more_fqs_path = more_fastqs(Sctx, run_tag = Rctx.run_tag)
+            if more_fqs_path:
+                print(more_fqs_path)
 #        print(Rctx.sample_contexts)
 
         if not Rctx.sample_contexts:

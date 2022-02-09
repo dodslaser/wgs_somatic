@@ -64,17 +64,7 @@ class SlimsSample:
             if records:
                 self._fastq = records[0]
 
-        # if sample_name has fastqs from additional sequencing runs - fetch those fastq objects
-        #more_fastqs = slims_connection.fetch('Content', conjunction()
-         #                         .add(equals('cntn_id', self.sample_name))
-          #                        .add(equals('cntn_fk_contentType', 22))
-           #                       .add(not_equals('cntn_cstm_runTag', self.run_tag)))
-        # can find the run tags of fastqs from additional runs. can use this to find the fastqs in demultiplexdir or download them from hcp. need to cat fastqs from different runs before starting pipeline. or maybe it works without merging the fastqs first, need to check this...
-        #print(more_fastqs)
-        #for fq in more_fastqs:
-         #   print(fq.cntn_cstm_runTag.value)
-
-        #return self._fastq
+        return self._fastq
 
 
 
@@ -155,16 +145,16 @@ def more_fastqs(Sctx, run_tag):
     if more_fastqs:
         for fq in more_fastqs:
             fqs_runtag = fq.cntn_cstm_runTag.value
-            print(fqs_runtag)
-            print(Sctx.sample_name)
+            #print(fqs_runtag)
+            #print(Sctx.sample_name)
             fqSSample = SlimsSample(Sctx.sample_name, fqs_runtag)
-            print(fqSSample.dna)
-            print(fqSSample.fastq)
-            #print(fqSSample.fastq.cntn_cstm_demuxerSampleResult)
-            #json_info = json.loads(fqSSample.fastq.cntn_cstm_demuxerSampleResult)
-            #fq_paths = json_info['fastq_paths']
+            #print(fqSSample.dna)
+            #print(fqSSample.fastq)
+            #print(fqSSample.fastq.cntn_cstm_demuxerSampleResult.value)
+            json_info = json.loads(fqSSample.fastq.cntn_cstm_demuxerSampleResult.value)
+            fq_paths = json_info['fastq_paths']
             #print(fq_paths)
-        #return fqs_runtag
+        return fq_paths
 
 # Can now get from slims:
 # Secondary analysis = wgs_somatic
