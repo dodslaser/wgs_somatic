@@ -30,4 +30,5 @@ class SampleContext:
 
     def add_fastq(self, paths):
         """Add fastq paths."""
-        self.fastqs.append({'fastq_paths': paths})
+        for path in paths:
+            self.fastqs.append(path)

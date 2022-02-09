@@ -113,6 +113,8 @@ def wrapper():
             more_fqs_path = more_fastqs(Sctx, run_tag = Rctx.run_tag)
             if more_fqs_path:
                 print(more_fqs_path)
+                Sctx.add_fastq(more_fqs_path)
+
 #        print(Rctx.sample_contexts)
 
         if not Rctx.sample_contexts:
@@ -147,7 +149,7 @@ def wrapper():
 
     # find tumor/normal pairs in the run and start pipeline
     for t in tumor_samples:
-#        print(t.fastqs)
+        print(t.fastqs)
         for n in normal_samples:
             if t.slims_info['tumorNormalID'] == n.slims_info['tumorNormalID']:
                 logger.info(f'Starting wgs_somatic for: \n Run: {runID} \n Tumor: {t.slims_info["content_id"]} \n Normal: {n.slims_info["content_id"]} ')
