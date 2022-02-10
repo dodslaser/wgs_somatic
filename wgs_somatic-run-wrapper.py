@@ -120,7 +120,13 @@ def wrapper():
                 print(f'more_fqs_dicts: {more_fqs_dicts}')
                 for d in more_fqs_dicts:
                     print(f'value of key Sample ID: {d["Sample ID"]}')                
-
+                    print(Sctx.sample_name)
+                    if Sctx.sample_name == d["Sample ID"]:
+                        Sctx.add_fastq(d["fastq paths"])
+                    print(f'value of fq paths: {d["fastq paths"]}')
+#                    for fqp in d["fastq paths"]:
+#                        print(fqp)
+            print(f'all fastq paths: {Sctx.fastqs}')
                 #Sctx.add_fastq(more_fqs_path)
 
 
