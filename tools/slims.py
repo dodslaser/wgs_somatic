@@ -134,19 +134,19 @@ def get_sample_slims_info(Sctx, run_tag):
 
 
 def more_fastqs(sample_name, run_tag):
-    """If a sample name has fastqs from additional sequencing runs - fetch those fastq objects """
+    """If a sample name has fastqs from additional sequencing runs - fetch those fastq objects. Returns a dictionary of sample name and location of its fastqs from other runs. """
     more_fastqs = slims_connection.fetch('Content', conjunction()
                               .add(equals('cntn_id', sample_name))
                               .add(equals('cntn_fk_contentType', 22))
                               .add(not_equals('cntn_cstm_runTag', run_tag)))
-        # can find the run tags of fastqs from additional runs. can use this to find the fastqs in demultiplexdir or download them from hcp. need to cat fastqs from different runs before starting pipeline. or maybe it works without merging the fastqs first, need to check this...
     #print('hej')
     #print(more_fastqs)
     if more_fastqs:
         runtags = []
         more_fq_paths = []
+        d = dict()
         for fq in more_fastqs:
-            print(fq)
+            #print(fq)
             fqs_runtag = fq.cntn_cstm_runTag.value
             #print(f'fastqs runtags: {fqs_runtag}')
             #print(Sctx.sample_name)
@@ -158,12 +158,18 @@ def more_fastqs(sample_name, run_tag):
             #print(fqSSample.fastq.cntn_cstm_demuxerSampleResult.value)
             json_info = json.loads(fqSSample.fastq.cntn_cstm_demuxerSampleResult.value)
             fq_paths = json_info['fastq_paths']
-            #print(fq_paths)
-            more_fq_paths.append(fq_paths)
-        return more_fq_paths
+            print(f'fq_paths: {fq_paths}')
+            for path in fq_paths:
+                more_fq_paths.append(path)
+        print(sample_name)
+        #print(more_fq_paths)
+        d['Sample ID'] = sample_name
+        d['fastq paths'] = more_fq_paths
+        #return [more_fq_paths, sample_name]
+        return d
 
 def get_pair(Sctx, run_tag):
-    """If tumor and normal are sequenced in different runs - find the pairs """
+    """If tumor and normal are sequenced in different runs - find the pairs. Then use the more_fastqs function to find paths of fastqs that are sequenced in different runs. """
     get_sample_slims_info(Sctx, run_tag)
     #print(Sctx.slims_info)
     #print(Sctx.slims_info['tumorNormalID'])
@@ -171,32 +177,18 @@ def get_pair(Sctx, run_tag):
                               .add(equals('cntn_fk_contentType', 6))
                               .add(equals('cntn_cstm_tumorNormalID', Sctx.slims_info['tumorNormalID'])))
     #print('hej')
-    print(f'pairs: {pairs}')
+    #print(f'pairs: {pairs}')
     parts_of_pair = []
+    fqs =[]
     for pair in pairs:
-        print(pair)
-        print(f' t/n type: {pair.cntn_cstm_tumorNormalType.value}')
-        print(f'sample id: {pair.cntn_id.value}')
-        print(f'run tag: {run_tag}')
-        print(more_fastqs(pair.cntn_id.value, run_tag))
+        #print(pair)
+        #print(f' t/n type: {pair.cntn_cstm_tumorNormalType.value}')
+        #print(f'sample id: {pair.cntn_id.value}')
+        #print(f'run tag: {run_tag}')
+        #print(more_fastqs(pair.cntn_id.value, run_tag))
+        fqs.append(more_fastqs(pair.cntn_id.value, run_tag))
+    return fqs
 
-
-        #part_of_pair_in_other_run = slims_connection.fetch('Content', conjunction()
-        #                      .add(equals('cntn_id', pair.cntn_id.value))
-        #                      .add(equals('cntn_fk_contentType', 22)))
-        #print(f'part of pair in other run: {part_of_pair_in_other_run}')
-        #for p in part_of_pair_in_other_run:
-        #    parts_of_pair.append(p)
-        #if parts_of_pair:
-        #    print(parts_of_pair)
-        #    for part in parts_of_pair:
-        #        print(f'part: {part}')
-    #        print(f'runtag: {part.cntn_cstm_runTag.value}')
-        #        print(part.cntn_cstm_tumorNormalType.value)
-        #        print(f'sample more fqs: {more_fastqs(Sctx, run_tag = part.cntn_cstm_runTag.value)}')
-        #        print(f'samplename: {Sctx.sample_name}')
-    #        more_fq_paths = more_fastqs(Sctx, run_tag = part.cntn_cstm_runTag.value)
-            #return more_fq_paths
 
 # Can now get from slims:
 # Secondary analysis = wgs_somatic

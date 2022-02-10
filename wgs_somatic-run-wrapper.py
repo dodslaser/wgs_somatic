@@ -115,10 +115,13 @@ def wrapper():
             #    print(more_fqs_path)
             #    Sctx.add_fastq(more_fqs_path)
             #print(get_pair(Sctx, Rctx.run_tag))
-            more_fqs_path = get_pair(Sctx, Rctx.run_tag)
-            if more_fqs_path:
-                print(more_fqs_path)
-                Sctx.add_fastq(more_fqs_path)
+            more_fqs_dicts = get_pair(Sctx, Rctx.run_tag)
+            if more_fqs_dicts:
+                print(f'more_fqs_dicts: {more_fqs_dicts}')
+                for d in more_fqs_dicts:
+                    print(f'value of key Sample ID: {d["Sample ID"]}')                
+
+                #Sctx.add_fastq(more_fqs_path)
 
 
 #        print(Rctx.sample_contexts)
