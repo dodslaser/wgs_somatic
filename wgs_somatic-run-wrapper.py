@@ -110,11 +110,17 @@ def wrapper():
             #print(Sctx)
 
 
-            more_fqs_path = more_fastqs(Sctx, run_tag = Rctx.run_tag)
+            #more_fqs_path = more_fastqs(Sctx, run_tag = Rctx.run_tag)
+            #if more_fqs_path:
+            #    print(more_fqs_path)
+            #    Sctx.add_fastq(more_fqs_path)
+            #print(get_pair(Sctx, Rctx.run_tag))
+            more_fqs_path = get_pair(Sctx, Rctx.run_tag)
             if more_fqs_path:
                 print(more_fqs_path)
                 Sctx.add_fastq(more_fqs_path)
-            get_pair(Sctx, Rctx.run_tag)
+
+
 #        print(Rctx.sample_contexts)
 
         if not Rctx.sample_contexts:
