@@ -117,16 +117,17 @@ def wrapper():
             #print(get_pair(Sctx, Rctx.run_tag))
             more_fqs_dicts = get_pair(Sctx, Rctx.run_tag)
             if more_fqs_dicts:
-                print(f'more_fqs_dicts: {more_fqs_dicts}')
+            #    print(f'more_fqs_dicts: {more_fqs_dicts}')
                 for d in more_fqs_dicts:
-                    print(f'value of key Sample ID: {d["Sample ID"]}')                
-                    print(Sctx.sample_name)
+            #        print(f'value of key Sample ID: {d["Sample ID"]}')                
+            #        print(Sctx.sample_name)
+                    # Adds all fastq paths to the Sctx which was in this run (but if other part of T/N pair is in other run, fastq paths are not added for that Sample ID. Need to fix this or just skip it and just get the sample ID for that sample to use as input argument to start the pipeline. Don't really need this as long as all fastqs are symlinked to the same folder (demultiplexdir) that the other fastqs are. 
                     if Sctx.sample_name == d["Sample ID"]:
                         Sctx.add_fastq(d["fastq paths"])
-                    print(f'value of fq paths: {d["fastq paths"]}')
+            #        print(f'value of fq paths: {d["fastq paths"]}')
 #                    for fqp in d["fastq paths"]:
 #                        print(fqp)
-            print(f'all fastq paths: {Sctx.fastqs}')
+            #print(f'all fastq paths: {Sctx.fastqs}')
                 #Sctx.add_fastq(more_fqs_path)
 
 
@@ -164,7 +165,7 @@ def wrapper():
 
     # find tumor/normal pairs in the run and start pipeline
     for t in tumor_samples:
-        print(t.fastqs)
+        #print(t.fastqs)
         for n in normal_samples:
             if t.slims_info['tumorNormalID'] == n.slims_info['tumorNormalID']:
                 logger.info(f'Starting wgs_somatic for: \n Run: {runID} \n Tumor: {t.slims_info["content_id"]} \n Normal: {n.slims_info["content_id"]} ')

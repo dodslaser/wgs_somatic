@@ -158,14 +158,18 @@ def more_fastqs(sample_name, run_tag):
             #print(fqSSample.fastq.cntn_cstm_demuxerSampleResult.value)
             json_info = json.loads(fqSSample.fastq.cntn_cstm_demuxerSampleResult.value)
             fq_paths = json_info['fastq_paths']
-            print(f'fq_paths: {fq_paths}')
+            #print(f'fq_paths: {fq_paths}')
             for path in fq_paths:
                 more_fq_paths.append(path)
-        print(sample_name)
+        #print(sample_name)
         #print(more_fq_paths)
         d['Sample ID'] = sample_name
         d['fastq paths'] = more_fq_paths
-        #return [more_fq_paths, sample_name]
+        #print(f'FQ PATHS:{more_fq_paths} ')
+        for f_path in more_fq_paths:
+        # Now symlinks all additional paths to fastqs for tumor and normal in other runs. If I symlink to demultiplexdir of particular run instead, all fastqs belonging to the T/N pair will be in the same folder and the pipeline can start using that folder as argument. Doesn't work if symlinks already exist. Need to force overwrite.
+            os.symlink(f_path, os.path.join(f"/home/xshang/ws_testoutput/symlinks/", os.path.basename(f_path)))
+        # Now returns a dict with sample name and fastqs from other runs belonging to that sample name. Might not be used now that the symlinks are created. But need the sample name of for example normal if only the tumor is in the run in question and vice versa. So could sort of be used.
         return d
 
 def get_pair(Sctx, run_tag):
@@ -200,7 +204,7 @@ def get_pair(Sctx, run_tag):
 # Need to do:
 # Paired T+N comes from same run = start wgs_somatic
 # Paired T+N comes from different runs. Do nothing with the first sample - wait for its pair to run pipeline.
-# Sample has been sequenced before and has additional fastqs. Find them and merge fastqs. Might need to download from HCP. Start pipeline with correct pair. The other part of the pair could be in same run or previous run.
+# Sample has been sequenced before and has additional fastqs. Find them and merge fastqs. Might need to download from HCP. Start pipeline with correct pair. The other part of the pair could be in same run or previous run. Can now find additional fastqs from other runs. Fastqs don't need to be merged to start the pipeline, they just need to be in the same folder. Mapping will be done for each fastq R1+R2 and then the bam files will be merged in the dedup step.
 # Tumor only. Flag in samplesheet? Info about this in slims?
 # Normal only. Flag in samplesheet? Info about this in slims?
 # Tumor has run as tumor only in a previous run. Normal comes in a later run and needs to be paired with its tumor and run as paired.
