@@ -167,8 +167,10 @@ def more_fastqs(sample_name, run_tag):
         d['fastq paths'] = more_fq_paths
         #print(f'FQ PATHS:{more_fq_paths} ')
         for f_path in more_fq_paths:
+        # Only links if link doesn't already exist
+            if not os.path.islink(os.path.join(f"/home/xshang/ws_testoutput/symlinks/", os.path.basename(f_path))):
         # Now symlinks all additional paths to fastqs for tumor and normal in other runs. If I symlink to demultiplexdir of particular run instead, all fastqs belonging to the T/N pair will be in the same folder and the pipeline can start using that folder as argument. Doesn't work if symlinks already exist. Need to force overwrite.
-            os.symlink(f_path, os.path.join(f"/home/xshang/ws_testoutput/symlinks/", os.path.basename(f_path)))
+                os.symlink(f_path, os.path.join(f"/home/xshang/ws_testoutput/symlinks/", os.path.basename(f_path)))
         # Now returns a dict with sample name and fastqs from other runs belonging to that sample name. Might not be used now that the symlinks are created. But need the sample name of for example normal if only the tumor is in the run in question and vice versa. So could sort of be used.
         return d
 
