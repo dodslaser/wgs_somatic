@@ -176,6 +176,7 @@ def more_fastqs(sample_name, run_tag):
 
 def get_pair(Sctx, run_tag):
     """If tumor and normal are sequenced in different runs - find the pairs. Then use the more_fastqs function to find paths of fastqs that are sequenced in different runs. """
+
     get_sample_slims_info(Sctx, run_tag)
     #print(Sctx.slims_info)
     #print(Sctx.slims_info['tumorNormalID'])
@@ -187,13 +188,17 @@ def get_pair(Sctx, run_tag):
     parts_of_pair = []
     fqs =[]
     for pair in pairs:
-        #print(pair)
+        #print(f'pair {pair}')
         #print(f' t/n type: {pair.cntn_cstm_tumorNormalType.value}')
         #print(f'sample id: {pair.cntn_id.value}')
         #print(f'run tag: {run_tag}')
         #print(more_fastqs(pair.cntn_id.value, run_tag))
-        fqs.append(more_fastqs(pair.cntn_id.value, run_tag))
-    return fqs
+        # if there are not fastqs in other runs, skip!
+        if not more_fastqs(pair.cntn_id.value, run_tag) == None:
+            fqs.append(more_fastqs(pair.cntn_id.value, run_tag))
+    # if fqs are in other run, get those paths:
+    if fqs:
+        return fqs
 
 
 # Can now get from slims:
