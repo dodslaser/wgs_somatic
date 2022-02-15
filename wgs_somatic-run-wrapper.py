@@ -8,6 +8,7 @@ import glob
 import yaml
 from datetime import datetime
 import json
+from itertools import chain
 
 from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
@@ -27,6 +28,8 @@ def look_for_runs(root_path):
 
 
 def wrapper():
+
+    additional_run_paths = []
 
     with open(CONFIG_PATH, 'r') as conf:
         config = yaml.safe_load(conf)
@@ -115,21 +118,28 @@ def wrapper():
             #    print(more_fqs_path)
             #    Sctx.add_fastq(more_fqs_path)
             #print(get_pair(Sctx, Rctx.run_tag))
-            more_fqs_dicts = get_pair(Sctx, Rctx.run_tag)
-            if more_fqs_dicts:
-            #    print(f'more_fqs_dicts: {more_fqs_dicts}')
-                for d in more_fqs_dicts:
+
+            run_paths = get_pair(Sctx, Rctx.run_tag)
+            #print(f'run paths: {run_paths}')
+            if not run_paths == None:
+                run_paths = list(chain.from_iterable(run_paths))
+                for r in run_paths:
+                    #print(f'r: {r}')
+                    additional_run_paths.append(r) if r not in additional_run_paths else additional_run_paths
+#            more_fqs_dicts = get_pair(Sctx, Rctx.run_tag)
+#            if more_fqs_dicts:
+#                print(f'more_fqs_dicts: {more_fqs_dicts}')
+#                for d in more_fqs_dicts:
             #        print(f'value of key Sample ID: {d["Sample ID"]}')                
             #        print(Sctx.sample_name)
                     # Adds all fastq paths to the Sctx which was in this run (but if other part of T/N pair is in other run, fastq paths are not added for that Sample ID. Need to fix this or just skip it and just get the sample ID for that sample to use as input argument to start the pipeline. Don't really need this as long as all fastqs are symlinked to the same folder (demultiplexdir) that the other fastqs are. 
-                    if Sctx.sample_name == d["Sample ID"]:
-                        Sctx.add_fastq(d["fastq paths"])
+#                    if Sctx.sample_name == d["Sample ID"]:
+#                        Sctx.add_fastq(d["fastq paths"])
             #        print(f'value of fq paths: {d["fastq paths"]}')
 #                    for fqp in d["fastq paths"]:
 #                        print(fqp)
             #print(f'all fastq paths: {Sctx.fastqs}')
                 #Sctx.add_fastq(more_fqs_path)
-
 
 #        print(Rctx.sample_contexts)
 
@@ -144,12 +154,17 @@ def wrapper():
     print(sample_status)
     tumor_samples = []
     normal_samples = []
+
+    print(f'additional run paths: {additional_run_paths}')
+
     for category, contexts in sample_status.items():
         print(category) 
         for Sctx in contexts:
             # if two samples have the same tumorNormalID and one is tumor and one is normal - start pipeline
             print(Sctx.sample_id, Sctx.slims_info['tumorNormalType'], Sctx.slims_info['tumorNormalID'])
         if category == 'approved':
+            #print(contexts)
+            # Need contexts for samples in other runs as well...
             for Sctx in contexts:
                 if Sctx.slims_info['tumorNormalType'] == 'tumor':
                     tumor_samples.append(Sctx)
