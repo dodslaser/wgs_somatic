@@ -100,6 +100,8 @@ def wrapper():
     additional_run_paths = []
     tumor_samples = []
     normal_samples = []
+    pair_ids_in_run = []
+    samples_ready = []
 
     with open(CONFIG_PATH, 'r') as conf:
         config = yaml.safe_load(conf)
@@ -143,11 +145,12 @@ def wrapper():
         #Sctx_list = Rctx_run.sample_contexts
         #print(f'Sctx_list: {Sctx_list}')
 
-       
+        #print(f'Rctx run sample contexts: {Rctx_run.sample_contexts}')
 
 
         # Get run paths for samples (or other part of t/n pair) with additional fastqs in other runs
         for sctx in Rctx_run.sample_contexts:
+            #print(f'sctx: {sctx}')
             run_paths = get_pair_and_more_fqs(sctx, Rctx.run_tag)
             #print(f'run paths: {run_paths}')
             if not run_paths == None:
@@ -170,14 +173,23 @@ def wrapper():
             print(Sctx.sample_id, Sctx.slims_info['tumorNormalType'], Sctx.slims_info['tumorNormalID'])
         if category == 'approved':
             #print(f'contexts: {contexts}')
-            # Need contexts for samples in other runs as well...
             for Sctx in contexts:
+                print(f'Rctx run tag: {Rctx_run.run_tag}')
+                print(f'sample id split: {Sctx.sample_id.split("_",1)[1]}')
+                print(f'pairid: {Sctx.slims_info["tumorNormalID"]}, samplenamesplit = pairid: {Sctx.sample_name.split("DNA")[1]}')
+                if Rctx_run.run_tag == Sctx.sample_id.split("_",1)[1]:
+                    pair_ids_in_run.append(Sctx.slims_info["tumorNormalID"])
+                    pair_ids_in_run.append(Sctx.sample_name.split("DNA")[1])
                 if Sctx.slims_info['tumorNormalType'] == 'tumor':
                     tumor_samples.append(Sctx)
                 elif Sctx.slims_info['tumorNormalType'] == 'normal':
                     normal_samples.append(Sctx)
                 else:
                     logger.info(f'Warning! {Sctx.slims_info["content_id"]} is not set as tumor or normal.')
+    
+    # make list of unique pair ids in current run
+    pair_ids_in_run = list(set(pair_ids_in_run))
+    print(f'pair_ids_in_run: {pair_ids_in_run}')
     print('tumor')
     print(tumor_samples)
     print('normal')
@@ -187,16 +199,36 @@ def wrapper():
     # find tumor/normal pairs in the run and start pipeline
     for t in tumor_samples:
         print(t.fastqs)
-        print(t.sample_name)
+        #print(t.sample_name)
+        print(f't sample name split = pairid: {t.sample_name.split("DNA")[1]}, t tumor id = pairid: {t.slims_info["tumorNormalID"]}')
         print(f'tumor sample id: {t.sample_id}')
+        if not any(pair_id in pair_ids_in_run for pair_id in (t.sample_name.split("DNA")[1], t.slims_info["tumorNormalID"])):
+        #if not t.sample_name.split("DNA")[1] in pair_ids_in_run or not t.slims_info["tumorNormalID"] in pair_ids_in_run:
+            print(f'{t.sample_name} does not belong to current run')
+            continue
         if t.sample_id.split('_',1)[1] == Rctx_run.run_tag:
             # the plan is to link the fastqs of other runs to fastq-folder in demultiplexdir for the current run so all fastqs for a sample + its pair are in the same folder. then the pipeline can start based on this folder.
             print('these fastqs do not need to be linked')
         else:
-            # only need to link fastqs from other runs
+            # only need to link fastqs from other runs. 
             print('linking fastqs')
             link_fastqs(t.fastqs)
+        samples_ready.append(t)
 
+# same code as for tumor... could make a function instead
+    for n in normal_samples:
+        if not any(pair_id in pair_ids_in_run for pair_id in (n.sample_name.split("DNA")[1], n.slims_info["tumorNormalID"])):
+        #if not n.sample_name.split("DNA")[1] in pair_ids_in_run or not n.slims_info["tumorNormalID"] in pair_ids_in_run:
+            print(f'{n.sample_name} does not belong to current run')
+            continue
+        if n.sample_id.split('_',1)[1] == Rctx_run.run_tag:
+            print('these fastqs do not need to be linked')
+        else:
+            print('linking fastqs')
+            link_fastqs(n.fastqs)
+        samples_ready.append(n)
+
+    print(f'samples ready: {samples_ready}')
         #for n in normal_samples:
         #    if t.slims_info['tumorNormalID'] == n.slims_info['tumorNormalID']:
         #        logger.info(f'Starting wgs_somatic for: \n Run: {runID} \n Tumor: {t.slims_info["content_id"]} \n Normal: {n.slims_info["content_id"]} ')
