@@ -87,11 +87,32 @@ def Rctx_Sctx_for_run(Rctx):
 def link_fastqs(list_of_fq_paths):
     '''Link fastqs to fastq-folder in demultiplexdir of current run. Need to change the hardcoded path to my home... '''
     for fq_path in list_of_fq_paths:
-        print(f'fq_path: {fq_path}')
+        #print(f'fq_path: {fq_path}')
     # Only links if link doesn't already exist
         if not os.path.islink(os.path.join(f"/home/xshang/ws_testoutput/symlinks/", os.path.basename(fq_path))):
         # Now symlinks all additional paths to fastqs for tumor and normal in other runs. If I symlink to demultiplexdir of particular run instead, all fastqs belonging to the T/N pair will be in the same folder and the pipeline can start using that folder as argument.
             os.symlink(fq_path, os.path.join(f"/home/xshang/ws_testoutput/symlinks/", os.path.basename(fq_path)))
+
+
+def get_samples_ready(list_of_samples, pair_ids_in_run, run_tag, samples_ready):
+    '''Add samples that belong to current run from current run and additional runs to list of ready samples'''
+    for s in list_of_samples:
+        #print(s.sample_name)
+        #print(f'pair ids in run: {pair_ids_in_run}')
+        #print(f's sample name split = pairid: {s.sample_name.split("DNA")[1]}, s tumor id = pairid: {s.slims_info["tumorNormalID"]}')
+        if not any(pair_id in pair_ids_in_run for pair_id in (s.sample_name.split("DNA")[1], s.slims_info["tumorNormalID"])):
+            print(f'{s.sample_name} does not belong to current run')
+            continue
+        if s.sample_id.split('_',1)[1] == run_tag:
+            # the plan is to link the fastqs of other runs to fastq-folder in demultiplexdir for the current run so all fastqs for a sample + its pair are in the same folder. then the pipeline can start based on this folder.
+            print(f'fastqs for {s.sample_id} do not need to be linked')
+        else:
+            # only need to link fastqs from other runs.
+            print(f'linking fastqs for {s.sample_id}')
+            link_fastqs(s.fastqs)
+        samples_ready.append(s)
+        #print(f'samples_ready: {samples_ready}')
+    return samples_ready
 
 
 def wrapper():
@@ -174,9 +195,9 @@ def wrapper():
         if category == 'approved':
             #print(f'contexts: {contexts}')
             for Sctx in contexts:
-                print(f'Rctx run tag: {Rctx_run.run_tag}')
-                print(f'sample id split: {Sctx.sample_id.split("_",1)[1]}')
-                print(f'pairid: {Sctx.slims_info["tumorNormalID"]}, samplenamesplit = pairid: {Sctx.sample_name.split("DNA")[1]}')
+                #print(f'Rctx run tag: {Rctx_run.run_tag}')
+                #print(f'sample id split: {Sctx.sample_id.split("_",1)[1]}')
+                #print(f'pairid: {Sctx.slims_info["tumorNormalID"]}, samplenamesplit = pairid: {Sctx.sample_name.split("DNA")[1]}')
                 if Rctx_run.run_tag == Sctx.sample_id.split("_",1)[1]:
                     pair_ids_in_run.append(Sctx.slims_info["tumorNormalID"])
                     pair_ids_in_run.append(Sctx.sample_name.split("DNA")[1])
@@ -190,44 +211,19 @@ def wrapper():
     # make list of unique pair ids in current run
     pair_ids_in_run = list(set(pair_ids_in_run))
     print(f'pair_ids_in_run: {pair_ids_in_run}')
-    print('tumor')
-    print(tumor_samples)
-    print('normal')
-    print(normal_samples)
+    #print('tumor')
+    #print(tumor_samples)
+    #print('normal')
+    #print(normal_samples)
 
-    print(f'Rctx run tag: {Rctx_run.run_tag}')
+    #print(f'Rctx run tag: {Rctx_run.run_tag}')
     # find tumor/normal pairs in the run and start pipeline
-    for t in tumor_samples:
-        print(t.fastqs)
-        #print(t.sample_name)
-        print(f't sample name split = pairid: {t.sample_name.split("DNA")[1]}, t tumor id = pairid: {t.slims_info["tumorNormalID"]}')
-        print(f'tumor sample id: {t.sample_id}')
-        if not any(pair_id in pair_ids_in_run for pair_id in (t.sample_name.split("DNA")[1], t.slims_info["tumorNormalID"])):
-        #if not t.sample_name.split("DNA")[1] in pair_ids_in_run or not t.slims_info["tumorNormalID"] in pair_ids_in_run:
-            print(f'{t.sample_name} does not belong to current run')
-            continue
-        if t.sample_id.split('_',1)[1] == Rctx_run.run_tag:
-            # the plan is to link the fastqs of other runs to fastq-folder in demultiplexdir for the current run so all fastqs for a sample + its pair are in the same folder. then the pipeline can start based on this folder.
-            print('these fastqs do not need to be linked')
-        else:
-            # only need to link fastqs from other runs. 
-            print('linking fastqs')
-            link_fastqs(t.fastqs)
-        samples_ready.append(t)
 
-# same code as for tumor... could make a function instead
-    for n in normal_samples:
-        if not any(pair_id in pair_ids_in_run for pair_id in (n.sample_name.split("DNA")[1], n.slims_info["tumorNormalID"])):
-        #if not n.sample_name.split("DNA")[1] in pair_ids_in_run or not n.slims_info["tumorNormalID"] in pair_ids_in_run:
-            print(f'{n.sample_name} does not belong to current run')
-            continue
-        if n.sample_id.split('_',1)[1] == Rctx_run.run_tag:
-            print('these fastqs do not need to be linked')
-        else:
-            print('linking fastqs')
-            link_fastqs(n.fastqs)
-        samples_ready.append(n)
+    get_samples_ready(tumor_samples, pair_ids_in_run, Rctx_run.run_tag, samples_ready)
+    get_samples_ready(normal_samples, pair_ids_in_run, Rctx_run.run_tag, samples_ready)
 
+    # remove duplicates from list of ready samples
+    samples_ready = list(set(samples_ready))
     print(f'samples ready: {samples_ready}')
         #for n in normal_samples:
         #    if t.slims_info['tumorNormalID'] == n.slims_info['tumorNormalID']:
