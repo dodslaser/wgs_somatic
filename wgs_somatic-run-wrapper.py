@@ -160,25 +160,21 @@ def wrapper():
             if not run_paths == None:
                 run_paths = list(chain.from_iterable(run_paths))
                 for r in run_paths:
-                    #print(f'r: {r}')
                     additional_run_paths.append(r) if r not in additional_run_paths else additional_run_paths
 
     # get Rctx and Sctx for additional runs that have samples related to current run
+    # i realized that i don't actually use "additionalRctx" for anything now. but using the function Rctx_Sctx_for_run does append to sample_status which is used below... could be done in a better way if i don't have to use additionalRctx anyway. just appending to sample_status is neccessary.  
     for run_path in additional_run_paths:
         additionalRctx = RunContext(run_path)
         additionalRctx = Rctx_Sctx_for_run(additionalRctx)
-        #print(f'additional Rctx: {additionalRctx}')
-        
+
 
     # get tumor and normal samples related to current run from approved samples
     for category, contexts in sample_status.items():
-        #print(category) 
-        #for Sctx in contexts:
-            # if two samples have the same tumorNormalID and one is tumor and one is normal - start pipeline
-            #print(Sctx.sample_id, Sctx.slims_info['tumorNormalType'], Sctx.slims_info['tumorNormalID'])
         if category == 'approved':
             for Sctx in contexts:
                 if Rctx_run.run_tag == Sctx.sample_id.split("_",1)[1]:
+                    # use both tumorNormalID and sample name (minus "DNA") as pair ids since we will change pair ids to be normalname for tumor and tumorname for normal 
                     pair_ids_in_run.append(Sctx.slims_info["tumorNormalID"])
                     pair_ids_in_run.append(Sctx.sample_name.split("DNA")[1])
                 if Sctx.slims_info['tumorNormalType'] == 'tumor':
@@ -204,6 +200,7 @@ def wrapper():
     # start the pipeline with the correct pairs. will use these arguments to start pipeline. some arguments are hardcoded right now, need to fix this. only considers barncancer hg38 (GMS-AL + GMS-BT samples) right now. could have outputdirs and arguments in config and get them from there. 
     # this will only work for pairs. have to consider tumor only/normal only as well. 
     # the arguments runtumor and runnormal could be "wrong" by doing it like this since they use run name of current run but if for example normal is in older run it has the wrong argument for "runnormal". this argument is not that important, it is only used to create a unique sample name. maybe it would be better discard/modify this argument than spending time on getting the correct value of it for samples from different runs. also, if fastqs come from more than one run, what will the value of this argument be then to be "correct"?...
+    # outputdir - need to consider if outputdir already exists (if sample has been run before and now it has new fastqs in current run, outputdir already exists). should old outputdir be moved to archive? 
     for t in tumor_samples_ready:
         if t.slims_info["content_id"] in started_samples:
             continue
@@ -211,7 +208,7 @@ def wrapper():
             if n.slims_info["content_id"] in started_samples:
                 continue
             if t.slims_info['tumorNormalID'] == n.slims_info['tumorNormalID']:
-                logger.info(f'Starting wgs_somatic with arguments: \n runnormal: {Rctx_run.run_name} \n runtumor: {Rctx_run.run_name} \n tumorsample: {t.slims_info["content_id"]} \n normalsample: {n.slims_info["content_id"]} \n normalfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n tumorfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n outputdir: {os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t.slims_info["content_id"])} \n igvuser: barncancer_hg38 \n hg38ref yes')
+                logger.info(f'Starting wgs_somatic with arguments: \n runnormal: {Rctx_run.run_name} \n runtumor: {Rctx_run.run_name} \n tumorsample: {t.slims_info["content_id"]} \n normalsample: {n.slims_info["content_id"]} \n normalfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n tumorfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n outputdir: {os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t.slims_info["content_id"])} \n igvuser: barncancer_hg38 \n hg38ref: yes')
                 started_samples.extend((t.slims_info["content_id"], n.slims_info["content_id"]))
 
 
