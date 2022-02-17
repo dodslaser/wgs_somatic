@@ -50,14 +50,11 @@ class SlimsSample:
     def fastq(self):
         if not self.run_tag:
             raise Exception('Can not fetch fastq without a set run tag.')
-        #print(self.run_tag)
-        #print(self.sample_name)
         if not self._fastq:
             records = slims_connection.fetch('Content', conjunction()
                                   .add(equals('cntn_id', self.sample_name))
                                   .add(equals('cntn_fk_contentType', 22))
                                   .add(equals('cntn_cstm_runTag', self.run_tag)))
-            #print(records) 
             if len(records) > 1:
                 raise Exception('More than 1 fastq somehow.')
 
@@ -81,7 +78,7 @@ def translate_slims_info(record):
     investigator = 'CGG'  # NOTE: Needed?
 
     department_record = slims_connection.fetch_by_pk('ReferenceDataRecord', record.cntn_cstm_department.value)
-    department = department_record.rdrc_name.value  # Format KK
+    department = department_record.rdrc_name.value  
     responder_records = [slims_connection.fetch_by_pk('ReferenceDataRecord', pk) for
                          pk in department_record.rdrc_cstm_responder.value]
     responder_emails = [rec.rdrc_cstm_email.value for rec in responder_records]
@@ -127,8 +124,6 @@ def get_sample_slims_info(Sctx, run_tag):
     if not SSample.dna:
         Sctx.slims_info = {}
         return
-    #print(SSample.dna)
-    #print(SSample.fastq)
     Sctx.slims_info = translate_slims_info(SSample.dna)
     return
 
@@ -139,54 +134,35 @@ def more_fastqs(sample_name, run_tag):
                               .add(equals('cntn_id', sample_name))
                               .add(equals('cntn_fk_contentType', 22))
                               .add(not_equals('cntn_cstm_runTag', run_tag)))
-    #print('hej')
-    #print(more_fastqs)
     if more_fastqs:
         runtags = []
         more_fq_paths = []
         run_paths = []
         for fq in more_fastqs:
-            #print(fq)
             fqs_runtag = fq.cntn_cstm_runTag.value
-            #print(f'fastqs runtags: {fqs_runtag}')
-            #print(Sctx.sample_name)
             runtags.append(fqs_runtag)
+
         for tag in runtags:
             fqSSample = SlimsSample(sample_name, tag)
-            #print(fqSSample.dna)
-            #print(fqSSample.fastq)
-            #print(fqSSample.fastq.cntn_cstm_demuxerSampleResult.value)
             json_info = json.loads(fqSSample.fastq.cntn_cstm_demuxerSampleResult.value)
             fq_paths = json_info['fastq_paths']
-            #print(f'fq_paths: {fq_paths}')
-            
             
             for path in fq_paths:
-                #print(f' path: {path.split("/fastq/")[0]}')
                 more_fq_paths.append(path) 
                 new_path = path.split("/fastq/")[0]
                 run_paths.append(new_path) if new_path not in run_paths else run_paths
-                #run_paths.append(path.split("/fastq/")[0])
         return run_paths
 
 def get_pair_and_more_fqs(Sctx, run_tag):
     """If tumor and normal are sequenced in different runs - find the pairs. Then use the more_fastqs function to find paths of fastqs that are sequenced in different runs. """
 
     get_sample_slims_info(Sctx, run_tag)
-    #print(Sctx.slims_info)
-    #print(Sctx.slims_info['tumorNormalID'])
     pairs = slims_connection.fetch('Content', conjunction()
                               .add(equals('cntn_fk_contentType', 6))
                               .add(equals('cntn_cstm_tumorNormalID', Sctx.slims_info['tumorNormalID'])))
-    #print(f'pairs: {pairs}')
     parts_of_pair = []
     fqs =[]
     for pair in pairs:
-        #print(f'pair {pair}')
-        #print(f' t/n type: {pair.cntn_cstm_tumorNormalType.value}')
-        #print(f'sample id: {pair.cntn_id.value}')
-        #print(f'run tag: {run_tag}')
-        #print(more_fastqs(pair.cntn_id.value, run_tag))
         # if there are not fastqs in other runs, skip!
         if not more_fastqs(pair.cntn_id.value, run_tag) == None:
             fqs.append(more_fastqs(pair.cntn_id.value, run_tag))
@@ -195,17 +171,9 @@ def get_pair_and_more_fqs(Sctx, run_tag):
         return fqs
 
 
-# Can now get from slims:
-# Secondary analysis = wgs_somatic
-# Run ID for possible additional fastqs for DNA no. 
-# Tumor/Normal type
-# Tumor ID
-# Gender
 
 # Need to do:
-# Paired T+N comes from same run = start wgs_somatic
 # Paired T+N comes from different runs. Do nothing with the first sample - wait for its pair to run pipeline.
-# Sample has been sequenced before and has additional fastqs. Find them and merge fastqs. Might need to download from HCP. Start pipeline with correct pair. The other part of the pair could be in same run or previous run. Can now find additional fastqs from other runs. Fastqs don't need to be merged to start the pipeline, they just need to be in the same folder. Mapping will be done for each fastq R1+R2 and then the bam files will be merged in the dedup step.
 # Tumor only. Flag in samplesheet? Info about this in slims?
 # Normal only. Flag in samplesheet? Info about this in slims?
 # Tumor has run as tumor only in a previous run. Normal comes in a later run and needs to be paired with its tumor and run as paired.
