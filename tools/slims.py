@@ -135,7 +135,6 @@ def run_paths_for_more_fastqs(sample_name, run_tag):
                               .add(not_equals('cntn_cstm_runTag', run_tag)))
     if more_fastqs:
         runtags = []
-        more_fq_paths = []
         run_paths = []
         for fq in more_fastqs:
             fqs_runtag = fq.cntn_cstm_runTag.value
@@ -147,7 +146,6 @@ def run_paths_for_more_fastqs(sample_name, run_tag):
             fq_paths = json_info['fastq_paths']
             
             for path in fq_paths:
-                more_fq_paths.append(path) 
                 new_path = path.split("/fastq/")[0]
                 if new_path not in run_paths:
                     run_paths.append(new_path)
