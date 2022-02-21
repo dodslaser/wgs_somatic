@@ -124,10 +124,10 @@ def get_sample_slims_info(Sctx, run_tag):
     return
 
 
-def more_fastqs(sample_name, run_tag):
+def run_paths_for_more_fastqs(sample_name, run_tag):
     """
     If a sample name has fastqs from additional sequencing runs - fetch those fastq objects. 
-    Returns run paths of runs where you can find additional fastqs. 
+    Returns run paths (Demultiplexdir/runTag) of runs where you can find additional fastqs. 
     """
     more_fastqs = slims_connection.fetch('Content', conjunction()
                               .add(equals('cntn_id', sample_name))
@@ -153,10 +153,10 @@ def more_fastqs(sample_name, run_tag):
                     run_paths.append(new_path)
         return run_paths
 
-def get_pair_and_more_fqs(Sctx, run_tag):
+def get_pair_and_run_paths(Sctx, run_tag):
     """
     If tumor and normal are sequenced in different runs - find the pairs. 
-    Then use the more_fastqs function to find paths of fastqs that are sequenced in different runs. 
+    Then use the run_paths_for_more_fastqs function to find paths of fastqs that are sequenced in different runs. 
     """
 
     get_sample_slims_info(Sctx, run_tag)
@@ -164,14 +164,13 @@ def get_pair_and_more_fqs(Sctx, run_tag):
                               .add(equals('cntn_fk_contentType', 6))
                               .add(equals('cntn_cstm_tumorNormalID', 
                               Sctx.slims_info['tumorNormalID'])))
-    parts_of_pair = []
-    fqs =[]
+    run_paths =[]
     for pair in pairs:
         # if there are not fastqs in other runs, skip!
-        if more_fastqs(pair.cntn_id.value, run_tag) != None:
-            fqs.append(more_fastqs(pair.cntn_id.value, run_tag))
+        if run_paths_for_more_fastqs(pair.cntn_id.value, run_tag) != None:
+            run_paths.append(run_paths_for_more_fastqs(pair.cntn_id.value, run_tag))
     # if fqs are in other run, get those paths:
-    return fqs or None
+    return run_paths or None
 
 
 

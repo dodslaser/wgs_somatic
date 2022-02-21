@@ -13,7 +13,7 @@ from itertools import chain
 from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
 from helpers import setup_logger
-from tools.slims import get_sample_slims_info, SlimsSample, more_fastqs, get_pair_and_more_fqs
+from tools.slims import get_sample_slims_info, SlimsSample, run_paths_for_more_fastqs, get_pair_and_run_paths
 
 logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
 
@@ -154,7 +154,7 @@ def wrapper():
 
         # Get run paths for samples (or other part of t/n pair) with additional fastqs in other runs
         for sctx in Rctx_run.sample_contexts:
-            run_paths = get_pair_and_more_fqs(sctx, Rctx.run_tag)
+            run_paths = get_pair_and_run_paths(sctx, Rctx.run_tag)
             if run_paths:
                 run_paths = list(chain.from_iterable(run_paths))
                 for r in run_paths:
