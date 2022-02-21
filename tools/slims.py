@@ -156,7 +156,7 @@ def get_pair_and_run_paths(Sctx, run_tag):
     Then use the run_paths_for_more_fastqs function to find paths of fastqs that are sequenced in different runs. 
     """
 
-    get_sample_slims_info(Sctx, run_tag)
+    Sctx.slims_info = get_sample_slims_info(Sctx, run_tag)
     pairs = slims_connection.fetch('Content', conjunction()
                               .add(equals('cntn_fk_contentType', 6))
                               .add(equals('cntn_cstm_tumorNormalID', 
