@@ -125,7 +125,10 @@ def get_sample_slims_info(Sctx, run_tag):
 
 
 def more_fastqs(sample_name, run_tag):
-    """If a sample name has fastqs from additional sequencing runs - fetch those fastq objects. Returns run paths of runs where you can find additional fastqs. """
+    """
+    If a sample name has fastqs from additional sequencing runs - fetch those fastq objects. 
+    Returns run paths of runs where you can find additional fastqs. 
+    """
     more_fastqs = slims_connection.fetch('Content', conjunction()
                               .add(equals('cntn_id', sample_name))
                               .add(equals('cntn_fk_contentType', 22))
@@ -146,25 +149,29 @@ def more_fastqs(sample_name, run_tag):
             for path in fq_paths:
                 more_fq_paths.append(path) 
                 new_path = path.split("/fastq/")[0]
-                run_paths.append(new_path) if new_path not in run_paths else run_paths
+                if new_path not in run_paths:
+                    run_paths.append(new_path)
         return run_paths
 
 def get_pair_and_more_fqs(Sctx, run_tag):
-    """If tumor and normal are sequenced in different runs - find the pairs. Then use the more_fastqs function to find paths of fastqs that are sequenced in different runs. """
+    """
+    If tumor and normal are sequenced in different runs - find the pairs. 
+    Then use the more_fastqs function to find paths of fastqs that are sequenced in different runs. 
+    """
 
     get_sample_slims_info(Sctx, run_tag)
     pairs = slims_connection.fetch('Content', conjunction()
                               .add(equals('cntn_fk_contentType', 6))
-                              .add(equals('cntn_cstm_tumorNormalID', Sctx.slims_info['tumorNormalID'])))
+                              .add(equals('cntn_cstm_tumorNormalID', 
+                              Sctx.slims_info['tumorNormalID'])))
     parts_of_pair = []
     fqs =[]
     for pair in pairs:
         # if there are not fastqs in other runs, skip!
-        if not more_fastqs(pair.cntn_id.value, run_tag) == None:
+        if more_fastqs(pair.cntn_id.value, run_tag) != None:
             fqs.append(more_fastqs(pair.cntn_id.value, run_tag))
     # if fqs are in other run, get those paths:
-    if fqs:
-        return fqs
+    return fqs or None
 
 
 

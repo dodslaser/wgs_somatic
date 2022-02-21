@@ -64,10 +64,10 @@ def Rctx_Sctx_for_run(Rctx):
         logger.info(f'Adding sample context to list of contexts.')
         Rctx.add_sample_context(Sctx)
 
-        if not Rctx.sample_contexts:
-            # If no samples set for wgs_somatic
-            logger.info('No samples set for wgs_somatic. Skipping run.')
-            continue
+    if not Rctx.sample_contexts:
+        # If no samples set for wgs_somatic
+        # doesn't skip continuing with the rest of the code - need to fix this
+        logger.info('No samples set for wgs_somatic. Skipping run.')
 
     for Sctx in Rctx.sample_contexts:
         sample_status['approved'].append(Sctx)
@@ -128,8 +128,6 @@ def wrapper():
     with open(previous_runs_file_path, 'r') as prev:
         previous_runs = [line.rstrip() for line in prev]
 
-
-
     # Loop through each run path and setup Run context class
     for run_path in local_run_paths:
         Rctx = RunContext(run_path)
@@ -157,10 +155,11 @@ def wrapper():
         # Get run paths for samples (or other part of t/n pair) with additional fastqs in other runs
         for sctx in Rctx_run.sample_contexts:
             run_paths = get_pair_and_more_fqs(sctx, Rctx.run_tag)
-            if not run_paths == None:
+            if run_paths:
                 run_paths = list(chain.from_iterable(run_paths))
                 for r in run_paths:
-                    additional_run_paths.append(r) if r not in additional_run_paths else additional_run_paths
+                    if r not in additional_run_paths:
+                        additional_run_paths.append(r)
 
     # get Rctx and Sctx for additional runs that have samples related to current run
     # i realized that i don't actually use "additionalRctx" for anything now. but using the function Rctx_Sctx_for_run does append to sample_status which is used below... could be done in a better way if i don't have to use additionalRctx anyway. just appending to sample_status is neccessary.  
@@ -170,19 +169,17 @@ def wrapper():
 
 
     # get tumor and normal samples related to current run from approved samples
-    for category, contexts in sample_status.items():
-        if category == 'approved':
-            for Sctx in contexts:
-                if Rctx_run.run_tag == Sctx.sample_id.split("_",1)[1]:
-                    # use both tumorNormalID and sample name (minus "DNA") as pair ids since we will change pair ids to be normalname for tumor and tumorname for normal 
-                    pair_ids_in_run.append(Sctx.slims_info["tumorNormalID"])
-                    pair_ids_in_run.append(Sctx.sample_name.split("DNA")[1])
-                if Sctx.slims_info['tumorNormalType'] == 'tumor':
-                    tumor_samples.append(Sctx)
-                elif Sctx.slims_info['tumorNormalType'] == 'normal':
-                    normal_samples.append(Sctx)
-                else:
-                    logger.info(f'Warning! {Sctx.slims_info["content_id"]} is not set as tumor or normal.')
+    for Sctx in sample_status['approved']:
+        if Rctx_run.run_tag == Sctx.sample_id.split("_",1)[1]:
+            # use both tumorNormalID and sample name (minus "DNA") as pair ids since we will change pair ids to be normalname for tumor and tumorname for normal 
+            pair_ids_in_run.append(Sctx.slims_info["tumorNormalID"])
+            pair_ids_in_run.append(Sctx.sample_name.split("DNA")[1])
+        if Sctx.slims_info['tumorNormalType'] == 'tumor':
+            tumor_samples.append(Sctx)
+        elif Sctx.slims_info['tumorNormalType'] == 'normal':
+            normal_samples.append(Sctx)
+        else:
+            logger.info(f'Warning! {Sctx.slims_info["content_id"]} is not set as tumor or normal.')
     
     # make list of unique pair ids in current run
     pair_ids_in_run = list(set(pair_ids_in_run))
@@ -208,7 +205,16 @@ def wrapper():
             if n.slims_info["content_id"] in started_samples:
                 continue
             if t.slims_info['tumorNormalID'] == n.slims_info['tumorNormalID']:
-                logger.info(f'Starting wgs_somatic with arguments: \n runnormal: {Rctx_run.run_name} \n runtumor: {Rctx_run.run_name} \n tumorsample: {t.slims_info["content_id"]} \n normalsample: {n.slims_info["content_id"]} \n normalfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n tumorfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n outputdir: {os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t.slims_info["content_id"])} \n igvuser: barncancer_hg38 \n hg38ref: yes')
+                logger.info(f'Starting wgs_somatic with arguments: \n \
+runnormal: {Rctx_run.run_name} \n \
+runtumor: {Rctx_run.run_name} \n \
+tumorsample: {t.slims_info["content_id"]} \n \
+normalsample: {n.slims_info["content_id"]} \n \
+normalfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n \
+tumorfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n \
+outputdir: {os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t.slims_info["content_id"])} \n \
+igvuser: barncancer_hg38 \n \
+hg38ref: yes')
                 started_samples.extend((t.slims_info["content_id"], n.slims_info["content_id"]))
 
 
