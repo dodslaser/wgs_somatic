@@ -47,7 +47,7 @@ def Rctx_Sctx_for_run(Rctx):
 
         # Query Slims for clinical information and add to sample context
         logger.info(f'Fetching SLIMS info.')
-        get_sample_slims_info(Sctx, run_tag = Rctx.run_tag)  # NOTE: Mod with slims info in-place
+        Sctx.slims_info = get_sample_slims_info(Sctx, run_tag = Rctx.run_tag)
 
         if not Sctx.slims_info:
             logger.warning(f'No SLIMS info available!')

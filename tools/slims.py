@@ -120,8 +120,7 @@ def get_sample_slims_info(Sctx, run_tag):
     if not SSample.dna:
         Sctx.slims_info = {}
         return
-    Sctx.slims_info = translate_slims_info(SSample.dna)
-    return
+    return translate_slims_info(SSample.dna)
 
 
 def run_paths_for_more_fastqs(sample_name, run_tag):
