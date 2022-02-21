@@ -90,10 +90,6 @@ def translate_slims_info(record):
 
     gender = record.gender.value
 
-    is_trio = record.cntn_cstm_trio.value
-    trio_id = record.cntn_cstm_trioID.value
-    trio_role = record.cntn_cstm_trioRole.value
-
     tumorNormalType = record.cntn_cstm_tumorNormalType.value
     tumorNormalID = record.cntn_cstm_tumorNormalID.value
 
