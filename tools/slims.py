@@ -164,8 +164,9 @@ def get_pair_and_run_paths(Sctx, run_tag):
     run_paths =[]
     for pair in pairs:
         # if there are not fastqs in other runs, skip!
-        if run_paths_for_more_fastqs(pair.cntn_id.value, run_tag) != None:
-            run_paths.append(run_paths_for_more_fastqs(pair.cntn_id.value, run_tag))
+        r_paths = run_paths_for_more_fastqs(pair.cntn_id.value, run_tag)
+        if r_paths != None:
+            run_paths.append(r_paths)
     # if fqs are in other run, get those paths:
     return run_paths or None
 
