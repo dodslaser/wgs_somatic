@@ -75,7 +75,7 @@ def generate_context_objects(Rctx):
 
     return Rctx
 
-
+"""
 def link_fastqs(list_of_fq_paths):
     '''Link fastqs to fastq-folder in demultiplexdir of current run. Need to change the hardcoded path to my home... '''
     # TODO: using a hardcoded test folder right now for symlinks. will change this to correct Demultiplexdir/current-run/fastq folder.
@@ -85,7 +85,7 @@ def link_fastqs(list_of_fq_paths):
         if not os.path.islink(os.path.join(f"/home/xshang/ws_testoutput/symlinks/", os.path.basename(fq_path))):
         # Now symlinks all additional paths to fastqs for tumor and normal in other runs. If I symlink to demultiplexdir of particular run instead, all fastqs belonging to the T/N pair will be in the same folder and the pipeline can start using that folder as argument.
             os.symlink(fq_path, os.path.join(f"/home/xshang/ws_testoutput/symlinks/", os.path.basename(fq_path)))
-
+"""
 
 def get_samples_ready(list_of_samples, pair_ids_in_run, run_tag):
     '''Add samples that belong to current run from current run and additional runs to list of ready samples'''
@@ -98,10 +98,10 @@ def get_samples_ready(list_of_samples, pair_ids_in_run, run_tag):
         if s.sample_id.split('_',1)[1] == run_tag:
             # the plan is to link the fastqs of other runs to fastq-folder in demultiplexdir for the current run so all fastqs for a sample + its pair are in the same folder. then the pipeline can start based on this folder.
             logger.info(f'fastqs for {s.sample_id} do not need to be linked')
-        else:
+        #else:
             # only need to link fastqs from other runs since i will link them to fastq folder of current run.
-            logger.info(f'linking fastqs for {s.sample_id}')
-            link_fastqs(s.fastqs)
+            #logger.info(f'linking fastqs for {s.sample_id}')
+            #link_fastqs(s.fastqs)
         samples_ready.append(s)
     return samples_ready
 
@@ -109,12 +109,12 @@ def get_samples_ready(list_of_samples, pair_ids_in_run, run_tag):
 def wrapper():
 
     # using lists to keep track of stuff... could maybe be done in a better way...
-    additional_run_paths = []
+    #additional_run_paths = []
     tumor_samples = []
     normal_samples = []
     pair_ids_in_run = []
     started_samples = []
-
+    pair_dict_all_pairs = {}
 
     with open(CONFIG_PATH, 'r') as conf:
         config = yaml.safe_load(conf)
@@ -155,26 +155,38 @@ def wrapper():
 
         # Get run paths for samples (or other part of t/n pair) with additional fastqs in other runs
         for sctx in Rctx_run.sample_contexts:
-            run_paths = get_pair_and_run_paths(sctx, Rctx.run_tag)
-            if run_paths:
-                # removes that there is a list of lists and makes just one list
-                run_paths = list(chain.from_iterable(run_paths))
-                for r in run_paths:
-                    if r not in additional_run_paths:
-                        additional_run_paths.append(r)
+            #run_paths = get_pair_and_run_paths(sctx, Rctx.run_tag)
+            print(f'sctx slims info: {sctx.slims_info["content_id"]}, {sctx.slims_info["tumorNormalType"]}, {sctx.slims_info["tumorNormalID"]}')
+            pair_dict = get_pair_and_run_paths(sctx, Rctx.run_tag)
+            print(f'pair dict hej {pair_dict}')
+            pair_dict_all_pairs.update(pair_dict)
+        print(f'pair dict all pairs: {pair_dict_all_pairs}')
+            #if run_paths:
+                # removes that there is a list of lists and makes just one list and removes duplicates
+                #run_paths = list(set(list(chain.from_iterable(run_paths))))
+                #print(f'run paths: {run_paths}')
+                #for r in run_paths:
+                #    if r not in additional_run_paths:
+                #        additional_run_paths.append(r)
+    #print(f'additional run paths: {additional_run_paths}')
 
     # get Rctx and Sctx for additional runs that have samples related to current run
     # i realized that i don't actually use "additionalRctx" for anything now. 
     # but using the function generate_context_objects does append to sample_status which is used below... 
     # could be done in a better way if i don't have to use additionalRctx anyway. 
     # just appending to sample_status is neccessary.  
-    for run_path in additional_run_paths:
-        additionalRctx = RunContext(run_path)
-        additionalRctx = generate_context_objects(additionalRctx)
 
+    #for run_path in run_paths:
+    #    additionalRctx = RunContext(run_path)
+    #    additionalRctx = generate_context_objects(additionalRctx)
+
+
+    # FIXME Need to get pair ID in other way if i don't have Sctx for additional runs
+    # Could maybe make a dictionary of tumor:normal
 
     # get tumor and normal samples related to current run from approved samples
     for Sctx in sample_status['approved']:
+        print(f'sample status approved sample id {Sctx.sample_id}')
         if Rctx_run.run_tag == Sctx.sample_id.split("_",1)[1]:
             # use both tumorNormalID and sample name (minus "DNA") as pair ids since we will change pair ids to be normalname for tumor and tumorname for normal 
             pair_ids_in_run.append(Sctx.slims_info["tumorNormalID"])
@@ -197,7 +209,8 @@ def wrapper():
     # get lists of ready samples and remove duplicates from list
     tumor_samples_ready = list(set(get_samples_ready(tumor_samples, pair_ids_in_run, Rctx_run.run_tag)))
     normal_samples_ready = list(set(get_samples_ready(normal_samples, pair_ids_in_run, Rctx_run.run_tag)))
-
+    print(f'tumor samples ready: {tumor_samples_ready}')
+    print(f'normal samples ready: {normal_samples_ready}')
 
     # start the pipeline with the correct pairs. 
     # will use these arguments to start pipeline. 
