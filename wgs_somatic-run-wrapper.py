@@ -77,8 +77,8 @@ def generate_context_objects(Rctx):
 
 def link_fastqs(list_of_fq_paths):
     '''Link fastqs to fastq-folder in demultiplexdir of current run. Need to change the hardcoded path to my home... '''
-    # using a hardcoded test folder right now for symlinks. will change this to correct Demultiplexdir/current-run/fastq folder.
-    # additional fastqs need to still be in demultiplexdir. not considering downloading from hcp right now. need to consider this later...
+    # TODO: using a hardcoded test folder right now for symlinks. will change this to correct Demultiplexdir/current-run/fastq folder.
+    # TODO: additional fastqs need to still be in demultiplexdir. not considering downloading from hcp right now. need to consider this later...
     for fq_path in list_of_fq_paths:
     # Only links if link doesn't already exist
         if not os.path.islink(os.path.join(f"/home/xshang/ws_testoutput/symlinks/", os.path.basename(fq_path))):
@@ -156,13 +156,17 @@ def wrapper():
         for sctx in Rctx_run.sample_contexts:
             run_paths = get_pair_and_run_paths(sctx, Rctx.run_tag)
             if run_paths:
+                # removes that there is a list of lists and makes just one list
                 run_paths = list(chain.from_iterable(run_paths))
                 for r in run_paths:
                     if r not in additional_run_paths:
                         additional_run_paths.append(r)
 
     # get Rctx and Sctx for additional runs that have samples related to current run
-    # i realized that i don't actually use "additionalRctx" for anything now. but using the function generate_context_objects does append to sample_status which is used below... could be done in a better way if i don't have to use additionalRctx anyway. just appending to sample_status is neccessary.  
+    # i realized that i don't actually use "additionalRctx" for anything now. 
+    # but using the function generate_context_objects does append to sample_status which is used below... 
+    # could be done in a better way if i don't have to use additionalRctx anyway. 
+    # just appending to sample_status is neccessary.  
     for run_path in additional_run_paths:
         additionalRctx = RunContext(run_path)
         additionalRctx = generate_context_objects(additionalRctx)
@@ -194,10 +198,25 @@ def wrapper():
     normal_samples_ready = list(set(get_samples_ready(normal_samples, pair_ids_in_run, Rctx_run.run_tag)))
 
 
-    # start the pipeline with the correct pairs. will use these arguments to start pipeline. some arguments are hardcoded right now, need to fix this. only considers barncancer hg38 (GMS-AL + GMS-BT samples) right now. could have outputdirs and arguments in config and get them from there. 
+    # start the pipeline with the correct pairs. 
+    # will use these arguments to start pipeline. 
+    # some arguments are hardcoded right now, need to fix this. 
+    # only considers barncancer hg38 (GMS-AL + GMS-BT samples) right now. 
+    # could have outputdirs and arguments in config and get them from there. 
+
     # this will only work for pairs. have to consider tumor only/normal only as well. 
-    # the arguments runtumor and runnormal could be "wrong" by doing it like this since they use run name of current run but if for example normal is in older run it has the wrong argument for "runnormal". this argument is not that important, it is only used to create a unique sample name. maybe it would be better discard/modify this argument than spending time on getting the correct value of it for samples from different runs. also, if fastqs come from more than one run, what will the value of this argument be then to be "correct"?...
-    # outputdir - need to consider if outputdir already exists (if sample has been run before and now it has new fastqs in current run, outputdir already exists). should old outputdir be moved to archive? 
+
+    # the arguments runtumor and runnormal could be "wrong" by doing it like this 
+    # since they use run name of current run 
+    # but if for example normal is in older run it has the wrong argument for "runnormal". 
+    # this argument is not that important, it is only used to create a unique sample name. 
+    # maybe it would be better discard/modify this argument than spending time on getting the correct value of it for samples from different runs. 
+    # also, if fastqs come from more than one run, what will the value of this argument be then to be "correct"?...
+
+    # outputdir - need to consider if outputdir already exists 
+    # (if sample has been run before and now it has new fastqs in current run, outputdir already exists). 
+    # should old outputdir be moved to archive? 
+
     for t in tumor_samples_ready:
         if t.slims_info["content_id"] in started_samples:
             continue
