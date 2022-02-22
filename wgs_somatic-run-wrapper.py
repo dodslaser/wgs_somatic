@@ -30,7 +30,7 @@ def look_for_runs(root_path):
     return [path for path in found_paths if re.search(regex, os.path.basename(path))]
 
 
-def Rctx_Sctx_for_run(Rctx):
+def generate_context_objects(Rctx):
     '''Create Rctx and Sctx for a demultiplexed run'''
 
     # Read demultiplex stats file for sample names, fastq paths, and nr reads
@@ -149,7 +149,7 @@ def wrapper():
             print(Rctx.run_name, file=prev)
 
         # get Rctx and Sctx for current run
-        Rctx_run = Rctx_Sctx_for_run(Rctx)
+        Rctx_run = generate_context_objects(Rctx)
 
 
         # Get run paths for samples (or other part of t/n pair) with additional fastqs in other runs
@@ -162,10 +162,10 @@ def wrapper():
                         additional_run_paths.append(r)
 
     # get Rctx and Sctx for additional runs that have samples related to current run
-    # i realized that i don't actually use "additionalRctx" for anything now. but using the function Rctx_Sctx_for_run does append to sample_status which is used below... could be done in a better way if i don't have to use additionalRctx anyway. just appending to sample_status is neccessary.  
+    # i realized that i don't actually use "additionalRctx" for anything now. but using the function generate_context_objects does append to sample_status which is used below... could be done in a better way if i don't have to use additionalRctx anyway. just appending to sample_status is neccessary.  
     for run_path in additional_run_paths:
         additionalRctx = RunContext(run_path)
-        additionalRctx = Rctx_Sctx_for_run(additionalRctx)
+        additionalRctx = generate_context_objects(additionalRctx)
 
 
     # get tumor and normal samples related to current run from approved samples
