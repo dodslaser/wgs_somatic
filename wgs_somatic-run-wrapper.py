@@ -9,6 +9,7 @@ import yaml
 from datetime import datetime
 import json
 from itertools import chain
+import traceback
 
 from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
@@ -247,6 +248,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         pass
     except Exception:
-        pass
-
+        format_exc = traceback.format_exc()
+        logger.error(format_exc)
+        # TODO: add send email about error here
 
