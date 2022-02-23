@@ -110,8 +110,8 @@ def wrapper():
 
     # using lists to keep track of stuff... could maybe be done in a better way...
     #additional_run_paths = []
-    tumor_samples = []
-    normal_samples = []
+    #tumor_samples = []
+    #normal_samples = []
     pair_ids_in_run = []
     started_samples = []
     pair_dict_all_pairs = {}
@@ -156,11 +156,11 @@ def wrapper():
         # Get run paths for samples (or other part of t/n pair) with additional fastqs in other runs
         for sctx in Rctx_run.sample_contexts:
             #run_paths = get_pair_and_run_paths(sctx, Rctx.run_tag)
-            print(f'sctx slims info: {sctx.slims_info["content_id"]}, {sctx.slims_info["tumorNormalType"]}, {sctx.slims_info["tumorNormalID"]}')
+            #print(f'sctx slims info: {sctx.slims_info["content_id"]}, {sctx.slims_info["tumorNormalType"]}, {sctx.slims_info["tumorNormalID"]}')
             pair_dict = get_pair_and_run_paths(sctx, Rctx.run_tag)
-            print(f'pair dict hej {pair_dict}')
+            #print(f'pair dict hej {pair_dict}')
             pair_dict_all_pairs.update(pair_dict)
-        print(f'pair dict all pairs: {pair_dict_all_pairs}')
+        #print(f'pair dict all pairs: {pair_dict_all_pairs}')
             #if run_paths:
                 # removes that there is a list of lists and makes just one list and removes duplicates
                 #run_paths = list(set(list(chain.from_iterable(run_paths))))
@@ -169,6 +169,42 @@ def wrapper():
                 #    if r not in additional_run_paths:
                 #        additional_run_paths.append(r)
     #print(f'additional run paths: {additional_run_paths}')
+
+    #print(f'pair dict all pairs: {pair_dict_all_pairs}')
+    for key in pair_dict_all_pairs:
+        #print(f'DICT: {pair_dict_all_pairs.get(key)}')
+        if 'tumor' in pair_dict_all_pairs.get(key):
+            t = key
+            t_ID = [val for val in pair_dict_all_pairs.get(key) if val != 'tumor'][0]
+            #t_ID.remove('tumor')
+            #ID = pair_dict_all_pairs.get(key).remove('tumor') 
+            #print(f't: {t}, t_ID: {t_ID}')
+            #tumor_samples.append(key)
+            for k in pair_dict_all_pairs:
+                #print(f'k: {k}')
+                #print(f'hejsan {pair_dict_all_pairs.get(k)}')
+                if 'normal' in pair_dict_all_pairs.get(k):
+                    n = k
+                    #print(f'n: {n}')
+                    n_ID = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][0]
+                    #print(f'n_ID: {n_ID}')
+                    #n_ID.remove('normal')
+                    if n_ID == t_ID or t_ID == n.split("DNA")[1] or n_ID == t.split("DNA")[1]:
+                        #print(f'{t} and {n} pair!')
+                        logger.info(f'Starting wgs_somatic with arguments: \n \
+runnormal: {Rctx_run.run_name} \n \
+runtumor: {Rctx_run.run_name} \n \
+tumorsample: {t} \n \
+normalsample: {n} \n \
+normalfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n \
+tumorfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n \
+outputdir: {os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t)} \n \
+igvuser: barncancer_hg38 \n \
+hg38ref: yes')
+
+    #print(f'tumor samples {tumor_samples}')
+    #print(f'normal samples {normal_samples}') 
+
 
     # get Rctx and Sctx for additional runs that have samples related to current run
     # i realized that i don't actually use "additionalRctx" for anything now. 
@@ -185,32 +221,32 @@ def wrapper():
     # Could maybe make a dictionary of tumor:normal
 
     # get tumor and normal samples related to current run from approved samples
-    for Sctx in sample_status['approved']:
-        print(f'sample status approved sample id {Sctx.sample_id}')
-        if Rctx_run.run_tag == Sctx.sample_id.split("_",1)[1]:
+    #for Sctx in sample_status['approved']:
+    #    print(f'sample status approved sample id {Sctx.sample_id}')
+        #if Rctx_run.run_tag == Sctx.sample_id.split("_",1)[1]:
             # use both tumorNormalID and sample name (minus "DNA") as pair ids since we will change pair ids to be normalname for tumor and tumorname for normal 
-            pair_ids_in_run.append(Sctx.slims_info["tumorNormalID"])
-            pair_ids_in_run.append(Sctx.sample_name.split("DNA")[1])
-        if Sctx.slims_info['tumorNormalType'] == 'tumor':
-            tumor_samples.append(Sctx)
-        elif Sctx.slims_info['tumorNormalType'] == 'normal':
-            normal_samples.append(Sctx)
-        else:
-            logger.info(f'Warning! {Sctx.slims_info["content_id"]} is not set as tumor or normal.')
+        #pair_ids_in_run.append(Sctx.slims_info["tumorNormalID"])
+        #pair_ids_in_run.append(Sctx.sample_name.split("DNA")[1])
+        #if Sctx.slims_info['tumorNormalType'] == 'tumor':
+        #    tumor_samples.append(Sctx)
+        #elif Sctx.slims_info['tumorNormalType'] == 'normal':
+        #    normal_samples.append(Sctx)
+        #else:
+        #    logger.info(f'Warning! {Sctx.slims_info["content_id"]} is not set as tumor or normal.')
     
     # make list of unique pair ids in current run
-    pair_ids_in_run = list(set(pair_ids_in_run))
-    logger.info(f'pair IDs in run: {pair_ids_in_run}')
+    #pair_ids_in_run = list(set(pair_ids_in_run))
+    #logger.info(f'pair IDs in run: {pair_ids_in_run}')
 
 
 
     # find tumor/normal pairs in the run and start pipeline
 
     # get lists of ready samples and remove duplicates from list
-    tumor_samples_ready = list(set(get_samples_ready(tumor_samples, pair_ids_in_run, Rctx_run.run_tag)))
-    normal_samples_ready = list(set(get_samples_ready(normal_samples, pair_ids_in_run, Rctx_run.run_tag)))
-    print(f'tumor samples ready: {tumor_samples_ready}')
-    print(f'normal samples ready: {normal_samples_ready}')
+    #tumor_samples_ready = list(set(get_samples_ready(tumor_samples, pair_ids_in_run, Rctx_run.run_tag)))
+    #normal_samples_ready = list(set(get_samples_ready(normal_samples, pair_ids_in_run, Rctx_run.run_tag)))
+    #print(f'tumor samples ready: {tumor_samples_ready}')
+    #print(f'normal samples ready: {normal_samples_ready}')
 
     # start the pipeline with the correct pairs. 
     # will use these arguments to start pipeline. 
@@ -231,24 +267,24 @@ def wrapper():
     # (if sample has been run before and now it has new fastqs in current run, outputdir already exists). 
     # should old outputdir be moved to archive? 
 
-    for t in tumor_samples_ready:
-        if t.slims_info["content_id"] in started_samples:
-            continue
-        for n in normal_samples_ready:
-            if n.slims_info["content_id"] in started_samples:
-                continue
-            if t.slims_info['tumorNormalID'] == n.slims_info['tumorNormalID']:
-                logger.info(f'Starting wgs_somatic with arguments: \n \
-runnormal: {Rctx_run.run_name} \n \
-runtumor: {Rctx_run.run_name} \n \
-tumorsample: {t.slims_info["content_id"]} \n \
-normalsample: {n.slims_info["content_id"]} \n \
-normalfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n \
-tumorfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n \
-outputdir: {os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t.slims_info["content_id"])} \n \
-igvuser: barncancer_hg38 \n \
-hg38ref: yes')
-                started_samples.extend((t.slims_info["content_id"], n.slims_info["content_id"]))
+#    for t in tumor_samples_ready:
+#        if t.slims_info["content_id"] in started_samples:
+#            continue
+#        for n in normal_samples_ready:
+#            if n.slims_info["content_id"] in started_samples:
+#                continue
+#            if t.slims_info['tumorNormalID'] == n.slims_info['tumorNormalID']:
+#                logger.info(f'Starting wgs_somatic with arguments: \n \
+#runnormal: {Rctx_run.run_name} \n \
+#runtumor: {Rctx_run.run_name} \n \
+#tumorsample: {t.slims_info["content_id"]} \n \
+#normalsample: {n.slims_info["content_id"]} \n \
+#normalfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n \
+#tumorfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n \
+#outputdir: {os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t.slims_info["content_id"])} \n \
+#igvuser: barncancer_hg38 \n \
+#hg38ref: yes')
+#                started_samples.extend((t.slims_info["content_id"], n.slims_info["content_id"]))
 
 
    # next step here is to actually start the pipeline with these arguments
