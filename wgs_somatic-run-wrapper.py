@@ -118,7 +118,7 @@ def wrapper():
 
         # Get T/N pair info in a dict for samples and link additional fastqs from other runs
         for sctx in Rctx_run.sample_contexts:
-            pair_dict = get_pair_dict(sctx, Rctx.run_tag)
+            pair_dict = get_pair_dict(sctx, Rctx.run_tag, logger)
             pair_dict_all_pairs.update(pair_dict)
 
     # Uses the dictionary of T/N samples to put the correct pairs together and finds the correct input arguments to the pipeline

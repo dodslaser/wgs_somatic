@@ -132,7 +132,7 @@ def link_fastqs(list_of_fq_paths):
         # Now symlinks all additional paths to fastqs for tumor and normal in other runs. If I symlink to demultiplexdir of particular run instead, all fastqs belonging to the T/N pair will be in the same folder and the pipeline can start using that folder as argument.
             os.symlink(fq_path, os.path.join(f"/home/xshang/ws_testoutput/symlinks/", os.path.basename(fq_path)))
 
-def find_more_fastqs(sample_name, run_tag):
+def find_more_fastqs(sample_name, run_tag, logger):
     """
     If a sample name has fastqs from additional sequencing runs - fetch those fastq objects and link them to Demultiplexdir of current run. 
     """
@@ -149,10 +149,10 @@ def find_more_fastqs(sample_name, run_tag):
             fqSSample = SlimsSample(sample_name, tag)
             json_info = json.loads(fqSSample.fastq.cntn_cstm_demuxerSampleResult.value)
             fq_paths = json_info['fastq_paths']
-            print(f'linking fastqs for {sample_name}_{tag}')
+            logger.info(f'linking fastqs for {sample_name}_{tag}')
             link_fastqs(fq_paths)
 
-def get_pair_dict(Sctx, run_tag):
+def get_pair_dict(Sctx, run_tag, logger):
     """
     If tumor and normal are sequenced in different runs - find the pairs. 
     Then use the find_more_fastqs function to find paths of fastqs that are sequenced in different runs and link fastqs.
@@ -171,7 +171,7 @@ def get_pair_dict(Sctx, run_tag):
         pair.slims_info = translate_slims_info(pair)
         pair_dict[pair.slims_info["content_id"]] = [pair.slims_info["tumorNormalType"], pair.slims_info["tumorNormalID"]]
         # Check if there are additional fastqs in other runs and symlink fastqs
-        find_more_fastqs(pair.cntn_id.value, run_tag)
+        find_more_fastqs(pair.cntn_id.value, run_tag, logger)
     return pair_dict
 
 
