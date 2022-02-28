@@ -10,11 +10,13 @@ from datetime import datetime
 import json
 from itertools import chain
 import traceback
+import subprocess
 
 from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
 from helpers import setup_logger
 from tools.slims import get_sample_slims_info, SlimsSample, find_more_fastqs, get_pair_dict
+
 
 logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
 
@@ -118,7 +120,7 @@ def wrapper():
 
         # Get T/N pair info in a dict for samples and link additional fastqs from other runs
         for sctx in Rctx_run.sample_contexts:
-            pair_dict = get_pair_dict(sctx, Rctx.run_tag, logger)
+            pair_dict = get_pair_dict(sctx, Rctx, logger)
             pair_dict_all_pairs.update(pair_dict)
 
     # Uses the dictionary of T/N samples to put the correct pairs together and finds the correct input arguments to the pipeline
@@ -138,10 +140,11 @@ def wrapper():
                         normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
                         tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
                         #outputdir = os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t) 
-                        outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", t) #CHANGE BACK TO CORRECT OUTDIR
+                        outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", t) #use for testing
                         igvuser = 'barncancer_hg38' #FIXME get from config instead
                         hg38ref = 'yes' #FIXME get from config instead
 
+                        # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead. 
                         if os.path.exists(outputdir):
                             logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
                             os.rename(outputdir, f'{outputdir}_old')
@@ -156,6 +159,9 @@ tumorfastqs: {tumorfastqs} \n \
 outputdir: {outputdir} \n \
 igvuser: {igvuser} \n \
 hg38ref: {hg38ref}')
+                        # Pass the correct arguments to launch_snakemake.py to start the pipeline
+                        pipeline_args = f'--runnormal {runnormal} --outputdir {outputdir} --normalsample {normalsample} --normalfastqs {normalfastqs} --runtumor {runtumor} --tumorsample {tumorsample} --tumorfastqs {tumorfastqs} --igvuser {igvuser} --hg38ref {hg38ref}'
+                        subprocess.call(f'./launch_snakemake.py {pipeline_args}', shell=True)
 
     # start the pipeline with the correct pairs. 
     # will use these arguments to start pipeline. 
@@ -171,15 +177,6 @@ hg38ref: {hg38ref}')
     # this argument is not that important, it is only used to create a unique sample name. 
     # maybe it would be better discard/modify this argument than spending time on getting the correct value of it for samples from different runs. 
     # also, if fastqs come from more than one run, what will the value of this argument be then to be "correct"?...
-
-    # outputdir - need to consider if outputdir already exists 
-    # (if sample has been run before and now it has new fastqs in current run, outputdir already exists). 
-    # should old outputdir be moved to archive? 
-
-
-
-   # next step here is to actually start the pipeline with these arguments
-
 
 
 if __name__ == '__main__':
