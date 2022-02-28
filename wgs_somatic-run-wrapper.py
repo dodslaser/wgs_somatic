@@ -131,16 +131,31 @@ def wrapper():
                     n = k
                     n_ID = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][0]
                     if n_ID == t_ID or t_ID == n.split("DNA")[1] or n_ID == t.split("DNA")[1]: # if we change to pair id instead of tumorNormalID this is needed
+                        runnormal = Rctx_run.run_name
+                        runtumor = Rctx_run.run_name
+                        tumorsample = t
+                        normalsample = n
+                        normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
+                        tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
+                        #outputdir = os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t) 
+                        outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", t) #CHANGE BACK TO CORRECT OUTDIR
+                        igvuser = 'barncancer_hg38' #FIXME get from config instead
+                        hg38ref = 'yes' #FIXME get from config instead
+
+                        if os.path.exists(outputdir):
+                            logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
+                            os.rename(outputdir, f'{outputdir}_old')
+
                         logger.info(f'Starting wgs_somatic with arguments: \n \
-runnormal: {Rctx_run.run_name} \n \
-runtumor: {Rctx_run.run_name} \n \
-tumorsample: {t} \n \
-normalsample: {n} \n \
-normalfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n \
-tumorfastqs: {os.path.join(Rctx_run.run_path, "fastq")} \n \
-outputdir: {os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t)} \n \
-igvuser: barncancer_hg38 \n \
-hg38ref: yes')
+runnormal: {runnormal} \n \
+runtumor: {runtumor} \n \
+tumorsample: {tumorsample} \n \
+normalsample: {normalsample} \n \
+normalfastqs: {normalfastqs} \n \
+tumorfastqs: {tumorfastqs} \n \
+outputdir: {outputdir} \n \
+igvuser: {igvuser} \n \
+hg38ref: {hg38ref}')
 
     # start the pipeline with the correct pairs. 
     # will use these arguments to start pipeline. 
