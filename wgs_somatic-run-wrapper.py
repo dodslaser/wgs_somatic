@@ -139,12 +139,13 @@ def wrapper():
                         normalsample = n
                         normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
                         tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
-                        #outputdir = os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t) 
-                        outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", t) #use for testing
+                        outputdir = os.path.join("/seqstore/webfolders/wgs/barncancer/hg38", t) 
+                        #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", t) #use for testing
                         igvuser = 'barncancer_hg38' #FIXME get from config instead
                         hg38ref = 'yes' #FIXME get from config instead
 
-                        # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead. 
+                        # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead.
+                        # Won't work if outputdir_old also already exists. Need to be solved in a better way 
                         if os.path.exists(outputdir):
                             logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
                             os.rename(outputdir, f'{outputdir}_old')
@@ -160,8 +161,7 @@ outputdir: {outputdir} \n \
 igvuser: {igvuser} \n \
 hg38ref: {hg38ref}')
                         # Pass the correct arguments to launch_snakemake.py to start the pipeline
-                        pipeline_args = f'--runnormal {runnormal} --outputdir {outputdir} --normalsample {normalsample} --normalfastqs {normalfastqs} --runtumor {runtumor} --tumorsample {tumorsample} --tumorfastqs {tumorfastqs} --igvuser {igvuser} --hg38ref {hg38ref}'
-                        subprocess.call(f'./launch_snakemake.py {pipeline_args}', shell=True)
+                        subprocess.Popen(['python', 'launch_snakemake.py', '--runnormal', f'{runnormal}', '--outputdir', f'{outputdir}', '--normalsample', f'{normalsample}', '--normalfastqs', f'{normalfastqs}', '--runtumor', f'{runtumor}', '--tumorsample', f'{tumorsample}', '--tumorfastqs', f'{tumorfastqs}', '--igvuser', f'{igvuser}', '--hg38ref', f'{hg38ref}'])
 
     # start the pipeline with the correct pairs. 
     # will use these arguments to start pipeline. 
