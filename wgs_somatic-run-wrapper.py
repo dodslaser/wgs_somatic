@@ -127,12 +127,19 @@ def wrapper():
     for key in pair_dict_all_pairs:
         if 'tumor' in pair_dict_all_pairs.get(key):
             t = key
-            t_ID = [val for val in pair_dict_all_pairs.get(key) if val != 'tumor'][0] # crappy solution... but works since there is only one item in the list
+            # Using the list containing two values; 'tumor' and value of tumorNormalID
+            # Removing the value 'tumor' from the list to get the tumorNormalID
+            # TODO: Would be nice to do in a better way rather than using [0] to get the remaining value in the list
+            t_ID = [val for val in pair_dict_all_pairs.get(key) if val != 'tumor'][0] 
             for k in pair_dict_all_pairs:
                 if 'normal' in pair_dict_all_pairs.get(k):
                     n = k
                     n_ID = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][0]
-                    if n_ID == t_ID or t_ID == n.split("DNA")[1] or n_ID == t.split("DNA")[1]: # if we change to pair id instead of tumorNormalID this is needed
+                    # As of now, tumorNormalID is the same for tumor and normal.
+                    # In the future, this will be changed to pairID
+                    # The or statements are here to prepare to when we change to pair ID
+                    # Pair ID for tumor will be normal name (minus DNA) and the opposite for normal
+                    if n_ID == t_ID or t_ID == n.split("DNA")[1] or n_ID == t.split("DNA")[1]: 
                         runnormal = Rctx_run.run_name
                         runtumor = Rctx_run.run_name
                         tumorsample = t
