@@ -139,11 +139,10 @@ def wrapper():
                         normalsample = n
                         normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
                         tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
-                        #outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
-                        outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
+                        outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
+                        #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
                         igvuser = config['igv']['GMS-BT']
                         hg38ref = config['hg38ref']['GMS-BT']
-                        print(f"outdir: {os.path.join(config['outputdir']['GMS-BT'], tumorsample)}")
 
                         # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead.
                         # Won't work if outputdir_old also already exists. Need to be solved in a better way 
