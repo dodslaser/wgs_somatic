@@ -145,10 +145,11 @@ def wrapper():
                         tumorsample = t
                         normalsample = n
                         normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
-                        tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
+                        tumorfastqs = normalfastqs
                         outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
                         #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
                         igvuser = config['igv']['GMS-BT']
+                        # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
                         hg38ref = config['hg38ref']['GMS-BT']
 
                         # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead.
@@ -168,7 +169,8 @@ outputdir: {outputdir} \n \
 igvuser: {igvuser} \n \
 hg38ref: {hg38ref}')
                         # Pass the correct arguments to launch_snakemake.py to start the pipeline
-                        subprocess.Popen(['python', 'launch_snakemake.py', '--runnormal', f'{runnormal}', '--outputdir', f'{outputdir}', '--normalsample', f'{normalsample}', '--normalfastqs', f'{normalfastqs}', '--runtumor', f'{runtumor}', '--tumorsample', f'{tumorsample}', '--tumorfastqs', f'{tumorfastqs}', '--igvuser', f'{igvuser}', '--hg38ref', f'{hg38ref}'])
+                        # UNCOMMENT BELOW TO START PIPELINE
+                        #subprocess.Popen(['python', 'launch_snakemake.py', '--runnormal', f'{runnormal}', '--outputdir', f'{outputdir}', '--normalsample', f'{normalsample}', '--normalfastqs', f'{normalfastqs}', '--runtumor', f'{runtumor}', '--tumorsample', f'{tumorsample}', '--tumorfastqs', f'{tumorfastqs}', '--igvuser', f'{igvuser}', '--hg38ref', f'{hg38ref}'])
 
     # start the pipeline with the correct pairs. 
     # will use these arguments to start pipeline. 
