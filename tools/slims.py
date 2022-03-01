@@ -170,8 +170,7 @@ def get_pair_dict(Sctx, Rctx, logger):
                               .add(equals('cntn_cstm_tumorNormalID', 
                               Sctx.slims_info['tumorNormalID'])))
     for pair in pairs:
-        pair.slims_info = translate_slims_info(pair)
-        pair_dict[pair.slims_info["content_id"]] = [pair.slims_info["tumorNormalType"], pair.slims_info["tumorNormalID"]]
+        pair_dict[pair.cntn_id.value] = [pair.cntn_cstm_tumorNormalType.value, pair.cntn_cstm_tumorNormalID.value]
         # Check if there are additional fastqs in other runs and symlink fastqs
         find_more_fastqs(pair.cntn_id.value, Rctx, logger)
     return pair_dict
