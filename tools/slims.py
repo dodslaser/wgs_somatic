@@ -127,9 +127,9 @@ def link_fastqs(list_of_fq_paths, Rctx):
     # TODO: additional fastqs need to still be in demultiplexdir. not considering downloading from hcp right now. need to consider this later...
     for fq_path in list_of_fq_paths:
     # Only links if link doesn't already exist
-        if not os.path.islink(os.path.join(Rctx.run_path, f"fastq", os.path.basename(fq_path))):
+        if not os.path.islink(os.path.join(Rctx.run_path, "fastq", os.path.basename(fq_path))):
         # Now symlinks all additional paths to fastqs for tumor and normal in other runs. 
-            os.symlink(fq_path, os.path.join(Rctx.run_path, f"fastq", os.path.basename(fq_path)))
+            os.symlink(fq_path, os.path.join(Rctx.run_path, "fastq", os.path.basename(fq_path)))
 
 def find_more_fastqs(sample_name, Rctx, logger):
     """

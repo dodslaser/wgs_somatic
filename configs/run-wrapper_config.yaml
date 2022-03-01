@@ -5,9 +5,16 @@ novaseq:
 
 previous_runs_file_path: 'novaseq_runlist.txt'
 
-#igv:
-#  root_path: '/seqstore/webfolders/igv/data/'
-#  GMS-BT: 'barncancer_hg38'
-#  GMS-AL: 'barncancer_hg38'
-#  G21-004: 'susanne.fransson'
+igv:
+  GMS-BT: 'barncancer_hg38'
+  GMS-AL: 'barncancer_hg38'
+  G21-004: 'susanne.fransson'
 
+hg38ref:
+  GMS-BT: 'yes'
+  GMS-AL: 'yes'
+
+outputdir:
+  GMS-BT: '/seqstore/webfolders/wgs/barncancer/hg38'
+  GMS-AL: '/seqstore/webfolders/wgs/barncancer/hg38'
+  G21-004: '/seqstore/webfolders/wgs/neuroblastom'
