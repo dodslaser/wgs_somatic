@@ -2,6 +2,7 @@
 Wrapper to be used by cron for automatic start of wgs_somatic
 """
 
+import argparse
 import os
 import re
 import glob
@@ -27,10 +28,11 @@ sample_status = {'missing_slims': [],
                  'unset_WS': [],
                  'approved': []}
 
-def look_for_runs(root_path):
+def look_for_runs(config, instrument):
     '''Look for runs in demultiplexdir'''
-    found_paths = glob.glob(os.path.join(root_path, '*'))
-    regex = '^[0-9]{6}_A00687_[0-9]{4}_.{10}$'
+    instrument_root_path = config[instrument]['demultiplex_path']
+    found_paths = glob.glob(os.path.join(instrument_root_path, '*'))
+    regex = config[instrument]['seq_name_regex']
     return [path for path in found_paths if re.search(regex, os.path.basename(path))]
 
 
@@ -80,8 +82,10 @@ def generate_context_objects(Rctx):
 
 def call_script(args):
     subprocess.call(args)
+    
 
-def wrapper():
+def wrapper(instrument):
+
 
     # Empty dict, will update later with T/N pair info
     pair_dict_all_pairs = {}
@@ -90,8 +94,7 @@ def wrapper():
         config = yaml.safe_load(conf)
 
     # Grab all available local run paths
-    instrument_root_path = config['novaseq']['demultiplex_path']
-    local_run_paths = look_for_runs(instrument_root_path)
+    local_run_paths = look_for_runs(config, instrument)
 
     # Read all previously analysed runs
     previous_runs_file = config['previous_runs_file_path']
@@ -193,13 +196,20 @@ def wrapper():
     # also, if fastqs come from more than one run, what will the value of this argument be then to be "correct"?...
 
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--instrument', help='novaseq_687_gc or novaseq_A01736', required=True)
+    args = parser.parse_args()
+
+    wrapper(args.instrument)
+
+
 if __name__ == '__main__':
     try:
-        wrapper()
+        main()
     except KeyboardInterrupt:
         pass
-    except Exception:
-        format_exc = traceback.format_exc()
-        logger.error(format_exc)
+    #except Exception:
+        #format_exc = traceback.format_exc()
+        #logger.error(format_exc)
         # TODO: add send email about error here
-
