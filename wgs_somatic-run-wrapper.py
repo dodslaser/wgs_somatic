@@ -11,6 +11,7 @@ import json
 from itertools import chain
 import traceback
 import subprocess
+import threading
 
 from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
@@ -77,6 +78,9 @@ def generate_context_objects(Rctx):
 
     return Rctx
 
+def call_script(args):
+    subprocess.call(args)
+
 def wrapper():
 
     # Empty dict, will update later with T/N pair info
@@ -124,6 +128,7 @@ def wrapper():
             pair_dict_all_pairs.update(pair_dict)
 
     # Uses the dictionary of T/N samples to put the correct pairs together and finds the correct input arguments to the pipeline
+    threads = []
     for key in pair_dict_all_pairs:
         if 'tumor' in pair_dict_all_pairs.get(key):
             t = key
@@ -146,8 +151,8 @@ def wrapper():
                         normalsample = n
                         normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
                         tumorfastqs = normalfastqs
-                        #outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
-                        outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
+                        outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
+                        #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
                         igvuser = config['igv']['GMS-BT']
                         # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
                         hg38ref = config['hg38ref']['GMS-BT']
@@ -158,12 +163,19 @@ def wrapper():
                             logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
                             os.rename(outputdir, f'{outputdir}_old')
 
-                        pipeline_args = ['python', 'launch_snakemake.py', '--runnormal', f'{runnormal}', '--outputdir', f'{outputdir}', '--normalsample', f'{normalsample}', '--normalfastqs', f'{normalfastqs}', '--runtumor', f'{runtumor}', '--tumorsample', f'{tumorsample}', '--tumorfastqs', f'{tumorfastqs}', '--igvuser', f'{igvuser}', '--hg38ref', f'{hg38ref}']
+                        pipeline_args = [['python', 'launch_snakemake.py', '--runnormal', f'{runnormal}', '--outputdir', f'{outputdir}', '--normalsample', f'{normalsample}', '--normalfastqs', f'{normalfastqs}', '--runtumor', f'{runtumor}', '--tumorsample', f'{tumorsample}', '--tumorfastqs', f'{tumorfastqs}', '--igvuser', f'{igvuser}', '--hg38ref', f'{hg38ref}']]
 
+                        # Using threading to start the pipeline for several samples at the same time
+                        threads.append(threading.Thread(target=call_script, args=pipeline_args))
                         logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
-
+    for t in threads:
+        t.start()
+        logger.info(f'Thread {t} has started')
+    for u in threads:
+        u.join()
+        logger.info(f'Thread {u} is finished')
                         # Pass the correct arguments to launch_snakemake.py to start the pipeline
-                        subprocess.Popen(pipeline_args)
+                        #subprocess.Popen(pipeline_args)
 
     # start the pipeline with the correct pairs. 
     # will use these arguments to start pipeline. 
