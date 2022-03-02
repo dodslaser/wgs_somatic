@@ -122,14 +122,15 @@ def get_sample_slims_info(Sctx, run_tag):
         return
     return translate_slims_info(SSample.dna)
 
-def link_fastqs(list_of_fq_paths, Rctx):
+def link_fastqs(list_of_fq_paths, run_path):
     '''Link fastqs to fastq-folder in demultiplexdir of current run. Need to change the hardcoded path to my home... '''
     # TODO: additional fastqs need to still be in demultiplexdir. not considering downloading from hcp right now. need to consider this later...
     for fq_path in list_of_fq_paths:
+        fq_link = os.path.join(run_path, "fastq", os.path.basename(fq_path))
     # Only links if link doesn't already exist
-        if not os.path.islink(os.path.join(Rctx.run_path, "fastq", os.path.basename(fq_path))):
+        if not os.path.islink(fq_link):
         # Now symlinks all additional paths to fastqs for tumor and normal in other runs. 
-            os.symlink(fq_path, os.path.join(Rctx.run_path, "fastq", os.path.basename(fq_path)))
+            os.symlink(fq_path, fq_link)
 
 def find_more_fastqs(sample_name, Rctx, logger):
     """
@@ -150,7 +151,7 @@ def find_more_fastqs(sample_name, Rctx, logger):
             json_info = json.loads(fqSSample.fastq.cntn_cstm_demuxerSampleResult.value)
             fq_paths = json_info['fastq_paths']
             logger.info(f'linking fastqs for {sample_name}_{tag}')
-            link_fastqs(fq_paths, Rctx)
+            link_fastqs(fq_paths, Rctx.run_path)
 
 def get_pair_dict(Sctx, Rctx, logger):
     """
@@ -169,8 +170,7 @@ def get_pair_dict(Sctx, Rctx, logger):
                               .add(equals('cntn_cstm_tumorNormalID', 
                               Sctx.slims_info['tumorNormalID'])))
     for pair in pairs:
-        pair.slims_info = translate_slims_info(pair)
-        pair_dict[pair.slims_info["content_id"]] = [pair.slims_info["tumorNormalType"], pair.slims_info["tumorNormalID"]]
+        pair_dict[pair.cntn_id.value] = [pair.cntn_cstm_tumorNormalType.value, pair.cntn_cstm_tumorNormalID.value]
         # Check if there are additional fastqs in other runs and symlink fastqs
         find_more_fastqs(pair.cntn_id.value, Rctx, logger)
     return pair_dict

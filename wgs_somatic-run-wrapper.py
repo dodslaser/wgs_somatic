@@ -11,6 +11,7 @@ import json
 from itertools import chain
 import traceback
 import subprocess
+import threading
 
 from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
@@ -77,6 +78,9 @@ def generate_context_objects(Rctx):
 
     return Rctx
 
+def call_script(args):
+    subprocess.call(args)
+
 def wrapper():
 
     # Empty dict, will update later with T/N pair info
@@ -124,24 +128,33 @@ def wrapper():
             pair_dict_all_pairs.update(pair_dict)
 
     # Uses the dictionary of T/N samples to put the correct pairs together and finds the correct input arguments to the pipeline
+    threads = []
     for key in pair_dict_all_pairs:
         if 'tumor' in pair_dict_all_pairs.get(key):
             t = key
-            t_ID = [val for val in pair_dict_all_pairs.get(key) if val != 'tumor'][0] # crappy solution... but works since there is only one item in the list
+            # Using the list containing two values; 'tumor' and value of tumorNormalID
+            # Removing the value 'tumor' from the list to get the tumorNormalID
+            # TODO: Would be nice to do in a better way rather than using [0] to get the remaining value in the list
+            t_ID = [val for val in pair_dict_all_pairs.get(key) if val != 'tumor'][0] 
             for k in pair_dict_all_pairs:
                 if 'normal' in pair_dict_all_pairs.get(k):
                     n = k
                     n_ID = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][0]
-                    if n_ID == t_ID or t_ID == n.split("DNA")[1] or n_ID == t.split("DNA")[1]: # if we change to pair id instead of tumorNormalID this is needed
+                    # As of now, tumorNormalID is the same for tumor and normal.
+                    # In the future, this will be changed to pairID
+                    # The or statements are here to prepare to when we change to pair ID
+                    # Pair ID for tumor will be normal name (minus DNA) and the opposite for normal
+                    if n_ID == t_ID or t_ID == n.split("DNA")[1] or n_ID == t.split("DNA")[1]: 
                         runnormal = Rctx_run.run_name
                         runtumor = Rctx_run.run_name
                         tumorsample = t
                         normalsample = n
                         normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
-                        tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
+                        tumorfastqs = normalfastqs
                         outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
                         #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
                         igvuser = config['igv']['GMS-BT']
+                        # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
                         hg38ref = config['hg38ref']['GMS-BT']
 
                         # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead.
@@ -150,18 +163,19 @@ def wrapper():
                             logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
                             os.rename(outputdir, f'{outputdir}_old')
 
-                        logger.info(f'Starting wgs_somatic with arguments: \n \
-runnormal: {runnormal} \n \
-runtumor: {runtumor} \n \
-tumorsample: {tumorsample} \n \
-normalsample: {normalsample} \n \
-normalfastqs: {normalfastqs} \n \
-tumorfastqs: {tumorfastqs} \n \
-outputdir: {outputdir} \n \
-igvuser: {igvuser} \n \
-hg38ref: {hg38ref}')
+                        pipeline_args = [['python', 'launch_snakemake.py', '--runnormal', f'{runnormal}', '--outputdir', f'{outputdir}', '--normalsample', f'{normalsample}', '--normalfastqs', f'{normalfastqs}', '--runtumor', f'{runtumor}', '--tumorsample', f'{tumorsample}', '--tumorfastqs', f'{tumorfastqs}', '--igvuser', f'{igvuser}', '--hg38ref', f'{hg38ref}']]
+
+                        # Using threading to start the pipeline for several samples at the same time
+                        threads.append(threading.Thread(target=call_script, args=pipeline_args))
+                        logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
+    for t in threads:
+        t.start()
+        logger.info(f'Thread {t} has started')
+    for u in threads:
+        u.join()
+        logger.info(f'Thread {u} is finished')
                         # Pass the correct arguments to launch_snakemake.py to start the pipeline
-                        subprocess.Popen(['python', 'launch_snakemake.py', '--runnormal', f'{runnormal}', '--outputdir', f'{outputdir}', '--normalsample', f'{normalsample}', '--normalfastqs', f'{normalfastqs}', '--runtumor', f'{runtumor}', '--tumorsample', f'{tumorsample}', '--tumorfastqs', f'{tumorfastqs}', '--igvuser', f'{igvuser}', '--hg38ref', f'{hg38ref}'])
+                        #subprocess.Popen(pipeline_args)
 
     # start the pipeline with the correct pairs. 
     # will use these arguments to start pipeline. 
