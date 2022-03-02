@@ -18,7 +18,7 @@ from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
 from helpers import setup_logger
 from tools.slims import get_sample_slims_info, SlimsSample, find_more_fastqs, get_pair_dict
-
+from tools.email import send_email, start_email
 
 logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
 
@@ -132,6 +132,7 @@ def wrapper(instrument):
 
     # Uses the dictionary of T/N samples to put the correct pairs together and finds the correct input arguments to the pipeline
     threads = []
+    final_pairs = []
     for key in pair_dict_all_pairs:
         if 'tumor' in pair_dict_all_pairs.get(key):
             t = key
@@ -154,11 +155,14 @@ def wrapper(instrument):
                         normalsample = n
                         normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
                         tumorfastqs = normalfastqs
-                        outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
-                        #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
+                        #outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
+                        outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
                         igvuser = config['igv']['GMS-BT']
                         # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
                         hg38ref = config['hg38ref']['GMS-BT']
+
+                        # Use this list of final pairs for email
+                        final_pairs.append(f'{tumorsample} (T) {normalsample} (N)')
 
                         # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead.
                         # Won't work if outputdir_old also already exists. Need to be solved in a better way 
@@ -171,12 +175,25 @@ def wrapper(instrument):
                         # Using threading to start the pipeline for several samples at the same time
                         threads.append(threading.Thread(target=call_script, args=pipeline_args))
                         logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
+
+    # Start several samples at the same time
     for t in threads:
         t.start()
         logger.info(f'Thread {t} has started')
+
+    # Send start email
+    start_email(Rctx_run.run_name, final_pairs)
+
     for u in threads:
         u.join()
         logger.info(f'Thread {u} is finished')
+
+    logger.info('Jobs have finished successfully')
+    end_email(Rctx_run.run_name, final_pairs)
+
+
+
+
                         # Pass the correct arguments to launch_snakemake.py to start the pipeline
                         #subprocess.Popen(pipeline_args)
 
