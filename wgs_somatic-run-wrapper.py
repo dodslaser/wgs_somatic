@@ -19,6 +19,8 @@ from context import RunContext, SampleContext
 from helpers import setup_logger
 from tools.slims import get_sample_slims_info, SlimsSample, find_more_fastqs, get_pair_dict
 from tools.email import send_email, start_email
+from launch_snakemake import analysis_main
+
 
 logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
 
@@ -80,9 +82,10 @@ def generate_context_objects(Rctx):
 
     return Rctx
 
-def call_script(args):
-    subprocess.call(args)
-    
+def call_script(**kwargs):
+
+    args = argparse.Namespace(**kwargs)
+    subprocess.call(analysis_main(args, **kwargs))
 
 def wrapper(instrument):
 
@@ -157,7 +160,8 @@ def wrapper(instrument):
                         tumorfastqs = normalfastqs
                         #outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
                         outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
-                        igvuser = config['igv']['GMS-BT']
+                        #igvuser = config['igv']['GMS-BT']
+                        igvuser = 'alvar.almstedt' # use for testing
                         # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
                         hg38ref = config['hg38ref']['GMS-BT']
 
@@ -170,12 +174,11 @@ def wrapper(instrument):
                             logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
                             os.rename(outputdir, f'{outputdir}_old')
 
-                        pipeline_args = [['python', 'launch_snakemake.py', '--runnormal', f'{runnormal}', '--outputdir', f'{outputdir}', '--normalsample', f'{normalsample}', '--normalfastqs', f'{normalfastqs}', '--runtumor', f'{runtumor}', '--tumorsample', f'{tumorsample}', '--tumorfastqs', f'{tumorfastqs}', '--igvuser', f'{igvuser}', '--hg38ref', f'{hg38ref}']]
+                        pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
 
                         # Using threading to start the pipeline for several samples at the same time
-                        threads.append(threading.Thread(target=call_script, args=pipeline_args))
+                        threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
                         logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
-
     # Start several samples at the same time
     for t in threads:
         t.start()
