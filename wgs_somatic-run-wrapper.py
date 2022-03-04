@@ -218,7 +218,7 @@ def wrapper(instrument):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--instrument', help='novaseq_687_gc or novaseq_A01736', required=True)
+    parser.add_argument('-i', '--instrument', help='For example novaseq_687_gc or novaseq_A01736', required=True)
     args = parser.parse_args()
 
     wrapper(args.instrument)
