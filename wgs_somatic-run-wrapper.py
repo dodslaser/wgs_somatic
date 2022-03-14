@@ -18,7 +18,7 @@ from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
 from helpers import setup_logger
 from tools.slims import get_sample_slims_info, SlimsSample, find_more_fastqs, get_pair_dict
-from tools.email import send_email, start_email
+from tools.email import start_email, end_email
 from launch_snakemake import analysis_main
 
 
@@ -133,66 +133,66 @@ def wrapper(instrument):
             pair_dict = get_pair_dict(sctx, Rctx, logger)
             pair_dict_all_pairs.update(pair_dict)
 
-    # Uses the dictionary of T/N samples to put the correct pairs together and finds the correct input arguments to the pipeline
-    threads = []
-    final_pairs = []
-    for key in pair_dict_all_pairs:
-        if 'tumor' in pair_dict_all_pairs.get(key):
-            t = key
-            # Using the list containing two values; 'tumor' and value of tumorNormalID
-            # Removing the value 'tumor' from the list to get the tumorNormalID
-            # TODO: Would be nice to do in a better way rather than using [0] to get the remaining value in the list
-            t_ID = [val for val in pair_dict_all_pairs.get(key) if val != 'tumor'][0] 
-            for k in pair_dict_all_pairs:
-                if 'normal' in pair_dict_all_pairs.get(k):
-                    n = k
-                    n_ID = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][0]
-                    # As of now, tumorNormalID is the same for tumor and normal.
-                    # In the future, this will be changed to pairID
-                    # The or statements are here to prepare to when we change to pair ID
-                    # Pair ID for tumor will be normal name (minus DNA) and the opposite for normal
-                    if n_ID == t_ID or t_ID == n.split("DNA")[1] or n_ID == t.split("DNA")[1]: 
-                        runnormal = Rctx_run.run_name
-                        runtumor = Rctx_run.run_name
-                        tumorsample = t
-                        normalsample = n
-                        normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
-                        tumorfastqs = normalfastqs
-                        #outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
-                        outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
-                        #igvuser = config['igv']['GMS-BT']
-                        igvuser = 'alvar.almstedt' # use for testing
-                        # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
-                        hg38ref = config['hg38ref']['GMS-BT']
+        # Uses the dictionary of T/N samples to put the correct pairs together and finds the correct input arguments to the pipeline
+        threads = []
+        final_pairs = []
+        for key in pair_dict_all_pairs:
+            if 'tumor' in pair_dict_all_pairs.get(key):
+                t = key
+                # Using the list containing two values; 'tumor' and value of tumorNormalID
+                # Removing the value 'tumor' from the list to get the tumorNormalID
+                # TODO: Would be nice to do in a better way rather than using [0] to get the remaining value in the list
+                t_ID = [val for val in pair_dict_all_pairs.get(key) if val != 'tumor'][0] 
+                for k in pair_dict_all_pairs:
+                    if 'normal' in pair_dict_all_pairs.get(k):
+                        n = k
+                        n_ID = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][0]
+                        # As of now, tumorNormalID is the same for tumor and normal.
+                        # In the future, this will be changed to pairID
+                        # The or statements are here to prepare to when we change to pair ID
+                        # Pair ID for tumor will be normal name (minus DNA) and the opposite for normal
+                        if n_ID == t_ID or t_ID == n.split("DNA")[1] or n_ID == t.split("DNA")[1]: 
+                            runnormal = Rctx_run.run_name
+                            runtumor = Rctx_run.run_name
+                            tumorsample = t
+                            normalsample = n
+                            normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
+                            tumorfastqs = normalfastqs
+                            outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
+                            #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
+                            igvuser = config['igv']['GMS-BT']
+                            #igvuser = 'alvar.almstedt' # use for testing
+                            # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
+                            hg38ref = config['hg38ref']['GMS-BT']
 
-                        # Use this list of final pairs for email
-                        final_pairs.append(f'{tumorsample} (T) {normalsample} (N)')
+                            # Use this list of final pairs for email
+                            final_pairs.append(f'{tumorsample} (T) {normalsample} (N)')
 
-                        # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead.
-                        # Won't work if outputdir_old also already exists. Need to be solved in a better way 
-                        if os.path.exists(outputdir):
-                            logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
-                            os.rename(outputdir, f'{outputdir}_old')
+                            # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead.
+                            # Won't work if outputdir_old also already exists. Need to be solved in a better way 
+                            if os.path.exists(outputdir):
+                                logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
+                                os.rename(outputdir, f'{outputdir}_old')
 
-                        pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+                            pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
 
-                        # Using threading to start the pipeline for several samples at the same time
-                        threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
-                        logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
-    # Start several samples at the same time
-    for t in threads:
-        t.start()
-        logger.info(f'Thread {t} has started')
+                            # Using threading to start the pipeline for several samples at the same time
+                            threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
+                            logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
+        # Start several samples at the same time
+        for t in threads:
+            t.start()
+            logger.info(f'Thread {t} has started')
 
-    # Send start email
-    start_email(Rctx_run.run_name, final_pairs)
+        # Send start email
+        start_email(Rctx_run.run_name, final_pairs)
 
-    for u in threads:
-        u.join()
-        logger.info(f'Thread {u} is finished')
+        for u in threads:
+            u.join()
+            logger.info(f'Thread {u} is finished')
 
-    logger.info('Jobs have finished successfully')
-    end_email(Rctx_run.run_name, final_pairs)
+        logger.info('Jobs have finished successfully')
+        end_email(Rctx_run.run_name, final_pairs)
 
 
 
