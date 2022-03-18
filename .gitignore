@@ -24,4 +24,5 @@ logfiles/commandlogs/*
 <<<<<<< HEAD
 !logfiles/README.md
 yearly_stats.txt
-
+/apps/bio/repos/wgs_somatic/workflows/scripts/annotate_manta/genelist.txt
+/apps/bio/repos/wgs_somatic/workflows/scripts/annotate_manta/genelist_old.txt
