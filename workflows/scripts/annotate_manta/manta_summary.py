@@ -48,7 +48,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
 
     # open the genelist
     genelist="/apps/bio/dependencies/wgs_somatic/genelist.txt"
-    genelist=os.getcwd()+genelist
+    #genelist=os.getcwd()+genelist
 
     genelist = open(genelist, "r")
 
