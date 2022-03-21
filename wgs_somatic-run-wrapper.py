@@ -19,7 +19,7 @@ from context import RunContext, SampleContext
 from helpers import setup_logger
 from tools.slims import get_sample_slims_info, SlimsSample, find_more_fastqs, get_pair_dict
 from tools.email import start_email, end_email
-from launch_snakemake import analysis_main
+from launch_snakemake import analysis_main, petagene_compress_bam, yearly_stats
 
 
 logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
@@ -87,6 +87,26 @@ def call_script(**kwargs):
     args = argparse.Namespace(**kwargs)
     subprocess.call(analysis_main(args, **kwargs))
 
+def check_ok(outputdir):
+    '''Function to check if analysis has finished correctly'''
+
+    if os.path.isfile(f"{outputdir}/reporting/workflow_finished.txt"):
+        return True
+    else:
+        return False
+
+def analysis_end(outputdir, tumorsample, normalsample):
+    '''Function to check if analysis has finished correctly and add to yearly stats and start petagene compression'''
+
+    if os.path.isfile(f"{outputdir}/reporting/workflow_finished.txt"):
+        if tumorsample:
+            # these functions are only executed if snakemake workflow has finished successfully
+            yearly_stats(tumorsample, normalsample)
+            petagene_compress_bam(outputdir, tumorsample)
+        else:
+            yearly_stats('None', normalsample)
+            petagene_compress_bam(outputdir, normalsample)
+
 def wrapper(instrument):
 
 
@@ -135,6 +155,8 @@ def wrapper(instrument):
 
         # Uses the dictionary of T/N samples to put the correct pairs together and finds the correct input arguments to the pipeline
         threads = []
+        check_ok_outdirs = []
+        end_threads = []
         final_pairs = []
         for key in pair_dict_all_pairs:
             if 'tumor' in pair_dict_all_pairs.get(key):
@@ -176,9 +198,14 @@ def wrapper(instrument):
 
                             pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
 
+
                             # Using threading to start the pipeline for several samples at the same time
                             threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
                             logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
+
+                            check_ok_outdirs.append(outputdir)
+                            end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample)))
+
         # Start several samples at the same time
         for t in threads:
             t.start()
@@ -191,8 +218,25 @@ def wrapper(instrument):
             u.join()
             logger.info(f'Thread {u} is finished')
 
-        logger.info('Jobs have finished successfully')
+        # Check if all samples in run have finished successfully. If not, exit script and send error email.
+        for outdir in check_ok_outdirs:
+            if check_ok(outdir) = True:
+                continue
+            else:
+                logger.info('All jobs have not finished successfully')
+                # add something to send end email about fail
+                sys.exit()
+
+        
+        logger.info('All jobs have finished successfully')
         end_email(Rctx_run.run_name, final_pairs)
+
+        # If all jobs have finished successfully - add to yearly stats and start petagene compression of bamfiles
+        for t in end_threads:
+            t.start()
+        for u in end_threads:
+            u.join()
+
 
 
 
