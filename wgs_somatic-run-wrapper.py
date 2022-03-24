@@ -82,7 +82,7 @@ def generate_context_objects(Rctx, logger):
     return Rctx
 
 def call_script(**kwargs):
-
+    '''Function to call main function from launch_snakemake.py'''
     args = argparse.Namespace(**kwargs)
     subprocess.call(analysis_main(args, **kwargs))
 
@@ -107,7 +107,7 @@ def analysis_end(outputdir, tumorsample, normalsample):
             petagene_compress_bam(outputdir, normalsample)
 
 def wrapper(instrument):
-
+    '''Wrapper function'''
     logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, f'{instrument}_WS_wrapper.log'))
 
     # Empty dict, will update later with T/N pair info
@@ -242,11 +242,7 @@ def wrapper(instrument):
 
 
 
-                        # Pass the correct arguments to launch_snakemake.py to start the pipeline
-                        #subprocess.Popen(pipeline_args)
 
-    # start the pipeline with the correct pairs. 
-    # will use these arguments to start pipeline. 
     # some arguments are hardcoded right now, need to fix this. 
     # only considers barncancer hg38 (GMS-AL + GMS-BT samples) right now. 
     # could have outputdirs and arguments in config and get them from there. 
