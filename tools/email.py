@@ -12,8 +12,8 @@ def send_email(subject, body):
     msg.set_content(body)
 
     msg['Subject'] = subject
-    msg['From'] = "hanna.soderstrom@gu.se" # TODO Get from config
-    msg['To'] = "hanna.soderstrom@gu.se" # TODO Get from config and have different recipients for errors and success
+    msg['From'] = "cgg-cancer@gu.se" # TODO Get from config
+    msg['To'] = "cgg-cancer@gu.se" # TODO Get from config and have different recipients for errors and success
     msg['Cc'] = "hanna.soderstrom@gu.se" # TODO Get from config
 
 
