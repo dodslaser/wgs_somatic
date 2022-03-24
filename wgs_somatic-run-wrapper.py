@@ -2,6 +2,7 @@
 Wrapper to be used by cron for automatic start of wgs_somatic
 """
 
+import sys
 import argparse
 import os
 import re
@@ -22,13 +23,11 @@ from tools.email import start_email, end_email
 from launch_snakemake import analysis_main, petagene_compress_bam, yearly_stats
 
 
-logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, 'WS_wrapper.log'))
-
-
 # Store info about samples to use for sending report emails
 sample_status = {'missing_slims': [],
                  'unset_WS': [],
                  'approved': []}
+
 
 def look_for_runs(config, instrument):
     '''Look for runs in demultiplexdir'''
@@ -38,7 +37,7 @@ def look_for_runs(config, instrument):
     return [path for path in found_paths if re.search(regex, os.path.basename(path))]
 
 
-def generate_context_objects(Rctx):
+def generate_context_objects(Rctx, logger):
     '''Create Rctx and Sctx for a demultiplexed run'''
 
     # Read demultiplex stats file for sample names, fastq paths, and nr reads
@@ -109,6 +108,7 @@ def analysis_end(outputdir, tumorsample, normalsample):
 
 def wrapper(instrument):
 
+    logger = setup_logger('wrapper', os.path.join(ROOT_LOGGING_PATH, f'{instrument}_WS_wrapper.log'))
 
     # Empty dict, will update later with T/N pair info
     pair_dict_all_pairs = {}
@@ -118,7 +118,6 @@ def wrapper(instrument):
 
     # Grab all available local run paths
     local_run_paths = look_for_runs(config, instrument)
-
     # Read all previously analysed runs
     previous_runs_file = config['previous_runs_file_path']
     previous_runs_file_path = os.path.join(ROOT_DIR, previous_runs_file)
@@ -146,7 +145,7 @@ def wrapper(instrument):
             print(Rctx.run_name, file=prev)
 
         # get Rctx and Sctx for current run
-        Rctx_run = generate_context_objects(Rctx)
+        Rctx_run = generate_context_objects(Rctx, logger)
 
         # Get T/N pair info in a dict for samples and link additional fastqs from other runs
         for sctx in Rctx_run.sample_contexts:
@@ -220,7 +219,7 @@ def wrapper(instrument):
 
         # Check if all samples in run have finished successfully. If not, exit script and send error email.
         for outdir in check_ok_outdirs:
-            if check_ok(outdir) = True:
+            if check_ok(outdir) == True:
                 continue
             else:
                 logger.info('All jobs have not finished successfully')
@@ -237,7 +236,9 @@ def wrapper(instrument):
         for u in end_threads:
             u.join()
 
-
+        # break out of for loop to avoid starting pipeline for a possible other run that was done sequenced at the same time.
+        # if cron runs every 30 mins it will find other runs at the next cron instance and run from there instead (and add to novaseq_runlist)
+        break
 
 
 
