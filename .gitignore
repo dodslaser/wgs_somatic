@@ -21,8 +21,8 @@ logfiles/*
 !logfiles/.gitkeep
 logfiles/commandlogs/*
 !logfiles/commandlogs/.gitkeep
-<<<<<<< HEAD
 !logfiles/README.md
 yearly_stats.txt
+novaseq_runlist.txt
 workflows/scripts/annotate_manta/genelist.txt
 workflows/scripts/annotate_manta/genelist_old.txt
