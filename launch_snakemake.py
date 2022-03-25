@@ -116,10 +116,10 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
             if not os.path.isdir(normalfastqs):
                 error_list.append(f"{normalfastqs} does not appear to be a directory")
             else:
-                f_normalfastqs = glob.glob(f"{normalfastqs}/*fastq.gz")
+                f_normalfastqs = glob.glob(f"{normalfastqs}/{normalname}*fastq.gz")
                 if not f_normalfastqs:
                     logger(f"Warning: No fastqs found in normaldir")
-                    f_normalfastqs = glob.glob(f"{normalfastqs}/*fasterq")
+                    f_normalfastqs = glob.glob(f"{normalfastqs}/{normalname}*fasterq")
                     if not f_normalfastqs:
                         error_list.append(f"No fastqs or fasterqs found in normaldir")
 
@@ -127,10 +127,10 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
                 if not os.path.isdir(tumorfastqs):
                     error_list.append(f"{tumorfastqs} does not appear to be a directory")
                 else:
-                    f_tumorfastqs = glob.glob(f"{tumorfastqs}/*fastq.gz")
+                    f_tumorfastqs = glob.glob(f"{tumorfastqs}/{tumorname}*fastq.gz")
                     if not f_tumorfastqs:
                         logger(f"Warning: No fastqs found in tumordir")
-                        f_tumorfastqs = glob.glob(f"{tumorfastqs}/*fasterq")
+                        f_tumorfastqs = glob.glob(f"{tumorfastqs}/{tumorname}*fasterq")
                         if not f_tumorfastqs:
                             error_list.append(f"No fastqs or fasterqs found in tumordir")
         # validate iva and igv users if supplied
@@ -262,9 +262,9 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
         # >>>>>>>>>>>> Create Dag of pipeline
         subprocess.run(snakemake_args, shell=True, env=my_env) # CREATE DAG
         if tumorname:
-            snakemake_args = f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{tumorid}_config.json --use-singularity --singularity-args '-e --bind {binddir_string}' --cluster-config configs/cluster.yaml --cluster \"qsub -S /bin/bash -pe mpi {{cluster.threads}} -q {{cluster.queue}} -N {{cluster.name}} -o {samplelogs}/{{cluster.output}} -e {samplelogs}/{{cluster.error}} -l {{cluster.excl}}\" --jobs 999 --latency-wait 60 --directory {scriptdir} &>> {samplelog}"
+            snakemake_args = f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{tumorid}_config.json --use-singularity --singularity-args '-e --bind {binddir_string} --bind /medstore --bind /seqstore --bind /apps' --cluster-config configs/cluster.yaml --cluster \"qsub -S /bin/bash -pe mpi {{cluster.threads}} -q {{cluster.queue}} -N {{cluster.name}} -o {samplelogs}/{{cluster.output}} -e {samplelogs}/{{cluster.error}} -l {{cluster.excl}}\" --jobs 999 --latency-wait 60 --directory {scriptdir} &>> {samplelog}"
         else:
-            snakemake_args = f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{normalid}_config.json --use-singularity --singularity-args '-e --bind {binddir_string}' --cluster-config configs/cluster.yaml --cluster \"qsub -S /bin/bash -pe mpi {{cluster.threads}} -q {{cluster.queue}} -N {{cluster.name}} -o {samplelogs}/{{cluster.output}} -e {samplelogs}/{{cluster.error}} -l {{cluster.excl}}\" --jobs 999 --latency-wait 60 --directory {scriptdir} &>> {samplelog}"
+            snakemake_args = f"snakemake -s pipeline.snakefile --configfile {runconfigs}/{normalid}_config.json --use-singularity --singularity-args '-e --bind {binddir_string} --bind /medstore --bind /seqstore --bind /apps' --cluster-config configs/cluster.yaml --cluster \"qsub -S /bin/bash -pe mpi {{cluster.threads}} -q {{cluster.queue}} -N {{cluster.name}} -o {samplelogs}/{{cluster.output}} -e {samplelogs}/{{cluster.error}} -l {{cluster.excl}}\" --jobs 999 --latency-wait 60 --directory {scriptdir} &>> {samplelog}"
         # >>>>>>>>>>>> Start pipeline
         subprocess.run(snakemake_args, shell=True, env=my_env) # Shellscript pipeline
 
@@ -273,14 +273,14 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
         logger(f"Error in script:")
         logger(f"{e} Traceback: {tb}")
         sys.exit(1)
-    if os.path.isfile(f"{output}/reporting/workflow_finished.txt"):
-        if tumorname:
+#    if os.path.isfile(f"{output}/reporting/workflow_finished.txt"):
+#        if tumorname:
             # these functions are only executed if snakemake workflow has finished successfully
-            yearly_stats(args.tumorsample, args.normalsample)
-            petagene_compress_bam(args.outputdir, args.tumorsample)
-        else:
-            yearly_stats(tumorname = 'None', normalname = args.normalsample)
-            petagene_compress_bam(args.outputdir, tumorname = args.normalsample)
+#            yearly_stats(args.tumorsample, args.normalsample)
+#            petagene_compress_bam(args.outputdir, args.tumorsample)
+#        else:
+#            yearly_stats(tumorname = 'None', normalname = args.normalsample)
+#            petagene_compress_bam(args.outputdir, tumorname = args.normalsample)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -297,3 +297,12 @@ if __name__ == '__main__':
     parser.add_argument('-stype', '--starttype', nargs='?', help='write forcestart if you want to ignore fastqs', required=False)
     args = parser.parse_args()
     analysis_main(args, args.runnormal, args.outputdir, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser, args.hg38ref, args.starttype)
+
+    if os.path.isfile(f"{args.outputdir}/reporting/workflow_finished.txt"):
+        if args.tumorsample:
+            # these functions are only executed if snakemake workflow has finished successfully
+            yearly_stats(args.tumorsample, args.normalsample)
+            petagene_compress_bam(args.outputdir, args.tumorsample)
+        else:
+            yearly_stats('None', args.normalsample)
+            petagene_compress_bam(args.outputdir, args.normalsample)
