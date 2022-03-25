@@ -47,8 +47,8 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
     # this part of the script highlights genes from the gene list
 
     # open the genelist
-    genelist="/workflows/scripts/annotate_manta/genelist.txt"
-    genelist=os.getcwd()+genelist
+    genelist="/apps/bio/dependencies/wgs_somatic/genelist.txt"
+    #genelist=os.getcwd()+genelist
 
     genelist = open(genelist, "r")
 
@@ -64,7 +64,10 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
     # pattern to search for with an "or" between each gene
     pattern = '|'.join(gene_list)
     # search for patterns of the genes in the genelist in certain column
-    column_patterns_genecrossings = df.loc[df['DEL/DUP Genecrossings'].str.contains(pattern, na=False)]['DEL/DUP Genecrossings']
+    if df['DEL/DUP Genecrossings'].isnull().all():
+        column_patterns_genecrossings = False
+    else:
+        column_patterns_genecrossings = df.loc[df['DEL/DUP Genecrossings'].str.contains(pattern, na=False)]['DEL/DUP Genecrossings']
     column_patterns_geneinfo1 = df.loc[df['GeneInfo 1'].str.contains(pattern, na=False)]['GeneInfo 1']
     column_patterns_geneinfo2 = df.loc[df['GeneInfo 2'].str.contains(pattern, na=False)]['GeneInfo 2']
     
@@ -105,7 +108,8 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
                             df.at[index_value, 'Genelist'] = df.at[index_value, 'Genelist'] + gene + ' '
         return df
 
-    append_genes(column_patterns_genecrossings, df['DEL/DUP Genecrossings'])
+    if not column_patterns_genecrossings is False:
+        append_genes(column_patterns_genecrossings, df['DEL/DUP Genecrossings'])
     append_genes(column_patterns_geneinfo1, df['GeneInfo 1'])
     append_genes(column_patterns_geneinfo2, df['GeneInfo 2'])
 

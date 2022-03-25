@@ -1,4 +1,3 @@
-#!/apps/bio/software/anaconda2/envs/wgs_somatic/bin/python
 import yaml
 import json
 import logging
