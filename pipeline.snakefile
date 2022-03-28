@@ -138,6 +138,7 @@ include:        "workflows/rules/variantcalling/canvas.smk"
 #########################################
 # QC
 include:        "workflows/rules/qc/aggregate_qc.smk"
+include:        "workflows/rules/qc/insilico_coverage.smk"
 
 #########################################
 # ResultSharing:
