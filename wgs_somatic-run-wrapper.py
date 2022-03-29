@@ -75,6 +75,8 @@ def generate_context_objects(Rctx, logger):
         # If no samples set for wgs_somatic
         # doesn't skip continuing with the rest of the code - need to fix this
         logger.info('No samples set for wgs_somatic. Skipping run.')
+        # exit script if no samples set for wgs_somatic in run
+        sys.exit()
 
     for Sctx in Rctx.sample_contexts:
         sample_status['approved'].append(Sctx)
