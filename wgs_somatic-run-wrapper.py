@@ -162,14 +162,20 @@ def wrapper(instrument):
         for key in pair_dict_all_pairs:
             if 'tumor' in pair_dict_all_pairs.get(key):
                 t = key
-                # Using the list containing two values; 'tumor' and value of tumorNormalID
+                # Using the list containing values 'tumor', value of tumorNormalID, department and prio status
                 # Removing the value 'tumor' from the list to get the tumorNormalID
-                # TODO: Would be nice to do in a better way rather than using [0] to get the remaining value in the list
+                # TODO: Would be nice to do in a better way rather than using [0] to get the first value in the list
                 t_ID = [val for val in pair_dict_all_pairs.get(key) if val != 'tumor'][0] 
                 for k in pair_dict_all_pairs:
                     if 'normal' in pair_dict_all_pairs.get(k):
                         n = k
                         n_ID = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][0]
+                        department = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][1]
+                        is_prio = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][2]
+                        if is_prio:
+                            prio_sample = 'prio'
+                        else:
+                            prio_sample = ''
                         # As of now, tumorNormalID is the same for tumor and normal.
                         # In the future, this will be changed to pairID
                         # The or statements are here to prepare to when we change to pair ID
@@ -188,8 +194,9 @@ def wrapper(instrument):
                             # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
                             hg38ref = config['hg38ref']['GMS-BT']
 
+                            
                             # Use this list of final pairs for email
-                            final_pairs.append(f'{tumorsample} (T) {normalsample} (N)')
+                            final_pairs.append(f'{tumorsample} (T) {normalsample} (N), {department} {prio_sample}')
 
                             # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead.
                             # Won't work if outputdir_old also already exists. Need to be solved in a better way 
@@ -206,6 +213,7 @@ def wrapper(instrument):
 
                             check_ok_outdirs.append(outputdir)
                             end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample)))
+
 
         # Start several samples at the same time
         for t in threads:
