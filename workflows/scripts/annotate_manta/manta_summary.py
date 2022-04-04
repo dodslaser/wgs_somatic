@@ -3,7 +3,7 @@ import re
 import openpyxl
 import os
 
-def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
+def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist):
     
     df = pd.read_excel(str(mantaSV_vcf),engine='openpyxl')
 
@@ -47,7 +47,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
     # this part of the script highlights genes from the gene list
 
     # open the genelist
-    genelist="/apps/bio/dependencies/wgs_somatic/genelist.txt"
+    #genelist="/apps/bio/dependencies/wgs_somatic/genelist.txt"
     #genelist=os.getcwd()+genelist
 
     genelist = open(genelist, "r")
