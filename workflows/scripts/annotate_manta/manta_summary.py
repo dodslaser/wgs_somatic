@@ -218,34 +218,35 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist)
             else:
                 df.at[row_index, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
+    # Second df with a selection of columns
     df2 = df[["Varianttype", "Breakpoint 1", "GeneInfo 1", "Breakpoint 2", "GeneInfo 2", "ALT", "FORMAT", "TOTAL alt (N)", "TOTAL VAF (N)", "TOTAL alt (T)", "TOTAL VAF (T)", "DEL/DUP Genecrossings", "Genelist"]]
-    #df2 = df2.reset_index()#.set_index('Varianttype')
-    #print(df2.columns[0])
-    #df2.style.set_table_styles([{"selector":"thread", "props":[("background-color", "dodgerblue")]}])
+
 
     with pd.ExcelWriter(str(mantaSV_summary)) as writer:
+        # Write both dfs to same excel file but different sheets
         df.to_excel(writer, sheet_name="Manta_raw", engine='xlsxwriter')
         df2.to_excel(writer, sheet_name="Manta_report", engine='xlsxwriter')
 
+        # Modify Manta_report sheet
         workbook = writer.book
         worksheet = writer.sheets["Manta_report"]
 
+        # Adjust cell width of column
+        for column in df2:
+            col_idx = df2.columns.get_loc(column)
+            worksheet.set_column(col_idx+1, col_idx+1, len(column)+10)
+
+        # Adjust font, color, etc
         header_format = workbook.add_format()
         header_format.set_font_name('Cambria (Headings)')
         header_format.set_font_size(16)
         header_format.set_bg_color('#99CCFF')
+        header_format.set_bold()
 
+        # Write adjustments to sheet
         for col_num, value in enumerate(df2.columns.values):
-            #print(col_num)
-            #print(value)
             worksheet.write(0, col_num+1, value, header_format)
 
-
-        #cell_format = workbook.add_format()
-        #cell_format.set_bold()
-        #cell_format.set_font_color("blue")
-
-        #worksheet.set_column('B:B', None, cell_format)
 
         writer.close()
         
