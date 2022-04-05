@@ -1,6 +1,8 @@
+import enum
 import pandas as pd
 import re
-import openpyxl
+#import openpyxl
+#from openpyxl.styles import PatternFill
 import os
 
 def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist):
@@ -216,4 +218,37 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist)
             else:
                 df.at[row_index, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
-    df.to_excel(str(mantaSV_summary),engine='openpyxl')
+    df2 = df[["Varianttype", "Breakpoint 1", "GeneInfo 1", "Breakpoint 2", "GeneInfo 2", "ALT", "FORMAT", "TOTAL alt (N)", "TOTAL VAF (N)", "TOTAL alt (T)", "TOTAL VAF (T)", "DEL/DUP Genecrossings", "Genelist"]]
+    #df2 = df2.reset_index()#.set_index('Varianttype')
+    #print(df2.columns[0])
+    #df2.style.set_table_styles([{"selector":"thread", "props":[("background-color", "dodgerblue")]}])
+
+    with pd.ExcelWriter(str(mantaSV_summary)) as writer:
+        df.to_excel(writer, sheet_name="Manta_raw", engine='xlsxwriter')
+        df2.to_excel(writer, sheet_name="Manta_report", engine='xlsxwriter')
+
+        workbook = writer.book
+        worksheet = writer.sheets["Manta_report"]
+
+        header_format = workbook.add_format()
+        header_format.set_font_name('Cambria (Headings)')
+        header_format.set_font_size(16)
+        header_format.set_bg_color('#99CCFF')
+
+        for col_num, value in enumerate(df2.columns.values):
+            #print(col_num)
+            #print(value)
+            worksheet.write(0, col_num+1, value, header_format)
+
+
+        #cell_format = workbook.add_format()
+        #cell_format.set_bold()
+        #cell_format.set_font_color("blue")
+
+        #worksheet.set_column('B:B', None, cell_format)
+
+        writer.close()
+        
+
+
+
