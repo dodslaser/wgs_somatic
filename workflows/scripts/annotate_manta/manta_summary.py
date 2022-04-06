@@ -1,3 +1,4 @@
+from cmath import nan
 import enum
 import pandas as pd
 import re
@@ -230,11 +231,25 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist)
         # Modify Manta_report sheet
         workbook = writer.book
         worksheet = writer.sheets["Manta_report"]
+        wrap_format = workbook.add_format({'text_wrap': True, 'font_name': 'Cambria (Headings)', 'font_size': 14})
 
         # Adjust cell width of column
         for column in df2:
             col_idx = df2.columns.get_loc(column)
             worksheet.set_column(col_idx+1, col_idx+1, len(column)+10)
+
+        # Adjust row height
+        row_idx = 1
+        for index, row in df2.iterrows():
+            column_idx = 0
+            for cell in row:
+                column_idx +=1
+                try:
+                    worksheet.write(row_idx, column_idx, cell, wrap_format)
+                except:
+                    continue
+            row_idx += 1
+    
 
         # Adjust font, color, etc
         header_format = workbook.add_format()
