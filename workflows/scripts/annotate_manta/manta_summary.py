@@ -2,8 +2,6 @@ from cmath import nan
 import enum
 import pandas as pd
 import re
-#import openpyxl
-#from openpyxl.styles import PatternFill
 import os
 
 def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist):
@@ -15,7 +13,6 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist)
 
 
     # this part of the script removes duplicates (translocations from both directions)
-
 
     row_indices = []
 
@@ -43,16 +40,9 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist)
 
     df.drop(remove_indices, 0, inplace=True)
 
-    
-
-
-
     # this part of the script highlights genes from the gene list
 
     # open the genelist
-    #genelist="/apps/bio/dependencies/wgs_somatic/genelist.txt"
-    #genelist=os.getcwd()+genelist
-
     genelist = open(genelist, "r")
 
     genelist = genelist.readlines()
@@ -122,20 +112,11 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist)
         df['Genelist'][ind] = ' '.join(set(df['Genelist'][ind].split()))
 
 
-
-
-
-
-
     # this part of the script extracts allele frequencies from PR/SR
-
 
     # extract variants only supported by both PR and SR
     df = df.loc[df['FORMAT'] == 'PR:SR']
 
-
-
-       
     # add columns for PR/SR for normal sample
     df[normalname + ':PR'] = ""
     df[normalname + ':PR-alt'] = ""
@@ -150,9 +131,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist)
         PR_alt = int(re.split('[,:]', row)[1])
         SR = int(re.split('[,:]', row)[2])
         SR_alt = int(re.split('[,:]', row)[3])
-        #print(row)   
         
-        #print(row_index)
         if len(df.loc[df[normalname] == row].index.values) > 1:
             for rown in df.loc[df[normalname] == row].index.values:
                 ind_val=int(rown)
@@ -277,7 +256,3 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist)
 
 
         writer.close()
-        
-
-
-
