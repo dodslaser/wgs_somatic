@@ -222,17 +222,18 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist)
     # Second df with a selection of columns
     df2 = df[["Varianttype", "Breakpoint 1", "GeneInfo 1", "Breakpoint 2", "GeneInfo 2", "ALT", "FORMAT", "TOTAL alt (N)", "TOTAL VAF (N)", "TOTAL alt (T)", "TOTAL VAF (T)", "DEL/DUP Genecrossings", "Genelist"]]
 
+
     # If more than 30 genes in DEL/DUP Genecrossings - write number of genes instead of names of genes 
     for deldup in df2['DEL/DUP Genecrossings']:
         deldup = str(deldup)
+        in_genes = []
+        for gene in deldup.split(','):
+            if 'in:' in gene:
+                in_genes.append(gene)
         if len(deldup.split(',')) > 30:
-            deldup_replace = len(deldup.split(','))
-            df2['DEL/DUP Genecrossings'] = df2['DEL/DUP Genecrossings'].replace(deldup, deldup_replace)
-
-            
-    #print(df2['DEL/DUP Genecrossings'])
-
-
+            no_of_genes = len(deldup.split(','))
+            new_deldup = f'No of genes: {no_of_genes}. \n {", ".join(in_genes)}'
+            df2['DEL/DUP Genecrossings'] = df2['DEL/DUP Genecrossings'].replace(deldup, new_deldup)
 
 
     with pd.ExcelWriter(str(mantaSV_summary)) as writer:
