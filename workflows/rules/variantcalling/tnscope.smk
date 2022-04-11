@@ -1,31 +1,56 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-rule tnscope:
-    input:
-        tumorbam = expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-        normalbam = expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-        tumortable = expand("{workingdir}/{stype}/recal/{sname}_RECAL_DATA.TABLE", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-        normaltable = expand("{workingdir}/{stype}/recal/{sname}_RECAL_DATA.TABLE", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-    params:
-        threads = clusterconf["tnscope"]["threads"],
-        tumorname = tumorname,
-        normalname = normalname,
-        sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
-        reference = pipeconfig["singularities"]["sentieon"]["reference"],
-        dbsnp = pipeconfig["singularities"]["sentieon"]["dbsnp"],
-        callsettings = pipeconfig["rules"]["tnscope"]["settings"],
-    singularity:
-        pipeconfig["singularities"]["sentieon"]["sing"]
-    output:
-        tnscope = "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn.vcf",
-        tnscope_bam = "{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam"
-    shell:
-        "echo $HOSTNAME;"
-        "{params.sentieon} driver -t {params.threads} -r {params.reference} "
-            "-i {input.tumorbam} -q {input.tumortable} -i {input.normalbam} -q {input.normaltable} "
-            "--algo TNscope --tumor_sample {params.tumorname} --normal_sample {params.normalname} --bam_output {output.tnscope_bam} "
-            "{params.callsettings} {output.tnscope}"
+if normalid:
+    rule tnscope:
+        input:
+            tumorbam = expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+            normalbam = expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            tumortable = expand("{workingdir}/{stype}/recal/{sname}_RECAL_DATA.TABLE", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+            normaltable = expand("{workingdir}/{stype}/recal/{sname}_RECAL_DATA.TABLE", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+        params:
+            threads = clusterconf["tnscope"]["threads"],
+            tumorname = tumorname,
+            normalname = normalname,
+            sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
+            reference = pipeconfig["singularities"]["sentieon"]["reference"],
+            dbsnp = pipeconfig["singularities"]["sentieon"]["dbsnp"],
+            callsettings = pipeconfig["rules"]["tnscope"]["settings"],
+        singularity:
+            pipeconfig["singularities"]["sentieon"]["sing"]
+        output:
+            tnscope = "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn.vcf",
+            tnscope_bam = "{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam"
+        shell:
+            "echo $HOSTNAME;"
+            "{params.sentieon} driver -t {params.threads} -r {params.reference} "
+                "-i {input.tumorbam} -q {input.tumortable} -i {input.normalbam} -q {input.normaltable} "
+                "--algo TNscope --tumor_sample {params.tumorname} --normal_sample {params.normalname} --bam_output {output.tnscope_bam} "
+                "{params.callsettings} {output.tnscope}"
+else:
+    rule tnscope:
+        input:
+            tumorbam = expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+            tumortable = expand("{workingdir}/{stype}/recal/{sname}_RECAL_DATA.TABLE", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+        params:
+            threads = clusterconf["tnscope"]["threads"],
+            tumorname = tumorname,
+            sentieon = pipeconfig["singularities"]["sentieon"]["tool_path"],
+            reference = pipeconfig["singularities"]["sentieon"]["reference"],
+            dbsnp = pipeconfig["singularities"]["sentieon"]["dbsnp"],
+            callsettings = pipeconfig["rules"]["tnscope"]["settings"],
+        singularity:
+            pipeconfig["singularities"]["sentieon"]["sing"]
+        output:
+            tnscope = "{workingdir}/{stype}/tnscope/{sname}_TNscope_tn.vcf",
+            tnscope_bam = "{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam"
+        shell:
+            "echo $HOSTNAME;"
+            "{params.sentieon} driver -t {params.threads} -r {params.reference} "
+                "-i {input.tumorbam} -q {input.tumortable} "
+                "--algo TNscope --tumor_sample {params.tumorname} --bam_output {output.tnscope_bam} "
+                "{params.callsettings} {output.tnscope}"
+
 
 rule tnscope_modelfilter:
     input:

@@ -62,7 +62,7 @@ def petagene_compress_bam(outputdir, tumorname):
     qsub_args = ["qsub", "-N", f"WS-{tumorname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, outputdir]
     subprocess.call(qsub_args, shell=False)
 
-def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=False, tumorname=False, tumorfastqs=False, ivauser=False, igvuser=False, hg38ref=False, starttype=False):
+def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=False, runtumor=False, tumorname=False, tumorfastqs=False, ivauser=False, igvuser=False, hg38ref=False, starttype=False):
     try:
         ################################################################
         # Write InputArgs to logfile
@@ -82,8 +82,9 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
 
         if output.endswith("/"):
             output = output[:-1]
-        if normalfastqs.endswith("/"):
-            normalfastqs = normalfastqs[:-1]
+        if normalfastqs:
+            if normalfastqs.endswith("/"):
+                normalfastqs = normalfastqs[:-1]
         if tumorfastqs:
             if tumorfastqs.endswith("/"):
                 tumorfastqs = tumorfastqs[:-1]
@@ -112,16 +113,18 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
         if starttype == "force":
                 f_tumorfastqs = ""
                 f_normalfastqs = "" 
+
         else:
-            if not os.path.isdir(normalfastqs):
-                error_list.append(f"{normalfastqs} does not appear to be a directory")
-            else:
-                f_normalfastqs = glob.glob(f"{normalfastqs}/{normalname}*fastq.gz")
-                if not f_normalfastqs:
-                    logger(f"Warning: No fastqs found in normaldir")
-                    f_normalfastqs = glob.glob(f"{normalfastqs}/{normalname}*fasterq")
+            if normalfastqs:
+                if not os.path.isdir(normalfastqs):
+                    error_list.append(f"{normalfastqs} does not appear to be a directory")
+                else:
+                    f_normalfastqs = glob.glob(f"{normalfastqs}/{normalname}*fastq.gz")
                     if not f_normalfastqs:
-                        error_list.append(f"No fastqs or fasterqs found in normaldir")
+                        logger(f"Warning: No fastqs found in normaldir")
+                        f_normalfastqs = glob.glob(f"{normalfastqs}/{normalname}*fasterq")
+                        if not f_normalfastqs:
+                            error_list.append(f"No fastqs or fasterqs found in normaldir")
 
             if tumorfastqs:
                 if not os.path.isdir(tumorfastqs):
@@ -163,8 +166,12 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
         #################################################################
         # Prepare AnalysisFolder
         #################################################################
-        date, _, _, chip, *_ = runnormal.split('_')
-        normalid= '_'.join([normalname, date, chip])
+        if runnormal:
+            date, _, _, chip, *_ = runnormal.split('_')
+        if normalname:
+            normalid= '_'.join([normalname, date, chip])
+        else:
+            normalid = None
         if runtumor:
             date, _, _, chip, *_ = runtumor.split('_')
         if tumorname:
@@ -189,8 +196,9 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
             samplelog = f"{samplelogs}/{normalid}.log"
         logger("Input validated:", samplelog)
         logger(f"{command}", samplelog)
-        logger("Fastqs found for normal:", samplelog)
-        logger(f"{f_normalfastqs}", samplelog)
+        if normalname:
+            logger("Fastqs found for normal:", samplelog)
+            logger(f"{f_normalfastqs}", samplelog)
         if tumorname:
             logger("Fastqs found for tumor:", samplelog)
             logger(f"{f_tumorfastqs}", samplelog)
@@ -202,7 +210,6 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
         analysisdict["normalname"] = normalname 
         analysisdict["normalid"] = normalid
         analysisdict["normalfastqs"] = [normalfastqs]
-        #if tumorname:
         analysisdict["tumorname"] = tumorname
         analysisdict["tumorid"] = tumorid
         analysisdict["tumorfastqs"] = [tumorfastqs]
@@ -238,8 +245,9 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
             destination = binddirs[binddir]["destination"]
             logger(f"preparing binddir variable {binddir} source: {source} destination: {destination}")
             binddir_string = f"{binddir_string}{source}:{destination},"
-            for normalfastqdir in analysisdict["normalfastqs"]:
-                 binddir_string = f"{binddir_string}{normalfastqdir},"
+            if normalname:
+                for normalfastqdir in analysisdict["normalfastqs"]:
+                     binddir_string = f"{binddir_string}{normalfastqdir},"
             if tumorname:
                 for tumorfastqdir in analysisdict["tumorfastqs"]:
                     binddir_string = f"{binddir_string}{tumorfastqdir},"
@@ -273,21 +281,13 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
         logger(f"Error in script:")
         logger(f"{e} Traceback: {tb}")
         sys.exit(1)
-#    if os.path.isfile(f"{output}/reporting/workflow_finished.txt"):
-#        if tumorname:
-            # these functions are only executed if snakemake workflow has finished successfully
-#            yearly_stats(args.tumorsample, args.normalsample)
-#            petagene_compress_bam(args.outputdir, args.tumorsample)
-#        else:
-#            yearly_stats(tumorname = 'None', normalname = args.normalsample)
-#            petagene_compress_bam(args.outputdir, tumorname = args.normalsample)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-rn', '--runnormal', nargs='?', help='the sequencing run the normalsample was sequenced in', required=True)
+    parser.add_argument('-rn', '--runnormal', nargs='?', help='the sequencing run the normalsample was sequenced in', required=False)
     parser.add_argument('-o', '--outputdir', nargs='?', help='output directory, where to put results', required=True)
-    parser.add_argument('-ns', '--normalsample', nargs='?', help='normal samplename', required=True)
-    parser.add_argument('-nf', '--normalfastqs', nargs='?', help='path to directory containing normal fastqs', required=True)
+    parser.add_argument('-ns', '--normalsample', nargs='?', help='normal samplename', required=False)
+    parser.add_argument('-nf', '--normalfastqs', nargs='?', help='path to directory containing normal fastqs', required=False)
     parser.add_argument('-rt', '--runtumor', nargs='?', help='the sequencing run the tumorsample was sequenced in',     required=False)
     parser.add_argument('-tn', '--tumorsample', nargs='?', help='tumor samplename', required=False)
     parser.add_argument('-tf', '--tumorfastqs', nargs='?', help='path to directory containing tumor fastqs', required=False)
@@ -296,13 +296,17 @@ if __name__ == '__main__':
     parser.add_argument('-hg38', '--hg38ref', nargs='?', help='run analysis on hg38 reference (write yes if you want this option)', required=False)
     parser.add_argument('-stype', '--starttype', nargs='?', help='write forcestart if you want to ignore fastqs', required=False)
     args = parser.parse_args()
-    analysis_main(args, args.runnormal, args.outputdir, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser, args.hg38ref, args.starttype)
+    analysis_main(args, args.outputdir, args.runnormal, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser, args.hg38ref, args.starttype)
 
     if os.path.isfile(f"{args.outputdir}/reporting/workflow_finished.txt"):
         if args.tumorsample:
+            if args.normalsample:
             # these functions are only executed if snakemake workflow has finished successfully
-            yearly_stats(args.tumorsample, args.normalsample)
-            petagene_compress_bam(args.outputdir, args.tumorsample)
+                yearly_stats(args.tumorsample, args.normalsample)
+                petagene_compress_bam(args.outputdir, args.tumorsample)    
+            else:
+                yearly_stats(args.tumorsample, 'None')
+                petagene_compress_bam(args.outputdir, args.tumorsample)
         else:
             yearly_stats('None', args.normalsample)
             petagene_compress_bam(args.outputdir, args.normalsample)
