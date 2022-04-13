@@ -199,7 +199,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist)
                 df.at[row_index, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
     # Second df with a selection of columns
-    df2 = df[["Varianttype", "Breakpoint 1", "GeneInfo 1", "Breakpoint 2", "GeneInfo 2", "ALT", "FORMAT", "TOTAL alt (N)", "TOTAL VAF (N)", "TOTAL alt (T)", "TOTAL VAF (T)", "DEL/DUP Genecrossings", "Genelist"]]
+    df2 = df[["Varianttype", "Breakpoint 1", "GeneInfo 1", "Breakpoint 2", "GeneInfo 2", "ALT", "FORMAT", normalname, "TOTAL VAF (N)", tumorname, "TOTAL VAF (T)", "DEL/DUP Genecrossings", "Genelist"]]
 
 
     # If more than 30 genes in DEL/DUP Genecrossings - write number of genes instead of names of genes 
