@@ -77,9 +77,10 @@ rule manta_somatic:
 rule manta_summary:
     input:
         "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx"
+    params:
+        genelist = pipeconfig["rules"]["manta_summary"]["genelist"]
     output:
         "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV_Summary.xlsx"
     run:
-        manta_summary(input, output, tumorname, normalname)
-
+        manta_summary(input, output, tumorname, normalname, f"{params.genelist}")
 
