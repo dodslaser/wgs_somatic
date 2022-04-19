@@ -1,0 +1,12 @@
+{
+    "ChiCap_Actionable_v2.0": {
+        "bedfile": "ChiCap_Actionable_v2.0_ext2.bed",
+        "levels": 2,
+        "version": "1.0"
+    },
+    "ChiCap_Clinical_v5.0": {
+        "bedfile": "ChiCap_Clinical_v5.0_ext2.bed",
+        "levels": 2,
+        "version": "1.0"
+    }
+}

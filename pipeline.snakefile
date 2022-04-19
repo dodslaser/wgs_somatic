@@ -19,7 +19,7 @@ tumorname = config["tumorname"]
 tumorid = config["tumorid"]
 
 igvuser = config["igvuser"]
-ivauser = config["ivauser"]
+#ivauser = config["ivauser"]
 reference = config["reference"]
 
 workingdir = config["workingdir"]
@@ -51,6 +51,7 @@ sampleconfig["normal"] = normalid
 sampleconfig["tumor"] = tumorid
 sampleconfig["normalname"] = normalname
 sampleconfig["tumorname"] = tumorname
+sampleconfig["insilico"] = pipeconfig["rules"]["insilico"] #What should this be?
 
 ####################################################
 # Prepare Fastq Variables 
@@ -201,7 +202,5 @@ def alissa_vcf_conversion(wildcards):
 rule all:
     input: 
         get_igv_input,
-        upload_somatic_iva,
-        upload_germline_iva,
         expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir),
         alissa_vcf_conversion

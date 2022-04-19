@@ -15,7 +15,7 @@ import traceback
 import subprocess
 import threading
 
-from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
+from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH, INSILICO_CONFIG, INSILICO_PANELS_ROOT
 from context import RunContext, SampleContext
 from helpers import setup_logger
 from tools.slims import get_sample_slims_info, SlimsSample, find_more_fastqs, get_pair_dict
@@ -83,10 +83,12 @@ def generate_context_objects(Rctx, logger):
 
     return Rctx
 
+
 def call_script(**kwargs):
     '''Function to call main function from launch_snakemake.py'''
     args = argparse.Namespace(**kwargs)
     subprocess.call(analysis_main(args, **kwargs))
+
 
 def check_ok(outputdir):
     '''Function to check if analysis has finished correctly'''
@@ -95,6 +97,7 @@ def check_ok(outputdir):
         return True
     else:
         return False
+
 
 def analysis_end(outputdir, tumorsample, normalsample):
     '''Function to check if analysis has finished correctly and add to yearly stats and start petagene compression'''
@@ -109,6 +112,36 @@ def analysis_end(outputdir, tumorsample, normalsample):
             petagene_compress_bam(outputdir, normalsample)
     else:
         pass
+
+
+def get_insilico_info(all_insilico=True, panel_names=[]):
+    """NOTE: This whole function is horrible. This was copied from WOPR"""
+    with open(INSILICO_CONFIG, 'r') as conf:
+        insilico_config = json.load(conf)
+
+    # All AND specific both set
+    if all_insilico:
+        if panel_names:
+            raise Exception(f'All insilico flag set but also found specific panel names: {panel_names}.')
+
+    panels = {}
+
+    for panel_name, panel_info in insilico_config.items():
+        # TODO: Overwrites, fix this and make proper
+        panel_info['bedfile'] = os.path.join(INSILICO_PANELS_ROOT, panel_info['bedfile'])
+
+        if all_insilico:
+            panels[panel_name] = panel_info
+        else:
+            if panel_name in panel_names:
+                panels[panel_name] = panel_info
+
+    if not all_insilico:
+        if len(panels) != len(panel_names):
+            raise Exception(f'One or more panel names not found in insilico config: {panel_names}')
+
+    return panels
+
 
 def wrapper(instrument):
     '''Wrapper function'''

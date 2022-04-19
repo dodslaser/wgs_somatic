@@ -38,10 +38,11 @@ def create_seg(rundir, samplename, vartype):
                     if ncov > 0 and cnv > 0:
                         cnvlog = math.log(cnv, 2)
                         covlog = math.log(ncov, 2)
-                        if not array_2[0] == "X" or not array_2[0] == "chrX" or not array_2[0] == "Y" or not array_2 == "chrY":
+                        # Uncomment this later when we can input correct sex of patient. Currently it will show messed up resuts for XX
+                        #if not array_2[0] == "X" or not array_2[0] == "chrX" or not array_2[0] == "Y" or not array_2 == "chrY":
+                        if not array_2[0] == "X" or not array_2[0] == "Y":
                             cnvlog -= 1
                             covlog -= 1
-
                         OUTFILE.write("Observed_CNVs\t%s\t%s\t%s\t%s\n" % (array_2[0], array_2[1], array_2[2], covlog))
                         OUTFILE2.write("Called_CNVs\t%s\t%s\t%s\t%s\n" % (array_2[0], array_2[1], array_2[2], cnvlog))
         return [f"{rundir}/{samplename}_{vartype}_CNV_observed.seg", f"{rundir}/{samplename}_{vartype}_CNV_called.seg"]

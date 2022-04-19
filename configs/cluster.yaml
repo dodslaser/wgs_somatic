@@ -70,6 +70,5 @@ alissa_vcf:
     threads: 1
 
 cutadapt:
-    queue: test.q
     threads:  1
     excl: excl=1

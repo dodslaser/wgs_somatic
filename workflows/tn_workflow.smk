@@ -1,6 +1,44 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
+import os
+from collections import defaultdict
+
+def group_insilico(paths):
+    insilico_groups = defaultdict(list)
+
+    for path in paths:
+        insilico_name = os.path.basename(os.path.dirname(path))  # NOTE: Not great...
+        insilico_groups[insilico_name].append(path)
+
+    # Collect files under keys for better access than relying on indexes
+    insilico_groups_named = {}
+    for insilico_name, insilico_paths in insilico_groups.items():
+        ten_x, twenty_x, below_ten_x, csv, pdf = insilico_paths
+
+        named = {'10x': ten_x,
+                 '20x': twenty_x,
+                 'below_10x': below_ten_x,
+                 'csv': csv,
+                 'pdf': pdf}
+        insilico_groups_named[insilico_name] = named
+
+    return insilico_groups_named
+
+
+def get_insilico(wcs):
+    insilico_data = pipeconfig['insilico']
+    insilico_names = insilico_data.keys()
+
+    # NOTE: sampleid and workingdir is essentially global because defined in snakefile
+    insilico_files = []
+    for insilico_name in insilico_names:
+        insilico_files.extend([f"{workingdir}/insilico/{insilico_name}/{sampleid}_{insilico_name}_10x.xlsx",
+                               f"{workingdir}/insilico/{insilico_name}/{sampleid}_{insilico_name}_20x.xlsx",
+                               f"{workingdir}/insilico/{insilico_name}/{sampleid}_{insilico_name}_genes_below10x.xlsx",
+                               f"{workingdir}/insilico/{insilico_name}/{sampleid}_{insilico_name}.csv"])
+    return insilico_files
+
 
 rule tn_workflow:
     input:
@@ -19,7 +57,8 @@ rule tn_workflow:
         expand("{workingdir}/{stype}/canvas/{sname}_{vartype}_CNV_called.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
         expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
         expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir,  sname=normalid, stype=sampleconfig[normalname]["stype"]),
-        expand("{workingdir}/{stype}/insilico/{insiliconame}/{sname}_{insiliconame}_genes_below10x.xlsx", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"], insiliconame="temp"),
+        #expand("{workingdir}/{stype}/insilico/{insiliconame}/{sname}_{insiliconame}_genes_below10x.xlsx", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"], insiliconame="temp"),
+        get_insilico,
         "{workingdir}/reporting/shared_result_files.txt"
         
     output:
