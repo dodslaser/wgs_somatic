@@ -134,22 +134,28 @@ def create_excel_main(tumorcov='', normalcov='', tumordedup='', normaldedup='', 
     if tumorcov:
         tumorcovfile = os.path.basename(tumorcov)
         tumorname = tumorcovfile.replace("_WGScov.tsv", "")
-    normalcovfile = os.path.basename(normalcov)
-    normalname = normalcovfile.replace("_WGScov.tsv", "")
+    if normalcov:
+        normalcovfile = os.path.basename(normalcov)
+        normalname = normalcovfile.replace("_WGScov.tsv", "")
     statsdict = {}
     if tumorcov:
         statsdict = extract_stats(tumorcov, "coverage",  "tumor", statsdict)
         statsdict = extract_stats(tumordedup, "dedup",  "tumor", statsdict)
-        canvas_dict = get_canvas_tumorinfo(canvasvcf)
-        match_dict = determine_match(normalvcf, tumorvcf, 400000)
-    statsdict = extract_stats(normalcov, "coverage", "normal", statsdict)
-    statsdict = extract_stats(normaldedup, "dedup", "normal", statsdict)
+        #if canvasvcf:
+        #    canvas_dict = get_canvas_tumorinfo(canvasvcf)
+        if normalcov:
+            match_dict = determine_match(normalvcf, tumorvcf, 400000)
+            statsdict = extract_stats(normalcov, "coverage", "normal", statsdict)
+            statsdict = extract_stats(normaldedup, "dedup", "normal", statsdict)
 
     if not output.endswith(".xlsx"):
         output = f"{output}.xlsx"
 
     if tumorcov:
-        create_excel(statsdict, output, normalname, tumorname, match_dict, canvas_dict)
+        if normalcov:
+            create_excel(statsdict, output, normalname, tumorname, match_dict, canvas_dict)
+        else:
+            create_excel(statsdict, output, normalname='', tumorname=tumorname, match_dict='', canvasdict='')
     else:
         create_excel(statsdict, output, normalname, tumorname='', match_dict='', canvasdict='')
 

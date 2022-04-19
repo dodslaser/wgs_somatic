@@ -82,12 +82,12 @@ else:
         run:
             if not os.path.isfile(f"{wildcards.workingdir}/{wildcards.stype}/manta/runWorkflow.py"):
                 shell("{params.mantaconf} --tumorBam={input.tumorbam} --referenceFasta {params.reference} --runDir {wildcards.workingdir}/{wildcards.stype}/manta/") # Preparing Manta
-            if not os.path.isfile(f"{wildcards.workingdir}/{wildcards.stype}/manta/results/variants/somaticSV.vcf.gz"):
+            if not os.path.isfile(f"{wildcards.workingdir}/{wildcards.stype}/manta/results/variants/tumorSV.vcf.gz"):
                 shell("{wildcards.workingdir}/{wildcards.stype}/manta/runWorkflow.py -m local") #Running Manta
-            if not os.path.isfile(f"{wildcards.workingdir}/{wildcards.stype}/manta/results/variants/somaticSV.vcf"):
-                shell("gunzip {wildcards.workingdir}/{wildcards.stype}/manta/results/variants/somaticSV.vcf.gz")
-            shell("grep -e $'\t'PASS$'\t' -e '^#' {wildcards.workingdir}/{wildcards.stype}/manta/results/variants/somaticSV.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/results/variants/somaticSV_PASS.vcf")
-            shell("grep -Ev 'GL000|hs37d5' {wildcards.workingdir}/{wildcards.stype}/manta/results/variants/somaticSV_PASS.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf")
+            if not os.path.isfile(f"{wildcards.workingdir}/{wildcards.stype}/manta/results/variants/tumorSV.vcf"):
+                shell("gunzip {wildcards.workingdir}/{wildcards.stype}/manta/results/variants/tumorSV.vcf.gz")
+            shell("grep -e $'\t'PASS$'\t' -e '^#' {wildcards.workingdir}/{wildcards.stype}/manta/results/variants/tumorSV.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/results/variants/tumorSV_PASS.vcf")
+            shell("grep -Ev 'GL000|hs37d5' {wildcards.workingdir}/{wildcards.stype}/manta/results/variants/tumorSV_PASS.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf")
             shell("grep -e '^#' -e 'MantaBND:' {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_MantaBNDs.vcf")
             shell("grep -v 'MantaBND:' {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_MantaNOBNDs.vcf")
             shell("{params.annotate} -v {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf -g {params.annotate_ref} -o {wildcards.workingdir}/{wildcards.stype}/manta")
