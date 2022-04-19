@@ -62,12 +62,7 @@ def petagene_compress_bam(outputdir, tumorname):
     qsub_args = ["qsub", "-N", f"WS-{tumorname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, outputdir]
     subprocess.call(qsub_args, shell=False)
 
-<<<<<<< HEAD
 def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=False, runtumor=False, tumorname=False, tumorfastqs=False, ivauser=False, igvuser=False, hg38ref=False, starttype=False):
-=======
-
-def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=False, tumorname=False, tumorfastqs=False, igvuser=False, hg38ref=False, starttype=False):
->>>>>>> insilico progress
     try:
         ################################################################
         # Write InputArgs to logfile
@@ -281,6 +276,7 @@ def analysis_main(args, runnormal, output, normalname, normalfastqs, runtumor=Fa
         logger(f"Error in script:")
         logger(f"{e} Traceback: {tb}")
         sys.exit(1)
+
 
 
 if __name__ == '__main__':
