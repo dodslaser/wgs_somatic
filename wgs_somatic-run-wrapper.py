@@ -19,7 +19,7 @@ from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
 from helpers import setup_logger
 from tools.slims import get_sample_slims_info, SlimsSample, find_more_fastqs, get_pair_dict
-from tools.email import start_email, end_email
+from tools.email import start_email, end_email, error_email
 from launch_snakemake import analysis_main, petagene_compress_bam, yearly_stats
 
 
@@ -107,6 +107,8 @@ def analysis_end(outputdir, tumorsample, normalsample):
         else:
             yearly_stats('None', normalsample)
             petagene_compress_bam(outputdir, normalsample)
+    else:
+        pass
 
 def wrapper(instrument):
     '''Wrapper function'''
@@ -227,15 +229,28 @@ def wrapper(instrument):
             u.join()
             logger.info(f'Thread {u} is finished')
 
+        ok_samples = []
+        not_ok_samples = []
         # Check if all samples in run have finished successfully. If not, exit script and send error email.
-        for outdir in check_ok_outdirs:
+        for outdir, sample_info in zip(check_ok_outdirs, final_pairs):
             if check_ok(outdir) == True:
-                continue
+                ok_samples.append(sample_info)
+                logger.info(f'Finished correctly: {sample_info}')
             else:
-                logger.info('All jobs have not finished successfully')
-                # add something to send end email about fail
-                sys.exit()
-
+                logger.info(f'Not finished correctly: {sample_info}')
+                not_ok_samples.append(sample_info)
+        if not_ok_samples:
+            # send emails about which samples ok and which not ok
+            error_email(Rctx_run.run_name, ok_samples, not_ok_samples)
+            if ok_samples:
+                # yearly stats and petagene compress ok samples
+                # even though thread starts for all samples, function checks if sample ok 
+                # so it will only do yearly stats and petagene compress for ok samples
+                for t in end_threads:
+                    t.start()
+                for u in end_threads:
+                    u.join()
+            sys.exit()
         
         logger.info('All jobs have finished successfully')
         end_email(Rctx_run.run_name, final_pairs)
