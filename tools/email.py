@@ -28,14 +28,12 @@ def start_email(run_name, samples):
 
     subject = f'WGS Somatic start mail {run_name}'
 
-    body = '\n'.join([f'Starting wgs_somatic for the following samples in run {run_name}:',
-                      '',
-                      f'{new_line}{new_line.join(samples)}',
-                      '',
-                      'You will get an email when the results are ready.',
-                      '',
-                      'Best regards,',
-                      'CGG Cancer'])
+    body = f"""Starting wgs_somatic for the following samples in run {run_name}:\n
+{new_line.join(samples)}\n
+You will get an email when the results are ready.\n
+Best regards,
+CGG Cancer
+ """
 
     send_email(subject, body)
 
@@ -44,12 +42,11 @@ def end_email(run_name, samples):
 
     subject = f'WGS Somatic end mail {run_name}'
 
-    body = '\n'.join([f'WGS somatic has finished successfully for the following samples in run {run_name}:',
-                      '',
-                      f'{new_line}{new_line.join(samples)}',
-                      '',
-                      'Best regards,',
-                      'CGG Cancer'])
+    body = f"""WGS somatic has finished successfully for the following samples in run {run_name}:\n
+{new_line.join(samples)}\n
+Best regards,
+CGG Cancer
+"""
 
     send_email(subject, body)
 
@@ -59,19 +56,13 @@ def error_email(run_name, ok_samples, bad_samples):
 
     subject = f'WGS Somatic end mail {run_name}'
 
-    body = '\n'.join([f'WGS somatic has finished successfully for the following samples in run {run_name}:',
-                      '',
-                      f'{new_line}{new_line.join(ok_samples)}',
-                      '',
-                      'The following samples have not finished correctly:',
-                      '',
-                      f'{new_line}{new_line.join(bad_samples)}',
-                      '',
-                      'Errors concerning these samples will be investigated.',
-                      '',
-                      'Best regards,',
-                      'CGG Cancer'])
+    body = f"""WGS somatic has finished successfully for the following samples in run {run_name}:\n
+{new_line.join(ok_samples)}\n
+The following samples have not finished correctly:\n
+{new_line.join(bad_samples)}\n
+Errors concerning these samples will be investigated.\n
+Best regards,
+CGG Cancer
+"""
 
     send_email(subject, body)
-
-
