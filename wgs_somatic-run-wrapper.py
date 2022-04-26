@@ -19,7 +19,7 @@ from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
 from context import RunContext, SampleContext
 from helpers import setup_logger
 from tools.slims import get_sample_slims_info, SlimsSample, find_more_fastqs, get_pair_dict
-from tools.email import start_email, end_email
+from tools.email import start_email, end_email, error_email
 from launch_snakemake import analysis_main, petagene_compress_bam, yearly_stats
 
 
@@ -75,6 +75,8 @@ def generate_context_objects(Rctx, logger):
         # If no samples set for wgs_somatic
         # doesn't skip continuing with the rest of the code - need to fix this
         logger.info('No samples set for wgs_somatic. Skipping run.')
+        # exit script if no samples set for wgs_somatic in run
+        sys.exit()
 
     for Sctx in Rctx.sample_contexts:
         sample_status['approved'].append(Sctx)
@@ -105,6 +107,8 @@ def analysis_end(outputdir, tumorsample, normalsample):
         else:
             yearly_stats('None', normalsample)
             petagene_compress_bam(outputdir, normalsample)
+    else:
+        pass
 
 def wrapper(instrument):
     '''Wrapper function'''
@@ -160,14 +164,20 @@ def wrapper(instrument):
         for key in pair_dict_all_pairs:
             if 'tumor' in pair_dict_all_pairs.get(key):
                 t = key
-                # Using the list containing two values; 'tumor' and value of tumorNormalID
+                # Using the list containing values 'tumor', value of tumorNormalID, department and prio status
                 # Removing the value 'tumor' from the list to get the tumorNormalID
-                # TODO: Would be nice to do in a better way rather than using [0] to get the remaining value in the list
+                # TODO: Would be nice to do in a better way rather than using [0] to get the first value in the list
                 t_ID = [val for val in pair_dict_all_pairs.get(key) if val != 'tumor'][0] 
                 for k in pair_dict_all_pairs:
                     if 'normal' in pair_dict_all_pairs.get(k):
                         n = k
                         n_ID = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][0]
+                        department = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][1]
+                        is_prio = [val for val in pair_dict_all_pairs.get(k) if val != 'normal'][2]
+                        if is_prio:
+                            prio_sample = 'prio'
+                        else:
+                            prio_sample = ''
                         # As of now, tumorNormalID is the same for tumor and normal.
                         # In the future, this will be changed to pairID
                         # The or statements are here to prepare to when we change to pair ID
@@ -186,8 +196,9 @@ def wrapper(instrument):
                             # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
                             hg38ref = config['hg38ref']['GMS-BT']
 
+                            
                             # Use this list of final pairs for email
-                            final_pairs.append(f'{tumorsample} (T) {normalsample} (N)')
+                            final_pairs.append(f'{tumorsample} (T) {normalsample} (N), {department} {prio_sample}')
 
                             # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead.
                             # Won't work if outputdir_old also already exists. Need to be solved in a better way 
@@ -205,6 +216,7 @@ def wrapper(instrument):
                             check_ok_outdirs.append(outputdir)
                             end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample)))
 
+
         # Start several samples at the same time
         for t in threads:
             t.start()
@@ -217,15 +229,28 @@ def wrapper(instrument):
             u.join()
             logger.info(f'Thread {u} is finished')
 
+        ok_samples = []
+        bad_samples = []
         # Check if all samples in run have finished successfully. If not, exit script and send error email.
-        for outdir in check_ok_outdirs:
+        for outdir, sample_info in zip(check_ok_outdirs, final_pairs):
             if check_ok(outdir) == True:
-                continue
+                ok_samples.append(sample_info)
+                logger.info(f'Finished correctly: {sample_info}')
             else:
-                logger.info('All jobs have not finished successfully')
-                # add something to send end email about fail
-                sys.exit()
-
+                logger.info(f'Not finished correctly: {sample_info}')
+                bad_samples.append(sample_info)
+        if bad_samples:
+            # send emails about which samples ok and which not ok
+            error_email(Rctx_run.run_name, ok_samples, bad_samples)
+            if ok_samples:
+                # yearly stats and petagene compress ok samples
+                # even though thread starts for all samples, function checks if sample ok 
+                # so it will only do yearly stats and petagene compress for ok samples
+                for t in end_threads:
+                    t.start()
+                for u in end_threads:
+                    u.join()
+            sys.exit()
         
         logger.info('All jobs have finished successfully')
         end_email(Rctx_run.run_name, final_pairs)
