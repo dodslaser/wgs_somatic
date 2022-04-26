@@ -230,7 +230,7 @@ def wrapper(instrument):
             logger.info(f'Thread {u} is finished')
 
         ok_samples = []
-        not_ok_samples = []
+        bad_samples = []
         # Check if all samples in run have finished successfully. If not, exit script and send error email.
         for outdir, sample_info in zip(check_ok_outdirs, final_pairs):
             if check_ok(outdir) == True:
@@ -238,10 +238,10 @@ def wrapper(instrument):
                 logger.info(f'Finished correctly: {sample_info}')
             else:
                 logger.info(f'Not finished correctly: {sample_info}')
-                not_ok_samples.append(sample_info)
-        if not_ok_samples:
+                bad_samples.append(sample_info)
+        if bad_samples:
             # send emails about which samples ok and which not ok
-            error_email(Rctx_run.run_name, ok_samples, not_ok_samples)
+            error_email(Rctx_run.run_name, ok_samples, bad_samples)
             if ok_samples:
                 # yearly stats and petagene compress ok samples
                 # even though thread starts for all samples, function checks if sample ok 

@@ -54,7 +54,7 @@ def end_email(run_name, samples):
     send_email(subject, body)
 
 
-def error_email(run_name, ok_samples, not_ok_samples):
+def error_email(run_name, ok_samples, bad_samples):
     """Send an email about which samples have failed and which samples have succeeded"""
 
     subject = f'WGS Somatic end mail {run_name}'
@@ -65,7 +65,7 @@ def error_email(run_name, ok_samples, not_ok_samples):
                       '',
                       'The following samples have not finished correctly:',
                       '',
-                      f'{new_line}{new_line.join(not_ok_samples)}',
+                      f'{new_line}{new_line.join(bad_samples)}',
                       '',
                       'Errors concerning these samples will be investigated.',
                       '',
