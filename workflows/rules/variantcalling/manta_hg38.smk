@@ -50,10 +50,7 @@ if normalid:
             "{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf"
         run:
             if not os.path.isfile(f"{wildcards.workingdir}/{wildcards.stype}/manta/runWorkflow.py"):
-            #if normalid:
                 shell("{params.mantaconf} --tumorBam={input.tumorbam} --normalBam={input.normalbam} --referenceFasta {params.reference} --runDir {wildcards.workingdir}/{wildcards.stype}/manta/") # Preparing Manta
-            #else:
-            #    shell("{params.mantaconf} --tumorBam={input.tumorbam} --referenceFasta {params.reference} --runDir {wildcards.workingdir}/{wildcards.stype}/manta/") # Preparing Manta
             if not os.path.isfile(f"{wildcards.workingdir}/{wildcards.stype}/manta/results/variants/somaticSV.vcf.gz"):
                 shell("{wildcards.workingdir}/{wildcards.stype}/manta/runWorkflow.py -m local") #Running Manta
             if not os.path.isfile(f"{wildcards.workingdir}/{wildcards.stype}/manta/results/variants/somaticSV.vcf"):
@@ -91,7 +88,6 @@ else:
             shell("grep -e '^#' -e 'MantaBND:' {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_MantaBNDs.vcf")
             shell("grep -v 'MantaBND:' {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_MantaNOBNDs.vcf")
             shell("{params.annotate} -v {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf -g {params.annotate_ref} -o {wildcards.workingdir}/{wildcards.stype}/manta")
-
 
 rule manta_summary:
     input:
