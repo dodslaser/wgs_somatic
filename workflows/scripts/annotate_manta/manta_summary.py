@@ -3,7 +3,7 @@ import re
 import openpyxl
 import os
 
-def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
+def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname=''):
     
     df = pd.read_excel(str(mantaSV_vcf),engine='openpyxl')
 
@@ -132,47 +132,45 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
 
 
 
-       
-    # add columns for PR/SR for normal sample
-    df[normalname + ':PR'] = ""
-    df[normalname + ':PR-alt'] = ""
-    df[normalname + ':SR'] = ""
-    df[normalname + ':SR-alt'] = ""
-    df['TOTAL alt (N)'] = ""
-    df['TOTAL VAF (N)'] = ""
+    if normalname:  
+        # add columns for PR/SR for normal sample
+        df[normalname + ':PR'] = ""
+        df[normalname + ':PR-alt'] = ""
+        df[normalname + ':SR'] = ""
+        df[normalname + ':SR-alt'] = ""
+        df['TOTAL alt (N)'] = ""
+        df['TOTAL VAF (N)'] = ""
 
-    # for row in column that contains PR/SR info for normal, add info to new columns
-    for row in df[normalname]:
-        PR = int(re.split('[,:]', row)[0])
-        PR_alt = int(re.split('[,:]', row)[1])
-        SR = int(re.split('[,:]', row)[2])
-        SR_alt = int(re.split('[,:]', row)[3])
-        #print(row)   
+        # for row in column that contains PR/SR info for normal, add info to new columns
+        for row in df[normalname]:
+            PR = int(re.split('[,:]', row)[0])
+            PR_alt = int(re.split('[,:]', row)[1])
+            SR = int(re.split('[,:]', row)[2])
+            SR_alt = int(re.split('[,:]', row)[3])
         
-        #print(row_index)
-        if len(df.loc[df[normalname] == row].index.values) > 1:
-            for rown in df.loc[df[normalname] == row].index.values:
-                ind_val=int(rown)
-                df.at[ind_val, normalname + ':PR'] = PR
-                df.at[ind_val, normalname + ':PR-alt'] = PR_alt
-                df.at[ind_val, normalname + ':SR'] = SR
-                df.at[ind_val, normalname + ':SR-alt'] =  SR_alt
-                df.at[ind_val, 'TOTAL alt (N)'] = PR_alt + SR_alt
-                if PR + PR_alt + SR + SR_alt == 0:
-                    df.at[ind_val, 'TOTAL VAF (N)'] = ''
-                else:
-                    df.at[ind_val, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'        
-        else:
-            row_index = int(df.loc[df[normalname] == row].index.values)
-            df.at[row_index, normalname + ':PR'] = PR
-            df.at[row_index, normalname + ':PR-alt'] = PR_alt
-            df.at[row_index, normalname + ':SR'] = SR
-            df.at[row_index, normalname + ':SR-alt'] =  SR_alt
-            df.at[row_index, 'TOTAL alt (N)'] = PR_alt + SR_alt
-            if PR + PR_alt + SR + SR_alt == 0:
-                df.at[row_index, 'TOTAL VAF (N)'] = ''
+            if len(df.loc[df[normalname] == row].index.values) > 1:
+                for rown in df.loc[df[normalname] == row].index.values:
+                    ind_val=int(rown)
+                    df.at[ind_val, normalname + ':PR'] = PR
+                    df.at[ind_val, normalname + ':PR-alt'] = PR_alt
+                    df.at[ind_val, normalname + ':SR'] = SR
+                    df.at[ind_val, normalname + ':SR-alt'] =  SR_alt
+                    df.at[ind_val, 'TOTAL alt (N)'] = PR_alt + SR_alt
+                    if PR + PR_alt + SR + SR_alt == 0:
+                        df.at[ind_val, 'TOTAL VAF (N)'] = ''
+                    else:
+                        df.at[ind_val, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'        
             else:
-                df.at[row_index, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
+                row_index = int(df.loc[df[normalname] == row].index.values)
+                df.at[row_index, normalname + ':PR'] = PR
+                df.at[row_index, normalname + ':PR-alt'] = PR_alt
+                df.at[row_index, normalname + ':SR'] = SR
+                df.at[row_index, normalname + ':SR-alt'] =  SR_alt
+                df.at[row_index, 'TOTAL alt (N)'] = PR_alt + SR_alt
+                if PR + PR_alt + SR + SR_alt == 0:
+                    df.at[row_index, 'TOTAL VAF (N)'] = ''
+                else:
+                    df.at[row_index, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
     
 
     # add columns for PR/SR for tumor sample
@@ -191,7 +189,6 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
         SR = int(re.split('[,:]', row)[2])
         SR_alt = int(re.split('[,:]', row)[3])
         
-        
         if len(df.loc[df[tumorname] == row].index.values) > 1:
             for rown in df.loc[df[tumorname] == row].index.values:
                 ind_val=int(rown)
@@ -199,11 +196,11 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname):
                 df.at[ind_val, tumorname + ':PR-alt'] = PR_alt
                 df.at[ind_val, tumorname + ':SR'] = SR
                 df.at[ind_val, tumorname + ':SR-alt'] =  SR_alt
-                df.at[ind_val, 'TOTAL alt (N)'] = PR_alt + SR_alt
+                df.at[ind_val, 'TOTAL alt (T)'] = PR_alt + SR_alt
                 if PR + PR_alt + SR + SR_alt == 0:
-                    df.at[ind_val, 'TOTAL VAF (N)'] = ''
+                    df.at[ind_val, 'TOTAL VAF (T)'] = ''
                 else:
-                    df.at[ind_val, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'        
+                    df.at[ind_val, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'        
         else:
             row_index = int(df.loc[df[tumorname] == row].index.values)
             df.at[row_index, tumorname + ':PR'] = PR
