@@ -28,8 +28,9 @@ if tumorid:
             input:
                 expand("{workingdir}/{stype}/{caller}/{sname}_{vcftype}_refseq3kfilt.vcf", workingdir=workingdir, stype=sampleconfig[tumorname]["stype"], caller="tnscope", sname=tumorid, vcftype="somatic"),
                 expand("{workingdir}/qc_report/{tumorname}_qc_stats.xlsx", workingdir=workingdir, tumorname=tumorname),
-                #expand("{workingdir}/{stype}/canvas/{sname}_CNV_somatic.vcf.xlsx", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/canvas/{sname}_CNV_germline.vcf.xlsx", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_mantaSV_Summary.xlsx", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
             output:
                 "{workingdir}/reporting/shared_result_files.txt"
             run:
