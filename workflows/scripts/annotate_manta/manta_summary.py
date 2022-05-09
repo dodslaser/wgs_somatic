@@ -181,11 +181,11 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname, genelist)
                 df.at[ind_val, tumorname + ':PR-alt'] = PR_alt
                 df.at[ind_val, tumorname + ':SR'] = SR
                 df.at[ind_val, tumorname + ':SR-alt'] =  SR_alt
-                df.at[ind_val, 'TOTAL alt (N)'] = PR_alt + SR_alt
+                df.at[ind_val, 'TOTAL alt (T)'] = PR_alt + SR_alt
                 if PR + PR_alt + SR + SR_alt == 0:
-                    df.at[ind_val, 'TOTAL VAF (N)'] = ''
+                    df.at[ind_val, 'TOTAL VAF (T)'] = ''
                 else:
-                    df.at[ind_val, 'TOTAL VAF (N)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'        
+                    df.at[ind_val, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'        
         else:
             row_index = int(df.loc[df[tumorname] == row].index.values)
             df.at[row_index, tumorname + ':PR'] = PR
