@@ -27,16 +27,21 @@ def group_insilico(paths):
 
 
 def get_insilico(wcs):
-    insilico_data = pipeconfig['insilico']
+    insilico_data = config['insilico']
     insilico_names = insilico_data.keys()
 
     # NOTE: sampleid and workingdir is essentially global because defined in snakefile
     insilico_files = []
     for insilico_name in insilico_names:
-        insilico_files.extend([f"{workingdir}/insilico/{insilico_name}/{sampleid}_{insilico_name}_10x.xlsx",
-                               f"{workingdir}/insilico/{insilico_name}/{sampleid}_{insilico_name}_20x.xlsx",
-                               f"{workingdir}/insilico/{insilico_name}/{sampleid}_{insilico_name}_genes_below10x.xlsx",
-                               f"{workingdir}/insilico/{insilico_name}/{sampleid}_{insilico_name}.csv"])
+        #insilico_files.extend([f"{workingdir}/insilico/{insilico_name}/{sname}_{insilico_name}_10x.xlsx",
+        #                       f"{workingdir}/insilico/{insilico_name}/{sname}_{insilico_name}_20x.xlsx",
+        #                       f"{workingdir}/insilico/{insilico_name}/{sname}_{insilico_name}_genes_below10x.xlsx",
+        #                       f"{workingdir}/insilico/{insilico_name}/{sname}_{insilico_name}.csv"])
+        insilico_files.extend([f"{workingdir}/{sampleconfig[normalname]['stype']}/insilico/{insilico_name}/{normalid}_{insilico_name}_10x.xlsx",
+                               f"{workingdir}/{sampleconfig[normalname]['stype']}/insilico/{insilico_name}/{normalid}_{insilico_name}_20x.xlsx",
+                               f"{workingdir}/{sampleconfig[normalname]['stype']}/insilico/{insilico_name}/{normalid}_{insilico_name}_genes_below10x.xlsx",
+                               f"{workingdir}/{sampleconfig[normalname]['stype']}/insilico/{insilico_name}/{normalid}_{insilico_name}.csv"])
+ 
     return insilico_files
 
 
@@ -58,10 +63,15 @@ rule tn_workflow:
         expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
         expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir,  sname=normalid, stype=sampleconfig[normalname]["stype"]),
         #expand("{workingdir}/{stype}/insilico/{insiliconame}/{sname}_{insiliconame}_genes_below10x.xlsx", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"], insiliconame="temp"),
-        get_insilico,
-        "{workingdir}/reporting/shared_result_files.txt"
-        
+        "{workingdir}/reporting/shared_result_files.txt",
+        insilico_files = get_insilico
     output:
-        "{workingdir}/reporting/workflow_finished.txt"
+        insilico_json = "{workingdir}/reporting/insilico.json",
+        wf_finished = "{workingdir}/reporting/workflow_finished.txt"
     run:
-        shell("echo {input} >> {output}")
+        output_mapping = dict(input)
+        output_mapping['insilico_files'] = group_insilico(output_mapping['insilico_files'])
+        with open(output["insilico_json"], "w") as j:
+            json.dump(output_mapping, j, indent=4)
+
+        shell("echo {input} >> {output['wf_finished']}")

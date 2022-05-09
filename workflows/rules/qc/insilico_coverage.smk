@@ -4,7 +4,7 @@
 import os
 
 def get_bedfile_path(wcs):
-    return config["insilico"][f"{wcs.insiliconame}"]['bedfile']
+    return config["insilico"][f"{wcs.insiliconame}"]['bed']
 
 def get_bedfile_version(wcs):
     return config["insilico"][f"{wcs.insiliconame}"]['version']

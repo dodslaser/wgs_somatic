@@ -211,6 +211,8 @@ def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=
         analysisdict["tumorfastqs"] = [tumorfastqs]
         analysisdict["igvuser"] = igvuser
         analysisdict["workingdir"] = output
+        #insilico
+        analysisdict["insilico"] = config["insilicopanels"]
 
         if hg38ref == "yes":
             analysisdict["reference"] = "hg38"
