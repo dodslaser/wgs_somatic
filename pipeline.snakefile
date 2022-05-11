@@ -210,11 +210,11 @@ def alissa_vcf_conversion(wildcards):
 
 def insilico_coverage(wildcards):
     if tumorid:
-        return expand("{workingdir}/{sname}_insilicostuffplaceholder", workingdir=workingdir, sname=tumorid)
+        return expand("{workingdir}/{sname}_insilicostuffplaceholder", workingdir=workingdir, sname=normalid)
 
 
 rule all:
     input: 
-        get_igv_input,
+        #get_igv_input,
         expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir),
-        alissa_vcf_conversion
+        #alissa_vcf_conversion

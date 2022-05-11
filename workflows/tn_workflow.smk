@@ -70,7 +70,9 @@ rule tn_workflow:
         wf_finished = "{workingdir}/reporting/workflow_finished.txt"
     run:
         output_mapping = dict(input)
+        print(f"output mapping: {output_mapping}")
         output_mapping['insilico_files'] = group_insilico(output_mapping['insilico_files'])
+        print(f"insilico files: {output_mapping['insilico_files']}")
         with open(output["insilico_json"], "w") as j:
             json.dump(output_mapping, j, indent=4)
 
