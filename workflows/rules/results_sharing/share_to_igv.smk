@@ -44,7 +44,7 @@ if tumorid:
                         shell("ln -sf {link_sharefile}.bai {igvsharedir}")
                     if sharefile.endswith(".vcf.gz"):
                         shell("ln -sf {link_sharefile}.csi {igvsharedir}")
-                shell("{params.updateigv}")
+                #shell("{params.updateigv}")
                 shell("echo {input} >> {output}")
 
     else:
@@ -81,7 +81,7 @@ if tumorid:
                         shell("ln -sf {link_sharefile}.bai {igvsharedir}")
                     if sharefile.endswith(".vcf.gz"):
                         shell("ln -sf {link_sharefile}.csi {igvsharedir}")
-                shell("{params.updateigv}")
+                #shell("{params.updateigv}")
                 shell("echo {input} >> {output}")
 
 else:
@@ -118,5 +118,5 @@ else:
                     shell("ln -sf {link_sharefile}.bai {igvsharedir}")
                 if sharefile.endswith(".vcf.gz"):
                     shell("ln -sf {link_sharefile}.csi {igvsharedir}")
-            shell("{params.updateigv}")
+            #shell("{params.updateigv}")
             shell("echo {input} >> {output}")
