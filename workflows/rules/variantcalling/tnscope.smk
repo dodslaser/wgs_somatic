@@ -39,6 +39,7 @@ else:
             reference = pipeconfig["singularities"]["sentieon"]["reference"],
             dbsnp = pipeconfig["singularities"]["sentieon"]["dbsnp"],
             callsettings = pipeconfig["rules"]["tnscope"]["settings"],
+            pon = pipeconfig["rules"]["tnscope"]["pon"],
         singularity:
             pipeconfig["singularities"]["sentieon"]["sing"]
         output:
@@ -48,7 +49,7 @@ else:
             "echo $HOSTNAME;"
             "{params.sentieon} driver -t {params.threads} -r {params.reference} "
                 "-i {input.tumorbam} -q {input.tumortable} "
-                "--algo TNscope --tumor_sample {params.tumorname} --bam_output {output.tnscope_bam} "
+                "--algo TNscope --tumor_sample {params.tumorname} --pon {params.pon} --bam_output {output.tnscope_bam} "
                 "{params.callsettings} {output.tnscope}"
 
 if normalid:
