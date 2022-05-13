@@ -67,20 +67,21 @@ fastq_dict["tumor"] = {}
 fastq_dict["tumor"]["fastqpair_patterns"] = {}
 
 # Prepare Normal Fastq Variables
-for normalfastqdir in normalfastqdirs:
-    for fwdpattern in fwdpatterns:
-        normal_fwd_fastqs = glob.glob(f"{normalfastqdir}/{normalname}*{fwdpattern}")
-        if normal_fwd_fastqs:
-            for normal_fwd_fastq in normal_fwd_fastqs:
-                fastqpair_pattern = os.path.basename(normal_fwd_fastq).replace(fwdpattern, "")
-                fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern] = {}
-                fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = normal_fwd_fastq
-    for revpattern in revpatterns:
-        normal_rev_fastqs = glob.glob(f"{normalfastqdir}/{normalname}*{revpattern}")
-        if normal_rev_fastqs:
-            for normal_rev_fastq in normal_rev_fastqs:
-                fastqpair_pattern = os.path.basename(normal_rev_fastq).replace(revpattern, "")
-                fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = normal_rev_fastq
+if normalfastqdirs:
+    for normalfastqdir in normalfastqdirs:
+        for fwdpattern in fwdpatterns:
+            normal_fwd_fastqs = glob.glob(f"{normalfastqdir}/{normalname}*{fwdpattern}")
+            if normal_fwd_fastqs:
+                for normal_fwd_fastq in normal_fwd_fastqs:
+                    fastqpair_pattern = os.path.basename(normal_fwd_fastq).replace(fwdpattern, "")
+                    fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern] = {}
+                    fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["fwd"] = normal_fwd_fastq
+        for revpattern in revpatterns:
+            normal_rev_fastqs = glob.glob(f"{normalfastqdir}/{normalname}*{revpattern}")
+            if normal_rev_fastqs:
+                for normal_rev_fastq in normal_rev_fastqs:
+                    fastqpair_pattern = os.path.basename(normal_rev_fastq).replace(revpattern, "")
+                    fastq_dict["normal"]["fastqpair_patterns"][fastqpair_pattern]["rev"] = normal_rev_fastq
 
 # Prepare Tumor Fastq Variables
 if tumorfastqdirs:
@@ -105,7 +106,10 @@ if tumorfastqdirs:
 ###########################################################
 # Defining Non Cluster Rules
 if tumorid:
-    localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
+    if normalid:
+        localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
+    else:
+        localrules: all, upload_to_iva, share_to_igv, share_to_resultdir, excel_qc, tumoronly_workflow
 else: 
     localrules: all, upload_to_iva, share_to_igv, share_to_resultdir, excel_qc, normalonly_workflow
 ###########################################################
@@ -113,7 +117,10 @@ else:
 ########################################
 # Workflows
 if tumorid:
-    include:        "workflows/tn_workflow.smk"
+    if normalid:
+        include:        "workflows/tn_workflow.smk"
+    else:
+        include:        "workflows/tumoronly_workflow.smk"
 else:
     include:        "workflows/normalonly_workflow.smk"
 
