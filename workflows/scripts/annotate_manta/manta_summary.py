@@ -1,9 +1,11 @@
+from cmath import nan
+import enum
 import pandas as pd
 import re
-import openpyxl
 import os
 
-def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname=''):
+
+def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname='', genelist):
     
     df = pd.read_excel(str(mantaSV_vcf),engine='openpyxl')
 
@@ -12,7 +14,6 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname=''):
 
 
     # this part of the script removes duplicates (translocations from both directions)
-
 
     row_indices = []
 
@@ -40,16 +41,9 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname=''):
 
     df.drop(remove_indices, 0, inplace=True)
 
-    
-
-
-
     # this part of the script highlights genes from the gene list
 
     # open the genelist
-    genelist="/apps/bio/dependencies/wgs_somatic/genelist.txt"
-    #genelist=os.getcwd()+genelist
-
     genelist = open(genelist, "r")
 
     genelist = genelist.readlines()
@@ -119,18 +113,10 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname=''):
         df['Genelist'][ind] = ' '.join(set(df['Genelist'][ind].split()))
 
 
-
-
-
-
-
     # this part of the script extracts allele frequencies from PR/SR
-
 
     # extract variants only supported by both PR and SR
     df = df.loc[df['FORMAT'] == 'PR:SR']
-
-
 
     if normalname:  
         # add columns for PR/SR for normal sample
@@ -167,6 +153,7 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname=''):
                 df.at[row_index, normalname + ':SR'] = SR
                 df.at[row_index, normalname + ':SR-alt'] =  SR_alt
                 df.at[row_index, 'TOTAL alt (N)'] = PR_alt + SR_alt
+
                 if PR + PR_alt + SR + SR_alt == 0:
                     df.at[row_index, 'TOTAL VAF (N)'] = ''
                 else:
@@ -213,4 +200,61 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname=''):
             else:
                 df.at[row_index, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
-    df.to_excel(str(mantaSV_summary),engine='openpyxl')
+    # Second df with a selection of columns
+    df2 = df[["Varianttype", "Breakpoint 1", "GeneInfo 1", "Breakpoint 2", "GeneInfo 2", "ALT", "FORMAT", normalname, "TOTAL VAF (N)", tumorname, "TOTAL VAF (T)", "DEL/DUP Genecrossings", "Genelist"]]
+
+
+    # If more than 30 genes in DEL/DUP Genecrossings - write number of genes instead of names of genes 
+    for deldup in df2['DEL/DUP Genecrossings']:
+        deldup = str(deldup)
+        in_genes = []
+        for gene in deldup.split(','):
+            if 'in:' in gene:
+                in_genes.append(gene)
+        if len(deldup.split(',')) > 30:
+            no_of_genes = len(deldup.split(','))
+            new_deldup = f'No of genes: {no_of_genes}. \n {", ".join(in_genes)}'
+            df2['DEL/DUP Genecrossings'] = df2['DEL/DUP Genecrossings'].replace(deldup, new_deldup)
+
+
+    with pd.ExcelWriter(str(mantaSV_summary)) as writer:
+        # Write both dfs to same excel file but different sheets
+        df.to_excel(writer, sheet_name="Manta_raw", engine='xlsxwriter')
+        df2.to_excel(writer, sheet_name="Manta_report", engine='xlsxwriter')
+
+        # Modify Manta_report sheet
+        workbook = writer.book
+        worksheet = writer.sheets["Manta_report"]
+        wrap_format = workbook.add_format({'text_wrap': True, 'font_name': 'Cambria (Headings)', 'font_size': 14})
+
+        # Adjust cell width of column
+        for column in df2:
+            col_idx = df2.columns.get_loc(column)
+            worksheet.set_column(col_idx+1, col_idx+1, len(column)+10)
+
+        # Adjust row height
+        row_idx = 1
+        for index, row in df2.iterrows():
+            column_idx = 0
+            for cell in row:
+                column_idx +=1
+                try:
+                    worksheet.write(row_idx, column_idx, cell, wrap_format)
+                except:
+                    continue
+            row_idx += 1
+    
+
+        # Adjust font, color, etc
+        header_format = workbook.add_format()
+        header_format.set_font_name('Cambria (Headings)')
+        header_format.set_font_size(16)
+        header_format.set_bg_color('#99CCFF')
+        header_format.set_bold()
+
+        # Write adjustments to sheet
+        for col_num, value in enumerate(df2.columns.values):
+            worksheet.write(0, col_num+1, value, header_format)
+
+
+        writer.close()
