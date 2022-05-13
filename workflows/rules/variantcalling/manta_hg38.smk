@@ -97,4 +97,4 @@ rule manta_summary:
     output:
         "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV_Summary.xlsx"
     run:
-        manta_summary(input, output, tumorname, normalname, f"{params.genelist}")
+        manta_summary(input, output, tumorname, f"{params.genelist}", normalname)
