@@ -5,7 +5,7 @@ import re
 import os
 
 
-def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname='', genelist):
+def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, genelist, normalname=''):
     
     df = pd.read_excel(str(mantaSV_vcf),engine='openpyxl')
 
@@ -201,8 +201,11 @@ def manta_summary(mantaSV_vcf, mantaSV_summary, tumorname, normalname='', geneli
                 df.at[row_index, 'TOTAL VAF (T)'] = str(int(round(float(PR_alt + SR_alt) / (PR + PR_alt + SR + SR_alt) *100))) + '%'
 
     # Second df with a selection of columns
-    df2 = df[["Varianttype", "Breakpoint 1", "GeneInfo 1", "Breakpoint 2", "GeneInfo 2", "ALT", "FORMAT", normalname, "TOTAL VAF (N)", tumorname, "TOTAL VAF (T)", "DEL/DUP Genecrossings", "Genelist"]]
 
+    if normalname:
+        df2 = df[["Varianttype", "Breakpoint 1", "GeneInfo 1", "Breakpoint 2", "GeneInfo 2", "ALT", "FORMAT", normalname, "TOTAL VAF (N)", tumorname, "TOTAL VAF (T)", "DEL/DUP Genecrossings", "Genelist"]]
+    else:
+        df2 = df[["Varianttype", "Breakpoint 1", "GeneInfo 1", "Breakpoint 2", "GeneInfo 2", "ALT", "FORMAT", tumorname, "TOTAL VAF (T)", "DEL/DUP Genecrossings", "Genelist"]]
 
     # If more than 30 genes in DEL/DUP Genecrossings - write number of genes instead of names of genes 
     for deldup in df2['DEL/DUP Genecrossings']:
