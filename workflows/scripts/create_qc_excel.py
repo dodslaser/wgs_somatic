@@ -145,6 +145,7 @@ def create_excel_main(tumorcov='', normalcov='', tumordedup='', normaldedup='', 
         #    canvas_dict = get_canvas_tumorinfo(canvasvcf)
         if normalcov:
             match_dict = determine_match(normalvcf, tumorvcf, 400000)
+            canvas_dict = get_canvas_tumorinfo(canvasvcf)
             statsdict = extract_stats(normalcov, "coverage", "normal", statsdict)
             statsdict = extract_stats(normaldedup, "dedup", "normal", statsdict)
 
