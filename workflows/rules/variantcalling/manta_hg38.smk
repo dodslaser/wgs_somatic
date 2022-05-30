@@ -89,12 +89,24 @@ else:
             shell("grep -v 'MantaBND:' {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf > {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_MantaNOBNDs.vcf")
             shell("{params.annotate} -v {wildcards.workingdir}/{wildcards.stype}/manta/{wildcards.sname}_somatic_mantaSV.vcf -g {params.annotate_ref} -o {wildcards.workingdir}/{wildcards.stype}/manta")
 
-rule manta_summary:
-    input:
-        "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx"
-    params:
-        genelist = pipeconfig["rules"]["manta_summary"]["genelist"]
-    output:
-        "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV_Summary.xlsx"
-    run:
-        manta_summary(input, output, tumorname, f"{params.genelist}", normalname)
+if normalid:
+    rule manta_summary:
+        input:
+            "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx"
+        params:
+            genelist = pipeconfig["rules"]["manta_summary"]["genelist"]
+        output:
+            "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV_Summary.xlsx"
+        run:
+            manta_summary(input, output, tumorname, f"{params.genelist}", normalname)
+
+else:
+    rule manta_summary:
+        input:
+            "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV.vcf.xlsx"
+        params:
+            genelist = pipeconfig["rules"]["manta_summary"]["genelist_tumoronly"]
+        output:
+            "{workingdir}/{stype}/manta/{sname}_somatic_mantaSV_Summary.xlsx"
+        run:
+            manta_summary(input, output, tumorname, f"{params.genelist}", normalname='')
