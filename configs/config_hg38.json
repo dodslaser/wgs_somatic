@@ -20,7 +20,11 @@
             "reference": "/canvasfiles/canvasfiles/",
             "kmerfile": "/canvasfiles/canvasfiles/kmer.fa",
             "filter13": "/canvasfiles/canvasfiles/filter13.bed"
-        } 
+        }, 
+        "pindel":
+        {
+            "sing": "/apps/bio/singularities/gms_hematology/pindel-0.2.5b8.simg"
+        }
     },
     "rules":
     {
@@ -130,6 +134,10 @@
         {
             "genelist": "/apps/bio/dependencies/wgs_somatic/genelist.txt",
             "genelist_tumoronly": "/apps/bio/dependencies/wgs_somatic/Genelist_GMS-AL_tumor-only.txt"
+        },
+        "pindel":
+        {
+            "bed": "/apps/bio/dependencies/wgs_somatic/hg38/twist_shortlist_pindel_hg38.bed"
         }
     }
 }
