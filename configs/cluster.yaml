@@ -69,6 +69,9 @@ manta_summary:
 alissa_vcf:
     threads: 1
 
+pindel:
+    threads: 4
+
 cutadapt:
     queue: wgs.q
     threads:  1
