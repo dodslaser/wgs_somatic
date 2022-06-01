@@ -14,13 +14,12 @@ def group_insilico(paths):
     # Collect files under keys for better access than relying on indexes
     insilico_groups_named = {}
     for insilico_name, insilico_paths in insilico_groups.items():
-        ten_x, twenty_x, below_ten_x, csv, pdf = insilico_paths
+        ten_x, twenty_x, below_ten_x, csv = insilico_paths
 
         named = {'10x': ten_x,
                  '20x': twenty_x,
                  'below_10x': below_ten_x,
-                 'csv': csv,
-                 'pdf': pdf}
+                 'csv': csv}
         insilico_groups_named[insilico_name] = named
 
     return insilico_groups_named
@@ -33,15 +32,10 @@ def get_insilico(wcs):
     # NOTE: sampleid and workingdir is essentially global because defined in snakefile
     insilico_files = []
     for insilico_name in insilico_names:
-        #insilico_files.extend([f"{workingdir}/insilico/{insilico_name}/{sname}_{insilico_name}_10x.xlsx",
-        #                       f"{workingdir}/insilico/{insilico_name}/{sname}_{insilico_name}_20x.xlsx",
-        #                       f"{workingdir}/insilico/{insilico_name}/{sname}_{insilico_name}_genes_below10x.xlsx",
-        #                       f"{workingdir}/insilico/{insilico_name}/{sname}_{insilico_name}.csv"])
-        insilico_files.extend([f"{workingdir}/{sampleconfig[normalname]['stype']}/insilico/{insilico_name}/{normalid}_{insilico_name}_10x.xlsx",
-                               f"{workingdir}/{sampleconfig[normalname]['stype']}/insilico/{insilico_name}/{normalid}_{insilico_name}_20x.xlsx",
-                               f"{workingdir}/{sampleconfig[normalname]['stype']}/insilico/{insilico_name}/{normalid}_{insilico_name}_genes_below10x.xlsx",
-                               f"{workingdir}/{sampleconfig[normalname]['stype']}/insilico/{insilico_name}/{normalid}_{insilico_name}.csv"])
- 
+        insilico_files.extend([f"{workingdir}/normal/insilico/{insilico_name}/{normalid}_{insilico_name}_10x.xlsx",
+                               f"{workingdir}/normal/insilico/{insilico_name}/{normalid}_{insilico_name}_20x.xlsx",
+                               f"{workingdir}/normal/insilico/{insilico_name}/{normalid}_{insilico_name}_genes_below10x.xlsx",
+                               f"{workingdir}/normal/insilico/{insilico_name}/{normalid}_{insilico_name}.csv"])
     return insilico_files
 
 
@@ -62,7 +56,6 @@ rule tn_workflow:
         expand("{workingdir}/{stype}/canvas/{sname}_{vartype}_CNV_called.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
         expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
         expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir,  sname=normalid, stype=sampleconfig[normalname]["stype"]),
-        #expand("{workingdir}/{stype}/insilico/{insiliconame}/{sname}_{insiliconame}_genes_below10x.xlsx", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"], insiliconame="temp"),
         "{workingdir}/reporting/shared_result_files.txt",
         insilico_files = get_insilico
     output:
@@ -76,4 +69,4 @@ rule tn_workflow:
         with open(output["insilico_json"], "w") as j:
             json.dump(output_mapping, j, indent=4)
 
-        shell("echo {input} >> {output['wf_finished']}")
+        shell(f"echo {input} >> {output['wf_finished']}")

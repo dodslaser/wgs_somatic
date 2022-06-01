@@ -5,6 +5,7 @@ import argparse
 import xlsxwriter
 import os
 from workflows.scripts.determine_match import determine_match
+from tools.git_versions import get_git_commit, get_git_tag, get_git_reponame
 import time
 
 def extract_stats(statsfile, statstype, sampletype, statsdict):
@@ -62,7 +63,9 @@ def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdic
     cellformat["pass"] = excelfile.add_format({'bg_color': '95FF80'})
 
     row = 1
-    worksheet.write(row, 0, f"QC-report created: {current_date}")    
+    worksheet.write(row, 0, f"QC-report created: {current_date}")
+    row += 1
+    worksheet.write(row, 0, f"{get_git_reponame()} tag: {get_git_tag()}, commit: {get_git_commit()}")
     row += 2
  
     for statstype in statsdict:

@@ -1,15 +1,15 @@
 __default__:
-    queue: test.q
+    queue: production.q
     threads: 20
     excl: excl=1
-    name: "WS-{rule}_{wildcards.sname}"
-    output: "WS-{rule}_{wildcards.sname}.stdout"
-    error: "WS-{rule}_{wildcards.sname}.stderr"
+    name: "WGSsomatic_{rule}_{wildcards.sname}"
+    output: "WGSsomatic_{rule}_{wildcards.sname}.stdout"
+    error: "WGSsomatic_{rule}_{wildcards.sname}.stderr"
 
 mapping:
-    name: "WS-{rule}_{wildcards.fastqpattern}"
-    output: "WS-{rule}_{wildcards.fastqpattern}.stdout"
-    error: "WS-{rule}_{wildcards.fastqpattern}.stderr"
+    name: "WGSsomatic_{rule}_{wildcards.fastqpattern}"
+    output: "WGSsomatic_{rule}_{wildcards.fastqpattern}.stdout"
+    error: "WGSsomatic_{rule}_{wildcards.fastqpattern}.stderr"
     threads: 40
 
 rtgtools_eval:
@@ -71,4 +71,8 @@ alissa_vcf:
 
 cutadapt:
     threads:  1
+    excl: excl=1
+
+insilico_coverage:
+    threads: 2
     excl: excl=1
