@@ -8,8 +8,7 @@ rule pindelConfig:
     output:
         pindelConfig = "{workingdir}/{stype}/pindel/{sname}_pindelConfig.txt"
     shell:
-        "echo '{input.tumorbam}\t300\t{tumorid}'>{output.pindelConfig}"
-        "echo '{input.normalbam}\t300\t{normalid}'>>{output.pindelConfig}"        
+        "echo '{input.tumorbam}\t300\t{tumorname}\n{input.normalbam}\t300\t{normalname}'>{output.pindelConfig}"
 
 rule pindel:
     input:
@@ -52,7 +51,7 @@ rule pindel2vcf:
         reference = pipeconfig["referencegenome"],
         refname = "GRCh38",
         refdate = 000000,
-        e = 10,
+        e = 3, #e = 10,
         mc = 10,
         minsize = 5
     singularity:
