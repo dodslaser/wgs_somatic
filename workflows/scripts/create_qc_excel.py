@@ -6,7 +6,9 @@ import xlsxwriter
 import os
 from workflows.scripts.determine_match import determine_match
 from tools.git_versions import get_git_commit, get_git_tag, get_git_reponame
+from workflows.scripts.sex import calc_sex
 import time
+
 
 def extract_stats(statsfile, statstype, sampletype, statsdict):
     with open(statsfile, 'r') as statsfile:
@@ -32,6 +34,7 @@ def extract_stats(statsfile, statstype, sampletype, statsdict):
                     headercount += 1
         return statsdict
 
+
 def get_canvas_tumorinfo(canvasvcf):
     canvasdict = {}
     canvas_infofields = ["##OverallPloidy", "##DiploidCoverage", "##EstimatedTumorPurity", "##PurityModelFit", "##InterModelDistance", "##LocalSDmetric", "##EvennessScore", "##HeterogeneityProportion", "##EstimatedChromosomeCount"]
@@ -48,7 +51,8 @@ def get_canvas_tumorinfo(canvasvcf):
                     canvasdict[canvasfield] = canvasfield_value
     return canvasdict
 
-def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdict):
+
+def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdict, sex):
     current_date = time.strftime("%Y-%m-%d")
     excelfile = xlsxwriter.Workbook(output)
     worksheet = excelfile.add_worksheet("qc_stats")
@@ -66,6 +70,7 @@ def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdic
     worksheet.write(row, 0, f"QC-report created: {current_date}")
     row += 1
     worksheet.write(row, 0, f"{get_git_reponame()} tag: {get_git_tag()}, commit: {get_git_commit()}")
+    worksheet.write(row, 4, f"Computed sex of patient: {sex}")
     row += 2
  
     for statstype in statsdict:
@@ -133,7 +138,8 @@ def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdic
 
     excelfile.close()
 
-def create_excel_main(tumorcov='', normalcov='', tumordedup='', normaldedup='', tumorvcf='', normalvcf='', canvasvcf='', output=''):
+
+def create_excel_main(tumorcov='', ycov='', normalcov='', tumordedup='', normaldedup='', tumorvcf='', normalvcf='', canvasvcf='', output=''):
     statsdict = {}
     if tumorcov:
         tumorcovfile = os.path.basename(tumorcov)
@@ -151,20 +157,29 @@ def create_excel_main(tumorcov='', normalcov='', tumordedup='', normaldedup='', 
         match_dict = determine_match(normalvcf, tumorvcf, 400000)
         canvas_dict = get_canvas_tumorinfo(canvasvcf)
 
+    
+
     if not output.endswith(".xlsx"):
         output = f"{output}.xlsx"
 
     if tumorcov:
         if normalcov:
-            create_excel(statsdict, output, normalname, tumorname, match_dict, canvas_dict)
+            # Tumour + Normal
+            calculated_sex = calc_sex(normalcov, ycov)
+            create_excel(statsdict, output, normalname, tumorname, match_dict, canvas_dict, sex=calculated_sex)
         else:
-            create_excel(statsdict, output, normalname='', tumorname=tumorname, match_dict='', canvasdict='')
+            # Tumour only
+            calculated_sex = calc_sex(tumorcov, ycov)
+            create_excel(statsdict, output, normalname='', tumorname=tumorname, match_dict='', canvasdict='', sex=calculated_sex)
     else:
-        create_excel(statsdict, output, normalname, tumorname='', match_dict='', canvasdict='')
+        # Normal only
+        calculated_sex = calc_sex(normalcov, ycov)
+        create_excel(statsdict, output, normalname, tumorname='', match_dict='', canvasdict='', sex=calculated_sex)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-tc', '--tumorcov', nargs='?', help='Sentieon WGS cov file from tumorbam', required=False)
+    parser.add_argument('-yc', '--ycov', nargs='?', help='Sentieon Y-cov file', required=False)
     parser.add_argument('-nc', '--normalcov', nargs='?', help='Sentieon WGS cov file from normalbam', required=True)
     parser.add_argument('-td', '--tumordedup', nargs='?', help='Sentieon dedup-stats for tumorbam', required=False)
     parser.add_argument('-nd', '--normaldedup', nargs='?', help='Sentieon dedup-stats for normalbam', required=True)
@@ -173,4 +188,4 @@ if __name__ == '__main__':
     parser.add_argument('-cv', '--canvasvcf', nargs='?', help='Somatic Canvas VCF', required=False)
     parser.add_argument('-o', '--output', nargs='?', help='fullpath to file to be created (xlsx will be appended if not written)', required=True)
     args = parser.parse_args()
-    create_excel_main(args.tumorcov, args.normalcov, args.tumordedup, args.normaldedup, args.tumorvcf, args.normalvcf, args.canvasvcf, args.output)
+    create_excel_main(args.tumorcov, args.ycov, args.normalcov, args.tumordedup, args.normaldedup, args.tumorvcf, args.normalvcf, args.canvasvcf, args.output)
