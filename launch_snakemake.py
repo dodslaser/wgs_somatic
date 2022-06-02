@@ -62,7 +62,7 @@ def petagene_compress_bam(outputdir, tumorname):
     qsub_args = ["qsub", "-N", f"WS-{tumorname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, outputdir]
     subprocess.call(qsub_args, shell=False)
 
-def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=False, runtumor=False, tumorname=False, tumorfastqs=False, ivauser=False, igvuser=False, hg38ref=False, starttype=False):
+def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=False, runtumor=False, tumorname=False, tumorfastqs=False, igvuser=False, hg38ref=False, starttype=False):
     try:
         ################################################################
         # Write InputArgs to logfile
@@ -295,7 +295,7 @@ if __name__ == '__main__':
     parser.add_argument('-stype', '--starttype', nargs='?', help='write forcestart if you want to ignore fastqs', required=False)
     parser.add_argument('-nc', '--nocompress', action="store_true", help='Disables petagene compression', required=False)
     args = parser.parse_args()
-    analysis_main(args, args.runnormal, args.outputdir, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.igvuser, args.hg38ref, args.starttype)
+    analysis_main(args, args.outputdir, args.runnormal, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.igvuser, args.hg38ref, args.starttype)
 
     if os.path.isfile(f"{args.outputdir}/reporting/workflow_finished.txt"):
         if args.tumorsample:
