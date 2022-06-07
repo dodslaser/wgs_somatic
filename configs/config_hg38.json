@@ -1,5 +1,6 @@
 {
     "referencegenome": "/apps/bio/dependencies/wgs_somatic/hg38/sentieon/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
+    "referencefai": "/apps/bio/dependencies/wgs_somatic/hg38/sentieon/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai",
     "singularities":
     {
         "sentieon":
@@ -137,7 +138,8 @@
         },
         "pindel":
         {
-            "bed": "/apps/bio/dependencies/wgs_somatic/hg38/twist_shortlist_pindel_hg38.bed"
+            "bed": "/apps/bio/dependencies/wgs_somatic/hg38/twist_shortlist_pindel_hg38.bed",
+            "python": "/apps/bio/software/anaconda2/envs/wgs_somatic/bin/python"
         }
     }
 }
