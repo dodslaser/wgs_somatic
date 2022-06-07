@@ -57,7 +57,28 @@ rule pindel2vcf:
     singularity:
         pipeconfig["singularities"]["pindel"]["sing"]
     output:
-        "{workingdir}/{stype}/pindel/{sname}_pindel.vcf"
+        "{workingdir}/{stype}/pindel/{sname}_pindel_noDP_noContig.vcf"
     shell:
         "echo $HOSTNAME;"
         " (pindel2vcf -P {workingdir}/{wildcards.stype}/pindel/{wildcards.sname} -r {params.reference} -R {params.refname} -d {params.refdate} -v {output} -e {params.e} -mc {params.mc} -G -is {params.minsize}) "
+
+rule fixContigPindel:
+    input:
+        "{workingdir}/{stype}/pindel/{sname}_pindel_noDP_noContig.vcf"
+    output:
+        "{workingdir}/{stype}/pindel/{sname}_pindel_noDP.vcf"
+    params: 
+        referencefai = pipeconfig["referencefai"]
+    shell:
+        """/apps/bio/software/anaconda2/envs/wgs_somatic/bin/bcftools reheader --fai {params.referencefai} {input} > {output}"""
+
+rule fixPindelDPoAF:
+    input:
+        "{workingdir}/{stype}/pindel/{sname}_pindel_noDP.vcf"
+    output:
+        "{workingdir}/{stype}/pindel/{sname}_pindel.vcf"
+    params:
+        python = pipeconfig["rules"]["pindel"]["python"],
+        fix_DPoAF = pipeconfig["rules"]["pindel"]["fix_DPoAF"] 
+    run:
+        shell(f"{params.python} {params.fix_DPoAF} {input} {output}")
