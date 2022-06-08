@@ -14,13 +14,12 @@ def group_insilico(paths):
     # Collect files under keys for better access than relying on indexes
     insilico_groups_named = {}
     for insilico_name, insilico_paths in insilico_groups.items():
-        ten_x, twenty_x, below_ten_x, csv, pdf = insilico_paths
+        ten_x, twenty_x, below_ten_x, csv = insilico_paths
 
         named = {'10x': ten_x,
                  '20x': twenty_x,
                  'below_10x': below_ten_x,
-                 'csv': csv,
-                 'pdf': pdf}
+                 'csv': csv}
         insilico_groups_named[insilico_name] = named
 
     return insilico_groups_named
@@ -55,10 +54,10 @@ rule normalonly_workflow:
         insilico_files = get_insilico
     output:
         insilico_json = "{workingdir}/reporting/insilico.json",
-        "{workingdir}/reporting/workflow_finished.txt"
+        wf_finished = "{workingdir}/reporting/workflow_finished.txt"
     run:
         output_mapping = dict(input)
         output_mapping['insilico_files'] = group_insilico(output_mapping['insilico_files'])
         with open(output["insilico_json"], "w") as j:
             json.dump(output_mapping, j, indent=4)
-        shell("echo {input} >> {output}")
+        shell(f"echo {input} >> {output['wf_finished']}")
