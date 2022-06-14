@@ -8,6 +8,19 @@ from workflows.scripts.determine_match import determine_match
 from tools.git_versions import get_git_commit, get_git_tag, get_git_reponame
 from workflows.scripts.sex import calc_sex
 import time
+import pandas as pd
+import glob
+
+
+def add_insilico_stats(insilicofolder, main_excel):
+    excel_file_list = glob.glob(f"{insilicofolder}/**/*.xlsx")
+    print(f"excel_file_list: {excel_file_list}")
+    for xlfile in excel_file_list:
+        dataframe = pd.read_excel(xlfile, engine='openpyxl')
+        sheetname = os.path.basename(xlfile).rstrip(".xlsx")
+        print(f"sheetname: {sheetname}")
+        with pd.ExcelWriter(main_excel, engine='openpyxl', mode='a') as writer:
+            dataframe.to_excel(writer, sheet_name=sheetname)
 
 
 def extract_stats(statsfile, statstype, sampletype, statsdict):
@@ -139,7 +152,8 @@ def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdic
     excelfile.close()
 
 
-def create_excel_main(tumorcov='', ycov='', normalcov='', tumordedup='', normaldedup='', tumorvcf='', normalvcf='', canvasvcf='', output=''):
+def create_excel_main(tumorcov='', ycov='', normalcov='', tumordedup='', normaldedup='', tumorvcf='', normalvcf='', canvasvcf='', output='', insilicodir=''):
+    print(f"insilicodir: {insilicodir}")
     statsdict = {}
     if tumorcov:
         tumorcovfile = os.path.basename(tumorcov)
@@ -162,11 +176,13 @@ def create_excel_main(tumorcov='', ycov='', normalcov='', tumordedup='', normald
     if not output.endswith(".xlsx"):
         output = f"{output}.xlsx"
 
+    # Determine which files to use to calculate sex and where to get insilico coverageg files
     if tumorcov:
         if normalcov:
             # Tumour + Normal
             calculated_sex = calc_sex(normalcov, ycov)
             create_excel(statsdict, output, normalname, tumorname, match_dict, canvas_dict, sex=calculated_sex)
+            add_insilico_stats(insilicodir, output)
         else:
             # Tumour only
             calculated_sex = calc_sex(tumorcov, ycov)
@@ -186,6 +202,7 @@ if __name__ == '__main__':
     parser.add_argument('-tv', '--tumorvcf', nargs='?', help='Tumor Germlinecalls', required=False)
     parser.add_argument('-nv', '--normalvcf', nargs='?', help='Normal Germlinecalls', required=True)
     parser.add_argument('-cv', '--canvasvcf', nargs='?', help='Somatic Canvas VCF', required=False)
+    parser.add_argument('-is', '--insilicodir', nargs='?', help='Full path to insilico directory (which contains excel files)', required=False)
     parser.add_argument('-o', '--output', nargs='?', help='fullpath to file to be created (xlsx will be appended if not written)', required=True)
     args = parser.parse_args()
-    create_excel_main(args.tumorcov, args.ycov, args.normalcov, args.tumordedup, args.normaldedup, args.tumorvcf, args.normalvcf, args.canvasvcf, args.output)
+    create_excel_main(args.tumorcov, args.ycov, args.normalcov, args.tumordedup, args.normaldedup, args.tumorvcf, args.normalvcf, args.canvasvcf, args.output, args.insilicodir)

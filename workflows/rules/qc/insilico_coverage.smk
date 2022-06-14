@@ -13,6 +13,7 @@ def get_insiliconame(wcs):
     return config["insilico"]
 
 
+# If normal sample is available, we will get the insilico coverage values from there
 if normalid:
     rule insilico_coverage:
         input:
@@ -29,14 +30,15 @@ if normalid:
             "{workingdir}/{normalid}/insilico/{insiliconame}/{sname}_{insiliconame}_20x.xlsx",
             "{workingdir}/{normalid}/insilico/{insiliconame}/{sname}_{insiliconame}_genes_below10x.xlsx",
             "{workingdir}/{normalid}/insilico/{insiliconame}/{sname}_{insiliconame}.csv",
-            "{workingdir}/{normalid}/insilico/{insiliconame}/{sname}_{insiliconame}_cov.tsv"
+            "{workingdir}/{normalid}/insilico/{insiliconame}/{sname}_{insiliconame}_cov.tsv",
         run:
-            os.makedirs(f'{workingdir}/{normalid}/{wildcards.sname}/insilico', exist_ok=True)
-            os.makedirs(f'{workingdir}/{normalid}/{wildcards.sname}/insilico/{wildcards.insiliconame}', exist_ok=True)
+            os.makedirs(f'{wildcards.workingdir}/{wildcards.normalid}/insilico', exist_ok=True)
+            os.makedirs(f'{wildcards.workingdir}/{wildcards.normalid}/insilico/{wildcards.insiliconame}', exist_ok=True)
 
             insilico_level = config["insilico"][f"{wildcards.insiliconame}"]["levels"]
             shell(f"{params.pythonversion} {params.insilico_wrapper} --bamfile {input.bamfile} --bedfile {params.bedfile_path} --version {params.bedfile_version} --outputdir {wildcards.workingdir}/{wildcards.normalid}/insilico/{wildcards.insiliconame} --annotationlevel {insilico_level} --samplename {wildcards.sname} --samtools {params.samtools}")
 
+# Otherwise (only when running tumour only) we will try go get coverage values from the tumour sample
 else:
      rule insilico_coverage:
         input:
@@ -53,10 +55,10 @@ else:
             "{workingdir}/{tumorid}/insilico/{insiliconame}/{sname}_{insiliconame}_20x.xlsx",
             "{workingdir}/{tumorid}/insilico/{insiliconame}/{sname}_{insiliconame}_genes_below10x.xlsx",
             "{workingdir}/{tumorid}/insilico/{insiliconame}/{sname}_{insiliconame}.csv",
-            "{workingdir}/{tumorid}/insilico/{insiliconame}/{sname}_{insiliconame}_cov.tsv"
+            "{workingdir}/{tumorid}/insilico/{insiliconame}/{sname}_{insiliconame}_cov.tsv",
         run:
-            os.makedirs(f'{workingdir}/{tumorid}/{wildcards.sname}/insilico', exist_ok=True)
-            os.makedirs(f'{workingdir}/{tumorid}/{wildcards.sname}/insilico/{wildcards.insiliconame}', exist_ok=True)
+            os.makedirs(f'{wildcards.workingdir}/{wildcards.tumorid}/insilico', exist_ok=True)
+            os.makedirs(f'{wildcards.workingdir}/{wildcards.tumorid}/insilico/{wildcards.insiliconame}', exist_ok=True)
 
             insilico_level = config["insilico"][f"{wildcards.insiliconame}"]["levels"]
             shell(f"{params.pythonversion} {params.insilico_wrapper} --bamfile {input.bamfile} --bedfile {params.bedfile_path} --version {params.bedfile_version} --outputdir {wildcards.workingdir}/{wildcards.tumorid}/insilico/{wildcards.insiliconame} --annotationlevel {insilico_level} --samplename {wildcards.sname} --samtools {params.samtools}")

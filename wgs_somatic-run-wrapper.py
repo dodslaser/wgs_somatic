@@ -114,63 +114,33 @@ def analysis_end(outputdir, tumorsample, normalsample):
         pass
 
 
-def get_insilico_info(all_insilico=True, panel_names=[]):
-    """NOTE: This whole function is horrible. This was copied from WOPR"""
-    with open(INSILICO_CONFIG, 'r') as conf:
-        insilico_config = json.load(conf)
+#def get_insilico_info(all_insilico=True, panel_names=[]):
+#    """NOTE: This whole function is horrible. This was copied from WOPR"""
+#    with open(INSILICO_CONFIG, 'r') as conf:
+#        insilico_config = json.load(conf)
 
     # All AND specific both set
-    if all_insilico:
-        if panel_names:
-            raise Exception(f'All insilico flag set but also found specific panel names: {panel_names}.')
+#    if all_insilico:
+#        if panel_names:
+#            raise Exception(f'All insilico flag set but also found specific panel names: {panel_names}.')
 
-    panels = {}
+#    panels = {}
 
-    for panel_name, panel_info in insilico_config.items():
+#    for panel_name, panel_info in insilico_config.items():
         # TODO: Overwrites, fix this and make proper
-        panel_info['bedfile'] = os.path.join(INSILICO_PANELS_ROOT, panel_info['bedfile'])
+#        panel_info['bedfile'] = os.path.join(INSILICO_PANELS_ROOT, panel_info['bedfile'])
 
-        if all_insilico:
-            panels[panel_name] = panel_info
-        else:
-            if panel_name in panel_names:
-                panels[panel_name] = panel_info
+#        if all_insilico:
+#            panels[panel_name] = panel_info
+#        else:
+#            if panel_name in panel_names:
+#                panels[panel_name] = panel_info
 
-    if not all_insilico:
-        if len(panels) != len(panel_names):
-            raise Exception(f'One or more panel names not found in insilico config: {panel_names}')
+#    if not all_insilico:
+#        if len(panels) != len(panel_names):
+#            raise Exception(f'One or more panel names not found in insilico config: {panel_names}')
 
-    return panels
-
-
-
-def get_insilico_info(all_insilico=True, panel_names=[]):
-    """NOTE: This whole function is horrible. This was copied from WOPR"""
-    with open(INSILICO_CONFIG, 'r') as conf:
-        insilico_config = json.load(conf)
-
-    # All AND specific both set
-    if all_insilico:
-        if panel_names:
-            raise Exception(f'All insilico flag set but also found specific panel names: {panel_names}.')
-
-    panels = {}
-
-    for panel_name, panel_info in insilico_config.items():
-        # TODO: Overwrites, fix this and make proper
-        panel_info['bedfile'] = os.path.join(INSILICO_PANELS_ROOT, panel_info['bedfile'])
-
-        if all_insilico:
-            panels[panel_name] = panel_info
-        else:
-            if panel_name in panel_names:
-                panels[panel_name] = panel_info
-
-    if not all_insilico:
-        if len(panels) != len(panel_names):
-            raise Exception(f'One or more panel names not found in insilico config: {panel_names}')
-
-    return panels
+#    return panels
 
 
 def wrapper(instrument):

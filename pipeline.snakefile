@@ -215,6 +215,6 @@ def insilico_coverage(wildcards):
 
 rule all:
     input: 
-        #get_igv_input,
+        get_igv_input,
         expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir),
-        #alissa_vcf_conversion
+        alissa_vcf_conversion
