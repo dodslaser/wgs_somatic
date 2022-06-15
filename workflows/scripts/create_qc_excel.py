@@ -17,7 +17,7 @@ def add_insilico_stats(insilicofolder, main_excel):
     print(f"excel_file_list: {excel_file_list}")
     for xlfile in excel_file_list:
         dataframe = pd.read_excel(xlfile, engine='openpyxl')
-        sheetname = os.path.basename(xlfile).rstrip(".xlsx")
+        sheetname = os.path.basename(os.path.splitext(xlfile)[0])
         print(f"sheetname: {sheetname}")
         with pd.ExcelWriter(main_excel, engine='openpyxl', mode='a') as writer:
             dataframe.to_excel(writer, sheet_name=sheetname)
@@ -187,10 +187,12 @@ def create_excel_main(tumorcov='', ycov='', normalcov='', tumordedup='', normald
             # Tumour only
             calculated_sex = calc_sex(tumorcov, ycov)
             create_excel(statsdict, output, normalname='', tumorname=tumorname, match_dict='', canvasdict='', sex=calculated_sex)
+            add_insilico_stats(insilicodir, output) # Maybe this can be commented out if not needed for tumour only
     else:
         # Normal only
         calculated_sex = calc_sex(normalcov, ycov)
         create_excel(statsdict, output, normalname, tumorname='', match_dict='', canvasdict='', sex=calculated_sex)
+        add_insilico_stats(insilicodir, output)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
