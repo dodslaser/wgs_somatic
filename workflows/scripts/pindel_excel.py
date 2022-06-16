@@ -22,6 +22,18 @@ def main():
     worksheet = workbook.add_worksheet('Pindel')
     worksheet.write('A1', 'Pindel results', headingFormat)
 
+    vcf_input = args.vcf_input
+    vcf_input = VariantFile(vcf_input, 'r')
+
+    # Get reference used
+    for x in vcf_input.header.records:
+        if x.key=='reference':
+            ref = x.value
+
+    worksheet.write('A4', 'Reference used: '+str(ref))
+
+
+    # Get genes in bedfile
     with open(args.bedfile) as bed:
         #for line in bed:
         #    print(line.split(" ")[3])
@@ -31,11 +43,15 @@ def main():
 
     #print(genes)
 
-    worksheet.write('A4', 'Genes included: ')
-    row = 5
+    # Write genes included in excel file
+    worksheet.write('A6', 'Genes included: ')
+    row = 7
     for gene in genes:
         worksheet.write('A'+str(row), gene)
         row += 1
+
+
+
 
     workbook.close()
 
