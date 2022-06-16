@@ -37,13 +37,8 @@ def main():
 
     # Get genes in bedfile
     with open(args.bedfile) as bed:
-        #for line in bed:
-        #    print(line.split(" ")[3])
-
         genesDup = [line.split(" ")[3] for line in bed]
         genes = set(genesDup)
-
-    #print(genes)
 
     # Write genes included in excel file
     worksheet.write('A6', 'Genes included: ')
@@ -53,10 +48,9 @@ def main():
         row += 1
 
     row += 1
-    #print(list(vcf_input.header.samples))
-    #print(len(list(vcf_input.header.samples)))
     samples = list(vcf_input.header.samples)
     # If only tumor sample in vcf or if tumor + normal sample in vcf...
+    # Write info from vcf to excel file
     if len(samples) == 1:
         sample = samples[0]
         tableheading = ['Chr', 'Position', 'Ref', 'Alt', sample]
@@ -64,22 +58,18 @@ def main():
     if len(samples) == 2:
         sample1 = samples[0]
         sample2 = samples[1]
-        tableheading = ['Chr', 'Start', 'Stop', 'Ref', 'Alt', sample1, sample2]
+        tableheading = ['Chr', 'Start', 'Stop', 'Ref', 'Alt', sample1+' DP', sample1+' AF', sample2+' DP', sample2+' AF']
         worksheet.write_row('A'+str(row), tableheading, tableHeadFormat)
         for indel in vcf_input.fetch():
             if len(indel.alts) == 1:
                 alt=indel.alts[0]
-            #chrom = indel.contig
-            worksheet.write_row(row,0,[indel.contig, indel.pos, indel.stop, indel.ref, alt])
+            s1_dp = indel.samples[sample1].get("DP")
+            s1_af = indel.samples[sample1].get("AF")
+            s2_dp = indel.samples[sample2].get("DP")
+            s2_af = indel.samples[sample2].get("AF")
+            worksheet.write_row(row,0,[indel.contig, indel.pos, indel.stop, indel.ref, alt, s1_dp, s1_af, s2_dp, s2_af])
             row += 1
 
-    #row += 1
-    #worksheet.write_row('A'+str(row), tableheading, tableHeadFormat)
-
-
-    #for record in vcf_input.fetch():
-    #    print(record)
-    #    print(record.info.keys())
 
 
     workbook.close()
