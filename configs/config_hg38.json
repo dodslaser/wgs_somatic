@@ -138,7 +138,7 @@
         },
         "pindel":
         {
-            "bed": "/apps/bio/dependencies/wgs_somatic/hg38/twist_shortlist_pindel_hg38.bed",
+            "bed": "/apps/bio/dependencies/wgs_somatic/hg38/new_twist_shortlist_pindel_hg38_padded50.bed",
             "python": "/apps/bio/software/anaconda2/envs/wgs_somatic/bin/python",
             "fix_DPoAF": "workflows/scripts/fix_pindelDPoAF.py"
         }
