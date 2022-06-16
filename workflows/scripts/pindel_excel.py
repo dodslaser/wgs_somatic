@@ -18,7 +18,9 @@ def main():
 
     # Define formats to be used.
     headingFormat = workbook.add_format({'bold': True, 'font_size': 18})
+    tableHeadFormat = workbook.add_format({'bold': True, 'text_wrap': True})
 
+    # Create worksheet
     worksheet = workbook.add_worksheet('Pindel')
     worksheet.write('A1', 'Pindel results', headingFormat)
 
@@ -50,7 +52,34 @@ def main():
         worksheet.write('A'+str(row), gene)
         row += 1
 
+    row += 1
+    #print(list(vcf_input.header.samples))
+    #print(len(list(vcf_input.header.samples)))
+    samples = list(vcf_input.header.samples)
+    # If only tumor sample in vcf or if tumor + normal sample in vcf...
+    if len(samples) == 1:
+        sample = samples[0]
+        tableheading = ['Chr', 'Position', 'Ref', 'Alt', sample]
+        worksheet.write_row('A'+str(row), tableheading, tableHeadFormat)
+    if len(samples) == 2:
+        sample1 = samples[0]
+        sample2 = samples[1]
+        tableheading = ['Chr', 'Start', 'Stop', 'Ref', 'Alt', sample1, sample2]
+        worksheet.write_row('A'+str(row), tableheading, tableHeadFormat)
+        for indel in vcf_input.fetch():
+            if len(indel.alts) == 1:
+                alt=indel.alts[0]
+            #chrom = indel.contig
+            worksheet.write_row(row,0,[indel.contig, indel.pos, indel.stop, indel.ref, alt])
+            row += 1
 
+    #row += 1
+    #worksheet.write_row('A'+str(row), tableheading, tableHeadFormat)
+
+
+    #for record in vcf_input.fetch():
+    #    print(record)
+    #    print(record.info.keys())
 
 
     workbook.close()
