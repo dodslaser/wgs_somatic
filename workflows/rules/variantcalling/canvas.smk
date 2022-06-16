@@ -1,7 +1,7 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 import os
-from workflows.scripts.gender import calc_gender
+from workflows.scripts.sex import calc_sex
 from workflows.scripts.create_segfile import create_seg
 from workflows.scripts.fix_sexploidyfile import mod_sex_vcf
 

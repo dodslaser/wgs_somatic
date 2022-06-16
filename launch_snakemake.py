@@ -12,19 +12,17 @@ import subprocess
 import stat
 #from snakemake import snakemake
 
-def read_ivaconf():
-    with open("configs/ingenuity.json", 'r') as configfile:
-        config_data = json.load(configfile)
-        return config_data
 
 def read_wrapperconf():
     with open("configs/wrapper_conf.json", 'r') as configfile:
         config_data = json.load(configfile)
         return config_data
 
+
 def get_time():
     nowtime = time.strftime("%Y-%m-%d-%H-%M-%S")
     return nowtime
+
 
 def logger(message, logfile=False):
     config = read_wrapperconf()
@@ -39,6 +37,7 @@ def logger(message, logfile=False):
         logfile.write(f"{get_time()}: {message}" + "\n")
     print(message)
 
+
 def yearly_stats(tumorname, normalname):
     #config_data = read_wrapperconf()
     #yearly_stats = open(config_data["yearly_stats"], "a")
@@ -51,6 +50,7 @@ def yearly_stats(tumorname, normalname):
     yearly_stats.write("Tumor ID: " + tumorname + " Normal ID: " + normalname + " Date and Time: " + date_time + "\n")
     yearly_stats.close()
 
+
 def petagene_compress_bam(outputdir, tumorname):
     config = read_wrapperconf()
     logger(f"Starting petagene compression on bamfiles for sample {outputdir}")
@@ -62,7 +62,7 @@ def petagene_compress_bam(outputdir, tumorname):
     qsub_args = ["qsub", "-N", f"WS-{tumorname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, outputdir]
     subprocess.call(qsub_args, shell=False)
 
-def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=False, runtumor=False, tumorname=False, tumorfastqs=False, ivauser=False, igvuser=False, hg38ref=False, starttype=False):
+def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=False, runtumor=False, tumorname=False, tumorfastqs=False, igvuser=False, hg38ref=False, starttype=False):
     try:
         ################################################################
         # Write InputArgs to logfile
@@ -136,17 +136,13 @@ def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=
                         f_tumorfastqs = glob.glob(f"{tumorfastqs}/{tumorname}*fasterq")
                         if not f_tumorfastqs:
                             error_list.append(f"No fastqs or fasterqs found in tumordir")
-        # validate iva and igv users if supplied
+        # validate igv users if supplied
         if igvuser:
             mainconf = helpers.read_config(mainconf_path)
             igvdatadir = mainconf["rules"]["share_to_igv"]["igvdatadir"]
             if not os.path.isdir(f"{igvdatadir}/{igvuser}"):
                 error_list.append(f"{igvuser} does not appear to be a valid preconfigured IGV user")
-        if ivauser:
-            ivaconf = read_ivaconf()
-            if ivauser not in ivaconf["ivausers"]:
-                error_list.append(f"{ivauser} is not a valid preconfigured IVA user")
-
+       
         # prepare outputdirectory
         if not os.path.isdir(output):
             try:
@@ -214,8 +210,9 @@ def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=
         analysisdict["tumorid"] = tumorid
         analysisdict["tumorfastqs"] = [tumorfastqs]
         analysisdict["igvuser"] = igvuser
-        analysisdict["ivauser"] = ivauser
         analysisdict["workingdir"] = output
+        #insilico
+        analysisdict["insilico"] = config["insilicopanels"]
 
         if hg38ref == "yes":
             analysisdict["reference"] = "hg38"
@@ -282,6 +279,8 @@ def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=
         logger(f"{e} Traceback: {tb}")
         sys.exit(1)
 
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-rn', '--runnormal', nargs='?', help='the sequencing run the normalsample was sequenced in', required=False)
@@ -291,22 +290,25 @@ if __name__ == '__main__':
     parser.add_argument('-rt', '--runtumor', nargs='?', help='the sequencing run the tumorsample was sequenced in',     required=False)
     parser.add_argument('-tn', '--tumorsample', nargs='?', help='tumor samplename', required=False)
     parser.add_argument('-tf', '--tumorfastqs', nargs='?', help='path to directory containing tumor fastqs', required=False)
-    parser.add_argument('-iva', '--ivauser', nargs='?', help='location to output results', required=False)
     parser.add_argument('-igv', '--igvuser', nargs='?', help='location to output results', required=False)
     parser.add_argument('-hg38', '--hg38ref', nargs='?', help='run analysis on hg38 reference (write yes if you want this option)', required=False)
     parser.add_argument('-stype', '--starttype', nargs='?', help='write forcestart if you want to ignore fastqs', required=False)
+    parser.add_argument('-nc', '--nocompress', action="store_true", help='Disables petagene compression', required=False)
     args = parser.parse_args()
-    analysis_main(args, args.outputdir, args.runnormal, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.ivauser, args.igvuser, args.hg38ref, args.starttype)
+    analysis_main(args, args.outputdir, args.runnormal, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.igvuser, args.hg38ref, args.starttype)
 
     if os.path.isfile(f"{args.outputdir}/reporting/workflow_finished.txt"):
         if args.tumorsample:
             if args.normalsample:
             # these functions are only executed if snakemake workflow has finished successfully
                 yearly_stats(args.tumorsample, args.normalsample)
-                petagene_compress_bam(args.outputdir, args.tumorsample)    
+                if not args.nocompress:
+                    petagene_compress_bam(args.outputdir, args.tumorsample)    
             else:
                 yearly_stats(args.tumorsample, 'None')
-                petagene_compress_bam(args.outputdir, args.tumorsample)
+                if not args.nocompress:
+                    petagene_compress_bam(args.outputdir, args.tumorsample)
         else:
             yearly_stats('None', args.normalsample)
-            petagene_compress_bam(args.outputdir, args.normalsample)
+            if not args.nocompress:
+                petagene_compress_bam(args.outputdir, args.normalsample)
