@@ -79,7 +79,8 @@ def main():
     if len(samples) == 2:
         sample1 = samples[0]
         sample2 = samples[1]
-        tableheading = ['Chr', 'Gene', 'Start', 'Stop', 'SV length', 'Ref', 'Alt', sample1+' DP', sample1+' AF', sample2+' DP', sample2+' AF']
+        tableheading = ['Chr', 'Gene', 'Start', 'Stop', 'SV length', 'Ref', 'Alt', sample1+'\nDP', sample1+'\nAF', sample2+'\nDP', sample2+'\nAF']
+        worksheet.set_column('H:K', 10)
         worksheet.write_row('A'+str(row), tableheading, tableHeadFormat)
         for indel in vcf_input.fetch():
             svlen = indel.info["SVLEN"]
