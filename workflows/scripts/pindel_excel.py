@@ -40,25 +40,26 @@ def main():
         genesDup = [line.split(" ")[3] for line in bed]
         genes = set(genesDup)
 
-    # Get position interval for each gene
-    #with open(args.bedfile) as bed:
-    #    for line in bed:
-    #        for gene in genes:
-    #            if line.split(" ")[3] == gene:
-    #                print(line)
-    def position_gene(position):
-        start = []
-        stop = []
+    def position_gene(position_start, position_stop):
+        gene_start = None
+        gene_stop = None
         with open(args.bedfile) as bed:
             for line in bed:
-                if position >= int(line.split(" ")[1]) and position <= int(line.split(" ")[2]):
-                    gene = line.split(" ")[3]
+                if position_start >= int(line.split(" ")[1]) and position_start <= int(line.split(" ")[2]):
+                    gene_start = line.split(" ")[3]
+                if position_stop >= int(line.split(" ")[1]) and position_stop <= int(line.split(" ")[2]):
+                    gene_stop = line.split(" ")[3]
+        if gene_stop == None:
+            gene = gene_start
+        elif gene_start == None:
+            gene = gene_stop
+        elif gene_start == gene_stop:
+            gene = gene_start
+        elif gene_start != gene_stop:
+            gene = "two different genes = weird"
         return(gene)
-    print(position_gene(28034106))
+    #print(position_gene(7676319, 32369173))
 
-    #for gene in genes:
-    #    print(position_interval(gene))
-    #position_interval('FLT3')
 
     # Write genes included in excel file
     worksheet.write('A6', 'Genes included: ')
@@ -78,7 +79,7 @@ def main():
     if len(samples) == 2:
         sample1 = samples[0]
         sample2 = samples[1]
-        tableheading = ['Chr', 'Start', 'Stop', 'SV length', 'Ref', 'Alt', sample1+' DP', sample1+' AF', sample2+' DP', sample2+' AF']
+        tableheading = ['Chr', 'Gene', 'Start', 'Stop', 'SV length', 'Ref', 'Alt', sample1+' DP', sample1+' AF', sample2+' DP', sample2+' AF']
         worksheet.write_row('A'+str(row), tableheading, tableHeadFormat)
         for indel in vcf_input.fetch():
             svlen = indel.info["SVLEN"]
@@ -88,9 +89,9 @@ def main():
             s1_af = indel.samples[sample1].get("AF")
             s2_dp = indel.samples[sample2].get("DP")
             s2_af = indel.samples[sample2].get("AF")
-            worksheet.write_row(row,0,[indel.contig, indel.pos, indel.stop, svlen, indel.ref, alt, s1_dp, s1_af, s2_dp, s2_af])
+            worksheet.write_row(row,0,[indel.contig, position_gene(indel.pos, indel.stop),indel.pos, indel.stop, svlen, indel.ref, alt, s1_dp, s1_af, s2_dp, s2_af])
             row += 1
-
+            #print(position_gene(indel.pos, indel.stop))
 
 
     workbook.close()
