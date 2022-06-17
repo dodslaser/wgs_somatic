@@ -4,6 +4,26 @@ import argparse
 from pysam import VariantFile
 import xlsxwriter
 
+def position_gene(position_start, position_stop, bed):
+    '''Function to get gene name based on start/stop position'''
+    gene_start = None
+    gene_stop = None
+    with open(bed) as bed:
+        for line in bed:
+            if position_start >= int(line.split(" ")[1]) and position_start <= int(line.split(" ")[2]):
+                gene_start = line.split(" ")[3]
+            if position_stop >= int(line.split(" ")[1]) and position_stop <= int(line.split(" ")[2]):
+                gene_stop = line.split(" ")[3]
+    if gene_stop == None:
+        gene = gene_start
+    elif gene_start == None:
+        gene = gene_stop
+    elif gene_start == gene_stop:
+        gene = gene_start
+    elif gene_start != gene_stop:
+        gene = "two different genes = weird"
+    return(gene)
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -40,26 +60,6 @@ def main():
         genesDup = [line.split(" ")[3] for line in bed]
         genes = set(genesDup)
 
-    def position_gene(position_start, position_stop):
-        gene_start = None
-        gene_stop = None
-        with open(args.bedfile) as bed:
-            for line in bed:
-                if position_start >= int(line.split(" ")[1]) and position_start <= int(line.split(" ")[2]):
-                    gene_start = line.split(" ")[3]
-                if position_stop >= int(line.split(" ")[1]) and position_stop <= int(line.split(" ")[2]):
-                    gene_stop = line.split(" ")[3]
-        if gene_stop == None:
-            gene = gene_start
-        elif gene_start == None:
-            gene = gene_stop
-        elif gene_start == gene_stop:
-            gene = gene_start
-        elif gene_start != gene_stop:
-            gene = "two different genes = weird"
-        return(gene)
-    #print(position_gene(7676319, 32369173))
-
 
     # Write genes included in excel file
     worksheet.write('A6', 'Genes included: ')
@@ -89,9 +89,8 @@ def main():
             s1_af = indel.samples[sample1].get("AF")
             s2_dp = indel.samples[sample2].get("DP")
             s2_af = indel.samples[sample2].get("AF")
-            worksheet.write_row(row,0,[indel.contig, position_gene(indel.pos, indel.stop),indel.pos, indel.stop, svlen, indel.ref, alt, s1_dp, s1_af, s2_dp, s2_af])
+            worksheet.write_row(row,0,[indel.contig, position_gene(indel.pos, indel.stop, args.bedfile),indel.pos, indel.stop, svlen, indel.ref, alt, s1_dp, s1_af, s2_dp, s2_af])
             row += 1
-            #print(position_gene(indel.pos, indel.stop))
 
 
     workbook.close()
