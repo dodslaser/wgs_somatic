@@ -46,21 +46,18 @@ def main():
     #        for gene in genes:
     #            if line.split(" ")[3] == gene:
     #                print(line)
-    def position_interval(gene):
+    def position_gene(position):
         start = []
         stop = []
         with open(args.bedfile) as bed:
             for line in bed:
-                if line.split(" ")[3] == gene:
-                    start.append(line.split(" ")[1])
-                    stop.append(line.split(" ")[2])
-        start_min = min(start)
-        stop_max = max(stop)
-        #print (start_min, stop_max)
-        return([start_min, stop_max])
+                if position >= int(line.split(" ")[1]) and position <= int(line.split(" ")[2]):
+                    gene = line.split(" ")[3]
+        return(gene)
+    print(position_gene(28034106))
 
-    for gene in genes:
-        print(position_interval(gene))
+    #for gene in genes:
+    #    print(position_interval(gene))
     #position_interval('FLT3')
 
     # Write genes included in excel file
