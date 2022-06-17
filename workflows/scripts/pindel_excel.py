@@ -40,6 +40,29 @@ def main():
         genesDup = [line.split(" ")[3] for line in bed]
         genes = set(genesDup)
 
+    # Get position interval for each gene
+    #with open(args.bedfile) as bed:
+    #    for line in bed:
+    #        for gene in genes:
+    #            if line.split(" ")[3] == gene:
+    #                print(line)
+    def position_interval(gene):
+        start = []
+        stop = []
+        with open(args.bedfile) as bed:
+            for line in bed:
+                if line.split(" ")[3] == gene:
+                    start.append(line.split(" ")[1])
+                    stop.append(line.split(" ")[2])
+        start_min = min(start)
+        stop_max = max(stop)
+        #print (start_min, stop_max)
+        return([start_min, stop_max])
+
+    for gene in genes:
+        print(position_interval(gene))
+    #position_interval('FLT3')
+
     # Write genes included in excel file
     worksheet.write('A6', 'Genes included: ')
     row = 7
@@ -58,16 +81,17 @@ def main():
     if len(samples) == 2:
         sample1 = samples[0]
         sample2 = samples[1]
-        tableheading = ['Chr', 'Start', 'Stop', 'Ref', 'Alt', sample1+' DP', sample1+' AF', sample2+' DP', sample2+' AF']
+        tableheading = ['Chr', 'Start', 'Stop', 'SV length', 'Ref', 'Alt', sample1+' DP', sample1+' AF', sample2+' DP', sample2+' AF']
         worksheet.write_row('A'+str(row), tableheading, tableHeadFormat)
         for indel in vcf_input.fetch():
+            svlen = indel.info["SVLEN"]
             if len(indel.alts) == 1:
                 alt=indel.alts[0]
             s1_dp = indel.samples[sample1].get("DP")
             s1_af = indel.samples[sample1].get("AF")
             s2_dp = indel.samples[sample2].get("DP")
             s2_af = indel.samples[sample2].get("AF")
-            worksheet.write_row(row,0,[indel.contig, indel.pos, indel.stop, indel.ref, alt, s1_dp, s1_af, s2_dp, s2_af])
+            worksheet.write_row(row,0,[indel.contig, indel.pos, indel.stop, svlen, indel.ref, alt, s1_dp, s1_af, s2_dp, s2_af])
             row += 1
 
 
