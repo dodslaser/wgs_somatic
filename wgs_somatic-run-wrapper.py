@@ -189,11 +189,13 @@ def wrapper(instrument):
             pair_dict = get_pair_dict(sctx, Rctx, logger)
             pair_dict_all_pairs.update(pair_dict)
 
+        print(pair_dict_all_pairs)
         # Uses the dictionary of T/N samples to put the correct pairs together and finds the correct input arguments to the pipeline
         threads = []
         check_ok_outdirs = []
         end_threads = []
         final_pairs = []
+        paired_samples = []
         for key in pair_dict_all_pairs:
             if 'tumor' in pair_dict_all_pairs.get(key):
                 t = key
@@ -222,10 +224,10 @@ def wrapper(instrument):
                             normalsample = n
                             normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
                             tumorfastqs = normalfastqs
-                            outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
-                            #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
-                            igvuser = config['igv']['GMS-BT']
-                            #igvuser = 'alvar.almstedt' # use for testing
+                            #outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
+                            outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
+                            #igvuser = config['igv']['GMS-BT']
+                            igvuser = 'alvar.almstedt' # use for testing
                             # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
                             hg38ref = config['hg38ref']['GMS-BT']
 
@@ -249,14 +251,74 @@ def wrapper(instrument):
                             check_ok_outdirs.append(outputdir)
                             end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample)))
 
+                            paired_samples.append(tumorsample)
+                            paired_samples.append(normalsample)
+        print(paired_samples)
 
+        for key in pair_dict_all_pairs:
+            if key in paired_samples:
+                print(f'{key} is a paired sample')
+            else:
+                print(f'{key} is an unpaired sample')
+                if 'tumor' in pair_dict_all_pairs.get(key):
+                    print(f'{key} is an unpaired tumor sample')
+                    runtumor = Rctx_run.run_name
+                    tumorsample = key
+                    tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
+                    #outputdir = os.path.join(config['outputdir']['GMS-BT'], "tumor_only", tumorsample)
+                    outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "tumor_only", tumorsample) #use for testing
+                    department = pair_dict_all_pairs.get(key)[2]
+                    is_prio = pair_dict_all_pairs.get(key)[3]
+                    print(f'department {department}, prio {is_prio}')
+                    if is_prio:
+                        prio_sample = 'prio'
+                    else:
+                        prio_sample = ''
+                    #igvuser = config['igv']['GMS-BT']
+                    igvuser = 'alvar.almstedt' # use for testing
+                    # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
+                    hg38ref = config['hg38ref']['GMS-BT']
+                    # Use this list of final pairs for email
+                    final_pairs.append(f'{tumorsample} (T), {department} {prio_sample}')
+                    if os.path.exists(outputdir):
+                        logger.info(f'Outputdir exists. Renaming old outputdir {outputdir} to {outputdir}_old')
+                        os.rename(outputdir, f'{outputdir}_old')
+
+                    pipeline_args = {'output': f'{outputdir}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+                elif 'normal' in pair_dict_all_pairs.get(key):
+                    print(f'{key} is an unpaired normal sample')
+                    runnormal = Rctx_run.run_name
+                    normalsample = key
+                    normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
+                    #outputdir = os.path.join(config['outputdir']['GMS-BT'], "normal_only", normalsample)
+                    outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "normal_only", normalsample) #use for testing
+                    department = pair_dict_all_pairs.get(key)[2]
+                    is_prio = pair_dict_all_pairs.get(key)[3]
+                    print(f'department {department}, prio {is_prio}')
+                    if is_prio:
+                        prio_sample = 'prio'
+                    else:
+                        prio_sample = ''
+                    #igvuser = config['igv']['GMS-BT']
+                    igvuser = 'alvar.almstedt' # use for testing
+                    # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
+                    hg38ref = config['hg38ref']['GMS-BT']
+                    final_pairs.append(f'{normalsample} (T), {department} {prio_sample}')
+                    if os.path.exists(outputdir):
+                        logger.info(f'Outputdir exists. Renaming old outputdir {outputdir} to {outputdir}_old')
+                        os.rename(outputdir, f'{outputdir}_old')
+
+                    pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+                print(pipeline_args)
+
+'''
         # Start several samples at the same time
         for t in threads:
             t.start()
             logger.info(f'Thread {t} has started')
 
         # Send start email
-        start_email(Rctx_run.run_name, final_pairs)
+        #start_email(Rctx_run.run_name, final_pairs)
 
         for u in threads:
             u.join()
@@ -286,7 +348,7 @@ def wrapper(instrument):
             sys.exit()
         
         logger.info('All jobs have finished successfully')
-        end_email(Rctx_run.run_name, final_pairs)
+        #end_email(Rctx_run.run_name, final_pairs)
 
         # If all jobs have finished successfully - add to yearly stats and start petagene compression of bamfiles
         for t in end_threads:
@@ -297,7 +359,7 @@ def wrapper(instrument):
         # break out of for loop to avoid starting pipeline for a possible other run that was done sequenced at the same time.
         # if cron runs every 30 mins it will find other runs at the next cron instance and run from there instead (and add to novaseq_runlist)
         break
-
+'''
 
 
 
