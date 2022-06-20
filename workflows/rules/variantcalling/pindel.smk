@@ -82,3 +82,15 @@ rule fixPindelDPoAF:
         fix_DPoAF = pipeconfig["rules"]["pindel"]["fix_DPoAF"] 
     run:
         shell(f"{params.python} {params.fix_DPoAF} {input} {output}")
+
+rule pindelVCF:
+    input:
+        "{workingdir}/{stype}/pindel/{sname}_pindel.vcf"
+    output:
+        "{workingdir}/{stype}/pindel/{sname}_pindel.xlsx"
+    params:
+        python = pipeconfig["rules"]["pindel"]["python"],
+        bed = pipeconfig["rules"]["pindel"]["bed"],
+        pindel_excel = pipeconfig["rules"]["pindel"]["pindel_excel"]
+    run:
+        shell(f"{params.python} {params.pindel_excel} {input} {output} {params.bed}")
