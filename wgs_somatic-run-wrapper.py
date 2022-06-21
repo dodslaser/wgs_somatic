@@ -99,17 +99,20 @@ def check_ok(outputdir):
         return False
 
 
-def analysis_end(outputdir, tumorsample, normalsample):
+def analysis_end(outputdir, tumorsample='', normalsample=''):
     '''Function to check if analysis has finished correctly and add to yearly stats and start petagene compression'''
 
     if os.path.isfile(f"{outputdir}/reporting/workflow_finished.txt"):
         if tumorsample:
-            # these functions are only executed if snakemake workflow has finished successfully
-            yearly_stats(tumorsample, normalsample)
-            petagene_compress_bam(outputdir, tumorsample)
+            if normalsample:
+                # these functions are only executed if snakemake workflow has finished successfully
+                yearly_stats(tumorsample, normalsample)
+            else:
+                yearly_stats(tumorsample, 'None')
+            #petagene_compress_bam(outputdir, tumorsample)
         else:
             yearly_stats('None', normalsample)
-            petagene_compress_bam(outputdir, normalsample)
+            #petagene_compress_bam(outputdir, normalsample)
     else:
         pass
 
@@ -189,7 +192,7 @@ def wrapper(instrument):
             pair_dict = get_pair_dict(sctx, Rctx, logger)
             pair_dict_all_pairs.update(pair_dict)
 
-        print(pair_dict_all_pairs)
+        #print(pair_dict_all_pairs)
         # Uses the dictionary of T/N samples to put the correct pairs together and finds the correct input arguments to the pipeline
         threads = []
         check_ok_outdirs = []
@@ -253,13 +256,11 @@ def wrapper(instrument):
 
                             paired_samples.append(tumorsample)
                             paired_samples.append(normalsample)
-        print(paired_samples)
+        #print(paired_samples)
 
         for key in pair_dict_all_pairs:
-            if key in paired_samples:
-                print(f'{key} is a paired sample')
-            else:
-                print(f'{key} is an unpaired sample')
+            if not key in paired_samples:
+                #print(f'{key} is an unpaired sample')
                 if 'tumor' in pair_dict_all_pairs.get(key):
                     print(f'{key} is an unpaired tumor sample')
                     runtumor = Rctx_run.run_name
@@ -269,7 +270,7 @@ def wrapper(instrument):
                     outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "tumor_only", tumorsample) #use for testing
                     department = pair_dict_all_pairs.get(key)[2]
                     is_prio = pair_dict_all_pairs.get(key)[3]
-                    print(f'department {department}, prio {is_prio}')
+                    #print(f'department {department}, prio {is_prio}')
                     if is_prio:
                         prio_sample = 'prio'
                     else:
@@ -285,8 +286,13 @@ def wrapper(instrument):
                         os.rename(outputdir, f'{outputdir}_old')
 
                     pipeline_args = {'output': f'{outputdir}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+                    # Using threading to start the pipeline for several samples at the same time
+                    threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
+                    logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
+                    check_ok_outdirs.append(outputdir)
+                    end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample='')))
                 elif 'normal' in pair_dict_all_pairs.get(key):
-                    print(f'{key} is an unpaired normal sample')
+                    #print(f'{key} is an unpaired normal sample')
                     runnormal = Rctx_run.run_name
                     normalsample = key
                     normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
@@ -294,7 +300,7 @@ def wrapper(instrument):
                     outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "normal_only", normalsample) #use for testing
                     department = pair_dict_all_pairs.get(key)[2]
                     is_prio = pair_dict_all_pairs.get(key)[3]
-                    print(f'department {department}, prio {is_prio}')
+                    #print(f'department {department}, prio {is_prio}')
                     if is_prio:
                         prio_sample = 'prio'
                     else:
@@ -309,7 +315,12 @@ def wrapper(instrument):
                         os.rename(outputdir, f'{outputdir}_old')
 
                     pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
-                print(pipeline_args)
+                #print(pipeline_args)
+                    # Using threading to start the pipeline for several samples at the same time
+                    threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
+                    logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
+                    check_ok_outdirs.append(outputdir)
+                    end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample='', normalsample)))
 
 '''
         # Start several samples at the same time
@@ -361,7 +372,7 @@ def wrapper(instrument):
         break
 '''
 
-
+    # DON'T FORGET TO UNCOMMENT PETAGENE COMPRESSION AND CHANGE BACK TO CORRECT OUTPUTDIR AND IGVUSER!!!!!!
 
     # some arguments are hardcoded right now, need to fix this. 
     # only considers barncancer hg38 (GMS-AL + GMS-BT samples) right now. 
