@@ -27,7 +27,7 @@ WOPR - junior
 
 `$ git submodule update --init --recursive --remote`
 
-Submodules used are annotate\_manta\_canvas, b\_allele\_igv\_plot, canvas\_to\_interpreter and alissa\_connector\_upload. They can all be foundat [CGG](https://github.com/ClinicalGenomicsGBG).
+Submodules used are annotate\_manta\_canvas, b\_allele\_igv\_plot, canvas\_to\_interpreter and alissa\_connector\_upload. They can all be found at [CGG](https://github.com/ClinicalGenomicsGBG).
 
 
 
@@ -71,7 +71,10 @@ For hg38ref, write 'yes' if you want this option. If you want to use hg19, simpl
 If you want to run pipeline for normal only (run only germline steps of pipeline), simply don't use arguments runtumor, tumorsample and tumorfastqs.
 
 
- Runnormal and runtumor is only used to create a unique samplename based on the sequencing run the data comes from. Could probably be done in a better way.
+If you want to run pipeline for tumor only, simply don't use arguments runnormal, normalsample and normalfastqs.
+
+
+Runnormal and runtumor is only used to create a unique samplename based on the sequencing run the data comes from. Could probably be done in a better way.
 
 
 Need to be on medair because python environment is hard-coded in launch_snakemake.py, also some tools in the snakemake workflow is hardcoded to install-locations on medair, and finally some dependencies such as references and databases are on medair.

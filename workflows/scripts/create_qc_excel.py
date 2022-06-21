@@ -5,7 +5,23 @@ import argparse
 import xlsxwriter
 import os
 from workflows.scripts.determine_match import determine_match
+from tools.git_versions import get_git_commit, get_git_tag, get_git_reponame
+from workflows.scripts.sex import calc_sex
 import time
+import pandas as pd
+import glob
+
+
+def add_insilico_stats(insilicofolder, main_excel):
+    excel_file_list = glob.glob(f"{insilicofolder}/**/*.xlsx")
+    print(f"excel_file_list: {excel_file_list}")
+    for xlfile in excel_file_list:
+        dataframe = pd.read_excel(xlfile, engine='openpyxl')
+        sheetname = os.path.basename(os.path.splitext(xlfile)[0])
+        print(f"sheetname: {sheetname}")
+        with pd.ExcelWriter(main_excel, engine='openpyxl', mode='a') as writer:
+            dataframe.to_excel(writer, sheet_name=sheetname)
+
 
 def extract_stats(statsfile, statstype, sampletype, statsdict):
     with open(statsfile, 'r') as statsfile:
@@ -31,6 +47,7 @@ def extract_stats(statsfile, statstype, sampletype, statsdict):
                     headercount += 1
         return statsdict
 
+
 def get_canvas_tumorinfo(canvasvcf):
     canvasdict = {}
     canvas_infofields = ["##OverallPloidy", "##DiploidCoverage", "##EstimatedTumorPurity", "##PurityModelFit", "##InterModelDistance", "##LocalSDmetric", "##EvennessScore", "##HeterogeneityProportion", "##EstimatedChromosomeCount"]
@@ -47,7 +64,8 @@ def get_canvas_tumorinfo(canvasvcf):
                     canvasdict[canvasfield] = canvasfield_value
     return canvasdict
 
-def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdict):
+
+def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdict, sex):
     current_date = time.strftime("%Y-%m-%d")
     excelfile = xlsxwriter.Workbook(output)
     worksheet = excelfile.add_worksheet("qc_stats")
@@ -62,7 +80,10 @@ def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdic
     cellformat["pass"] = excelfile.add_format({'bg_color': '95FF80'})
 
     row = 1
-    worksheet.write(row, 0, f"QC-report created: {current_date}")    
+    worksheet.write(row, 0, f"QC-report created: {current_date}")
+    row += 1
+    worksheet.write(row, 0, f"{get_git_reponame()} tag: {get_git_tag()}, commit: {get_git_commit()}")
+    worksheet.write(row, 4, f"Computed sex of patient: {sex}")
     row += 2
  
     for statstype in statsdict:
@@ -130,7 +151,9 @@ def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdic
 
     excelfile.close()
 
-def create_excel_main(tumorcov='', normalcov='', tumordedup='', normaldedup='', tumorvcf='', normalvcf='', canvasvcf='', output=''):
+
+def create_excel_main(tumorcov='', ycov='', normalcov='', tumordedup='', normaldedup='', tumorvcf='', normalvcf='', canvasvcf='', output='', insilicodir=''):
+    print(f"insilicodir: {insilicodir}")
     statsdict = {}
     if tumorcov:
         tumorcovfile = os.path.basename(tumorcov)
@@ -148,26 +171,40 @@ def create_excel_main(tumorcov='', normalcov='', tumordedup='', normaldedup='', 
         match_dict = determine_match(normalvcf, tumorvcf, 400000)
         canvas_dict = get_canvas_tumorinfo(canvasvcf)
 
+    
+
     if not output.endswith(".xlsx"):
         output = f"{output}.xlsx"
 
+    # Determine which files to use to calculate sex and where to get insilico coverageg files
     if tumorcov:
         if normalcov:
-            create_excel(statsdict, output, normalname, tumorname, match_dict, canvas_dict)
+            # Tumour + Normal
+            calculated_sex = calc_sex(normalcov, ycov)
+            create_excel(statsdict, output, normalname, tumorname, match_dict, canvas_dict, sex=calculated_sex)
+            add_insilico_stats(insilicodir, output)
         else:
-            create_excel(statsdict, output, normalname='', tumorname=tumorname, match_dict='', canvasdict='')
+            # Tumour only
+            calculated_sex = calc_sex(tumorcov, ycov)
+            create_excel(statsdict, output, normalname='', tumorname=tumorname, match_dict='', canvasdict='', sex=calculated_sex)
+            add_insilico_stats(insilicodir, output) # Maybe this can be commented out if not needed for tumour only
     else:
-        create_excel(statsdict, output, normalname, tumorname='', match_dict='', canvasdict='')
+        # Normal only
+        calculated_sex = calc_sex(normalcov, ycov)
+        create_excel(statsdict, output, normalname, tumorname='', match_dict='', canvasdict='', sex=calculated_sex)
+        add_insilico_stats(insilicodir, output)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-tc', '--tumorcov', nargs='?', help='Sentieon WGS cov file from tumorbam', required=False)
+    parser.add_argument('-yc', '--ycov', nargs='?', help='Sentieon Y-cov file', required=False)
     parser.add_argument('-nc', '--normalcov', nargs='?', help='Sentieon WGS cov file from normalbam', required=True)
     parser.add_argument('-td', '--tumordedup', nargs='?', help='Sentieon dedup-stats for tumorbam', required=False)
     parser.add_argument('-nd', '--normaldedup', nargs='?', help='Sentieon dedup-stats for normalbam', required=True)
     parser.add_argument('-tv', '--tumorvcf', nargs='?', help='Tumor Germlinecalls', required=False)
     parser.add_argument('-nv', '--normalvcf', nargs='?', help='Normal Germlinecalls', required=True)
     parser.add_argument('-cv', '--canvasvcf', nargs='?', help='Somatic Canvas VCF', required=False)
+    parser.add_argument('-is', '--insilicodir', nargs='?', help='Full path to insilico directory (which contains excel files)', required=False)
     parser.add_argument('-o', '--output', nargs='?', help='fullpath to file to be created (xlsx will be appended if not written)', required=True)
     args = parser.parse_args()
-    create_excel_main(args.tumorcov, args.normalcov, args.tumordedup, args.normaldedup, args.tumorvcf, args.normalvcf, args.canvasvcf, args.output)
+    create_excel_main(args.tumorcov, args.ycov, args.normalcov, args.tumordedup, args.normaldedup, args.tumorvcf, args.normalvcf, args.canvasvcf, args.output, args.insilicodir)
