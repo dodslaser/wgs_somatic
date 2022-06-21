@@ -70,12 +70,22 @@ def main():
 
     row += 1
     samples = list(vcf_input.header.samples)
-    # If only tumor sample in vcf or if tumor + normal sample in vcf...
     # Write info from vcf to excel file
+    # If only tumor sample in vcf
     if len(samples) == 1:
         sample = samples[0]
-        tableheading = ['Chr', 'Position', 'Ref', 'Alt', sample]
+        tableheading = ['Chr', 'Gene', 'Start', 'Stop', 'SV length', 'Ref', 'Alt', sample+'\nDP', sample+'\nAF']
+        worksheet.set_column('H:I', 10)
         worksheet.write_row('A'+str(row), tableheading, tableHeadFormat)
+        for indel in vcf_input.fetch():
+            svlen = indel.info["SVLEN"]
+            if len(indel.alts) == 1:
+                alt=indel.alts[0]
+            s_dp = indel.samples[sample].get("DP")
+            s_af = indel.samples[sample].get("AF")
+            worksheet.write_row(row,0,[indel.contig, position_gene(indel.pos, indel.stop, args.bedfile),indel.pos, indel.stop, svlen, indel.ref, alt, s_dp, s_af])
+            row +=1
+    # If tumor and normal sample in vcf
     if len(samples) == 2:
         sample1 = samples[0]
         sample2 = samples[1]

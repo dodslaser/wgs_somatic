@@ -38,18 +38,19 @@ def main():
         # Add value of AF to tumor sample column
         record.samples[0]["AF"]=af
 
-        # Calculate DP for normal
-        n_dp = sum(record.samples[1].get("AD"))
-        # Add value of DP to normal sample column
-        record.samples[1]["DP"]=n_dp
-        # Calculate AF for normal
-        if n_dp == 0:
-            # Solve division by zero problem if DP = 0
-            n_af=0
-        else:
-            n_af=record.samples[1].get("AD")[1]/n_dp
-        # Add value of AF to normal sample column
-        record.samples[1]["AF"]=n_af
+        # Calculate DP for normal if normal sample in vcf
+        if len(record.samples) == 2:
+            n_dp = sum(record.samples[1].get("AD"))
+            # Add value of DP to normal sample column
+            record.samples[1]["DP"]=n_dp
+            # Calculate AF for normal
+            if n_dp == 0:
+                # Solve division by zero problem if DP = 0
+                n_af=0
+            else:
+                n_af=record.samples[1].get("AD")[1]/n_dp
+            # Add value of AF to normal sample column
+            record.samples[1]["AF"]=n_af
 
         vcf_out.write(record)
 

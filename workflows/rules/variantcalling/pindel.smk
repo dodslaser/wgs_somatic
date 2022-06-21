@@ -1,14 +1,23 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 
-rule pindelConfig:
-    input:
-        tumorbam = expand("{workingdir}/{stype}/dedup/{sname}_DEDUP.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-        normalbam = expand("{workingdir}/{stype}/dedup/{sname}_DEDUP.bam", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-    output:
-        pindelConfig = "{workingdir}/{stype}/pindel/{sname}_pindelConfig.txt"
-    shell:
-        "echo '{input.tumorbam}\t300\t{tumorname}\n{input.normalbam}\t300\t{normalname}'>{output.pindelConfig}"
+if normalid:
+    rule pindelConfig:
+        input:
+            tumorbam = expand("{workingdir}/{stype}/dedup/{sname}_DEDUP.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+            normalbam = expand("{workingdir}/{stype}/dedup/{sname}_DEDUP.bam", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+        output:
+            pindelConfig = "{workingdir}/{stype}/pindel/{sname}_pindelConfig.txt"
+        shell:
+            "echo '{input.tumorbam}\t300\t{tumorname}\n{input.normalbam}\t300\t{normalname}'>{output.pindelConfig}"
+else:
+    rule pindelConfig:
+        input:
+            tumorbam = expand("{workingdir}/{stype}/dedup/{sname}_DEDUP.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+        output:
+            pindelConfig = "{workingdir}/{stype}/pindel/{sname}_pindelConfig.txt"
+        shell:
+            "echo '{input.tumorbam}\t300\t{tumorname}'>{output.pindelConfig}"
 
 rule pindel:
     input:
@@ -83,7 +92,7 @@ rule fixPindelDPoAF:
     run:
         shell(f"{params.python} {params.fix_DPoAF} {input} {output}")
 
-rule pindelVCF:
+rule pindel_xlsx:
     input:
         "{workingdir}/{stype}/pindel/{sname}_pindel.vcf"
     output:
