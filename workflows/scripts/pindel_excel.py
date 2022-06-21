@@ -1,8 +1,9 @@
 #!/bin/python3.6
 #import sys
 import argparse
-from pysam import VariantFile
 import xlsxwriter
+
+from pysam import VariantFile
 
 def position_gene(position_start, position_stop, bed):
     '''Function to get gene name based on start/stop position'''
