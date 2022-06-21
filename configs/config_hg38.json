@@ -1,5 +1,6 @@
 {
     "referencegenome": "/apps/bio/dependencies/wgs_somatic/hg38/sentieon/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
+    "referencefai": "/apps/bio/dependencies/wgs_somatic/hg38/sentieon/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai",
     "singularities":
     {
         "sentieon":
@@ -20,7 +21,11 @@
             "reference": "/canvasfiles/canvasfiles/",
             "kmerfile": "/canvasfiles/canvasfiles/kmer.fa",
             "filter13": "/canvasfiles/canvasfiles/filter13.bed"
-        } 
+        }, 
+        "pindel":
+        {
+            "sing": "/apps/bio/singularities/gms_hematology/pindel-0.2.5b8.simg"
+        }
     },
     "rules":
     {
@@ -136,6 +141,13 @@
         {
             "genelist": "/apps/bio/dependencies/wgs_somatic/genelist.txt",
             "genelist_tumoronly": "/apps/bio/dependencies/wgs_somatic/Genelist_GMS-AL_tumor-only.txt"
+        },
+        "pindel":
+        {
+            "bed": "/apps/bio/dependencies/wgs_somatic/hg38/new_twist_shortlist_pindel_hg38_padded50.bed",
+            "python": "/apps/bio/software/anaconda2/envs/wgs_somatic/bin/python",
+            "fix_DPoAF": "workflows/scripts/fix_pindelDPoAF.py",
+	    "pindel_excel": "workflows/scripts/pindel_excel.py"
         }
     }
 }

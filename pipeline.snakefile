@@ -134,6 +134,7 @@ else:
 # VariantCalling
 if tumorid:
     include:        "workflows/rules/variantcalling/tnscope.smk"
+    include:        "workflows/rules/variantcalling/pindel.smk"
 include:        "workflows/rules/variantcalling/dnascope.smk"
 include:        "workflows/rules/small_tools/ballele.smk"
 include:        "workflows/rules/variantcalling/canvas.smk"
