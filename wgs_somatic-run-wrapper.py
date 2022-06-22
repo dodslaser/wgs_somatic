@@ -83,6 +83,42 @@ def generate_context_objects(Rctx, logger):
 
     return Rctx
 
+def get_pipeline_args(config, Rctx_run, t=None, n=None):
+
+    if n:
+        runnormal = Rctx_run.run_name
+        normalsample = n
+        normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
+        if not t:
+            #outputdir = os.path.join(config['outputdir']['GMS-BT'], "normal_only", normalsample)
+            outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "normal_only", normalsample) #use for testing
+    if t:
+        runtumor = Rctx_run.run_name
+        tumorsample = t
+        tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
+        if not n:
+            #outputdir = os.path.join(config['outputdir']['GMS-BT'], "tumor_only", tumorsample)
+            outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "tumor_only", tumorsample) #use for testing
+        else:
+            #outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample)
+            outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
+    #igvuser = config['igv']['GMS-BT']
+    igvuser = 'alvar.almstedt' # use for testing
+    # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
+    hg38ref = config['hg38ref']['GMS-BT']
+
+    if os.path.exists(outputdir):
+        logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
+        os.rename(outputdir, f'{outputdir}_old')
+
+    if t and n:
+        pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+    if t and not n:
+        pipeline_args = {'output': f'{outputdir}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+    if n and not t:
+        pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+
+    return pipeline_args
 
 def call_script(**kwargs):
     '''Function to call main function from launch_snakemake.py'''
@@ -99,7 +135,7 @@ def check_ok(outputdir):
         return False
 
 
-def analysis_end(outputdir, tumorsample='', normalsample=''):
+def analysis_end(outputdir, tumorsample=None, normalsample=None):
     '''Function to check if analysis has finished correctly and add to yearly stats and start petagene compression'''
 
     if os.path.isfile(f"{outputdir}/reporting/workflow_finished.txt"):
@@ -192,7 +228,7 @@ def wrapper(instrument):
             pair_dict = get_pair_dict(sctx, Rctx, logger)
             pair_dict_all_pairs.update(pair_dict)
 
-        #print(pair_dict_all_pairs)
+        print(pair_dict_all_pairs)
         # Uses the dictionary of T/N samples to put the correct pairs together and finds the correct input arguments to the pipeline
         threads = []
         check_ok_outdirs = []
@@ -221,53 +257,57 @@ def wrapper(instrument):
                         # The or statements are here to prepare to when we change to pair ID
                         # Pair ID for tumor will be normal name (minus DNA) and the opposite for normal
                         if n_ID == t_ID or t_ID == n.split("DNA")[1] or n_ID == t.split("DNA")[1]: 
-                            runnormal = Rctx_run.run_name
-                            runtumor = Rctx_run.run_name
-                            tumorsample = t
-                            normalsample = n
-                            normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
-                            tumorfastqs = normalfastqs
+                            pipeline_args = get_pipeline_args(config, Rctx_run, t, n)
+                            #runnormal = Rctx_run.run_name
+                            #runtumor = Rctx_run.run_name
+                            #tumorsample = t
+                            #normalsample = n
+                            #normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
+                            #tumorfastqs = normalfastqs
                             #outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
-                            outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
+                            #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
                             #igvuser = config['igv']['GMS-BT']
-                            igvuser = 'alvar.almstedt' # use for testing
+                            #igvuser = 'alvar.almstedt' # use for testing
                             # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
-                            hg38ref = config['hg38ref']['GMS-BT']
+                            #hg38ref = config['hg38ref']['GMS-BT']
 
                             
                             # Use this list of final pairs for email
-                            final_pairs.append(f'{tumorsample} (T) {normalsample} (N), {department} {prio_sample}')
+                            final_pairs.append(f'{t} (T) {n} (N), {department} {prio_sample}')
 
                             # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead.
                             # Won't work if outputdir_old also already exists. Need to be solved in a better way 
-                            if os.path.exists(outputdir):
-                                logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
-                                os.rename(outputdir, f'{outputdir}_old')
+                            #if os.path.exists(outputdir):
+                            #    logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
+                            #    os.rename(outputdir, f'{outputdir}_old')
 
-                            pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+                            #pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
 
 
                             # Using threading to start the pipeline for several samples at the same time
                             threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
                             logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
 
+                            #print(get_pipeline_args(config, Rctx_run, tumorsample, normalsample))
+                            outputdir = pipeline_args.get('output')
                             check_ok_outdirs.append(outputdir)
-                            end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample)))
+                            end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, t, n)))
 
-                            paired_samples.append(tumorsample)
-                            paired_samples.append(normalsample)
+                            paired_samples.append(t)
+                            paired_samples.append(n)
+
         #print(paired_samples)
 
         for key in pair_dict_all_pairs:
             if not key in paired_samples:
                 #print(f'{key} is an unpaired sample')
                 if 'tumor' in pair_dict_all_pairs.get(key):
-                    print(f'{key} is an unpaired tumor sample')
-                    runtumor = Rctx_run.run_name
+                    #print(f'{key} is an unpaired tumor sample')
+                    #runtumor = Rctx_run.run_name
                     tumorsample = key
-                    tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
+                    #tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
                     #outputdir = os.path.join(config['outputdir']['GMS-BT'], "tumor_only", tumorsample)
-                    outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "tumor_only", tumorsample) #use for testing
+                    #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "tumor_only", tumorsample) #use for testing
                     department = pair_dict_all_pairs.get(key)[2]
                     is_prio = pair_dict_all_pairs.get(key)[3]
                     #print(f'department {department}, prio {is_prio}')
@@ -276,28 +316,31 @@ def wrapper(instrument):
                     else:
                         prio_sample = ''
                     #igvuser = config['igv']['GMS-BT']
-                    igvuser = 'alvar.almstedt' # use for testing
+                    #igvuser = 'alvar.almstedt' # use for testing
                     # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
-                    hg38ref = config['hg38ref']['GMS-BT']
+                    #hg38ref = config['hg38ref']['GMS-BT']
                     # Use this list of final pairs for email
                     final_pairs.append(f'{tumorsample} (T), {department} {prio_sample}')
-                    if os.path.exists(outputdir):
-                        logger.info(f'Outputdir exists. Renaming old outputdir {outputdir} to {outputdir}_old')
-                        os.rename(outputdir, f'{outputdir}_old')
+                    #if os.path.exists(outputdir):
+                    #    logger.info(f'Outputdir exists. Renaming old outputdir {outputdir} to {outputdir}_old')
+                    #    os.rename(outputdir, f'{outputdir}_old')
 
-                    pipeline_args = {'output': f'{outputdir}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+                    #pipeline_args = {'output': f'{outputdir}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
                     # Using threading to start the pipeline for several samples at the same time
+                    pipeline_args = get_pipeline_args(config, Rctx_run, tumorsample, n == None)
                     threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
                     logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
+                    #print(get_pipeline_args(config, Rctx_run, tumorsample, n == None))
+                    outputdir = pipeline_args.get('output')
                     check_ok_outdirs.append(outputdir)
-                    end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample='')))
+                    end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, n == None)))
                 elif 'normal' in pair_dict_all_pairs.get(key):
                     #print(f'{key} is an unpaired normal sample')
-                    runnormal = Rctx_run.run_name
+                    #runnormal = Rctx_run.run_name
                     normalsample = key
-                    normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
+                    #normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
                     #outputdir = os.path.join(config['outputdir']['GMS-BT'], "normal_only", normalsample)
-                    outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "normal_only", normalsample) #use for testing
+                    #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "normal_only", normalsample) #use for testing
                     department = pair_dict_all_pairs.get(key)[2]
                     is_prio = pair_dict_all_pairs.get(key)[3]
                     #print(f'department {department}, prio {is_prio}')
@@ -306,21 +349,22 @@ def wrapper(instrument):
                     else:
                         prio_sample = ''
                     #igvuser = config['igv']['GMS-BT']
-                    igvuser = 'alvar.almstedt' # use for testing
+                    #igvuser = 'alvar.almstedt' # use for testing
                     # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
-                    hg38ref = config['hg38ref']['GMS-BT']
+                    #hg38ref = config['hg38ref']['GMS-BT']
                     final_pairs.append(f'{normalsample} (T), {department} {prio_sample}')
-                    if os.path.exists(outputdir):
-                        logger.info(f'Outputdir exists. Renaming old outputdir {outputdir} to {outputdir}_old')
-                        os.rename(outputdir, f'{outputdir}_old')
-
-                    pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+                    #if os.path.exists(outputdir):
+                    #    logger.info(f'Outputdir exists. Renaming old outputdir {outputdir} to {outputdir}_old')
+                    #    os.rename(outputdir, f'{outputdir}_old')
+                    pipeline_args = get_pipeline_args(config, Rctx_run, t == None, normalsample)
+                    #pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
                 #print(pipeline_args)
                     # Using threading to start the pipeline for several samples at the same time
                     threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
                     logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
+                    outputdir = pipeline_args.get('output')
                     check_ok_outdirs.append(outputdir)
-                    end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample='', normalsample)))
+                    end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, t == None, normalsample)))
 
 '''
         # Start several samples at the same time
