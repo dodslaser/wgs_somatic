@@ -55,18 +55,12 @@ def overall_coverage_stats(coverage, thresholds) -> list:
         for coverage_stat in cov_stats:
             header.append(coverage_stat)
             data.append(cov_stats[coverage_stat])
-        #write_header = '\t'.join(header)
-        #write_data = '\t'.join(data)
-    
-        #print(write_header)
-        #print(write_data)
         return [header, data]
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--coverage', nargs='?', help='(from samtools mpileup -l $BED -Q 1 $BAM | cut -f1,2,4)', required=True)
     parser.add_argument('-t', '--thresholds', nargs='?', help='list of coverage thresholds, 1,10,20,40,50 etc...', required=True)
-#    parser.add_argument('-o', '--output', nargs='?', help='(Output location)', required=True)
     args = parser.parse_args()
     overall_coverage_stats(args.coverage, args.thresholds)
 

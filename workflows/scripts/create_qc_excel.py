@@ -22,7 +22,7 @@ def add_insilico_stats(insilicofolder, main_excel):
         print(f"ocov: {ocov}")
         ocov_sheetname = os.path.basename(os.path.splitext(ocov)[0])
         ocov_list = insilico_overall_coverage.overall_coverage_stats(ocov, "10,20,30,40,50,60,70,80,90,100,110,120")
-        ocov_df = pd.DataFrame(ocov_list) # Continue here
+        ocov_df = pd.DataFrame(ocov_list)
         with pd.ExcelWriter(main_excel, engine='openpyxl', mode='a') as writer:
             ocov_df.to_excel(writer, sheet_name=ocov_sheetname, index=False, header=False)
 
