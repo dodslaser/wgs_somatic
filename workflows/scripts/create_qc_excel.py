@@ -13,14 +13,29 @@ import glob
 
 
 def add_insilico_stats(insilicofolder, main_excel):
+    from workflows.scripts.insilico_coverage import insilico_overall_coverage
+    
+    # generate overall insilico coverage dataframe & append to main excel
+    ocov_file_list = glob.glob(f"{insilicofolder}/**/*_cov.tsv")
+    print(f"ocov_file_list: {ocov_file_list}")
+    for ocov in ocov_file_list:
+        print(f"ocov: {ocov}")
+        ocov_sheetname = os.path.basename(os.path.splitext(ocov)[0])
+        ocov_list = insilico_overall_coverage.overall_coverage_stats(ocov, "10,20,30,40,50,60,70,80,90,100,110,120")
+        ocov_df = pd.DataFrame(ocov_list) # Continue here
+        with pd.ExcelWriter(main_excel, engine='openpyxl', mode='a') as writer:
+            ocov_df.to_excel(writer, sheet_name=ocov_sheetname, index=False, header=False)
+
+    # generate per region stats and append to main excel
     excel_file_list = glob.glob(f"{insilicofolder}/**/*.xlsx")
     print(f"excel_file_list: {excel_file_list}")
     for xlfile in excel_file_list:
         dataframe = pd.read_excel(xlfile, engine='openpyxl')
+        dataframe = dataframe.iloc[: , 1:]
         sheetname = os.path.basename(os.path.splitext(xlfile)[0])
         print(f"sheetname: {sheetname}")
         with pd.ExcelWriter(main_excel, engine='openpyxl', mode='a') as writer:
-            dataframe.to_excel(writer, sheet_name=sheetname)
+            dataframe.to_excel(writer, sheet_name=sheetname, index=False)
 
 
 def extract_stats(statsfile, statstype, sampletype, statsdict):
