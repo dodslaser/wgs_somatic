@@ -14,28 +14,37 @@ import glob
 
 def add_insilico_stats(insilicofolder, main_excel):
     from workflows.scripts.insilico_coverage import insilico_overall_coverage
-    
+
+
     # generate overall insilico coverage dataframe & append to main excel
     ocov_file_list = glob.glob(f"{insilicofolder}/**/*_cov.tsv")
-    print(f"ocov_file_list: {ocov_file_list}")
     for ocov in ocov_file_list:
-        print(f"ocov: {ocov}")
         ocov_sheetname = os.path.basename(os.path.splitext(ocov)[0])
+        # This abbreviation has to be done because microsoft has a hardcap of 31 characters for sheetnames
+        ocov_sheetname_abbr = ocov_sheetname.replace("_", "")[-30:]
         ocov_list = insilico_overall_coverage.overall_coverage_stats(ocov, "10,20,30,40,50,60,70,80,90,100,110,120")
         ocov_df = pd.DataFrame(ocov_list)
         with pd.ExcelWriter(main_excel, engine='openpyxl', mode='a') as writer:
-            ocov_df.to_excel(writer, sheet_name=ocov_sheetname, index=False, header=False)
+            ocov_df.to_excel(writer, sheet_name=ocov_sheetname_abbr, index=False, header=False)
+
+    # generate all region stats (even if they are 100%)
+    arcov_file_list = glob.glob(f"{insilicofolder}/**/*v[0-9].[0-9].csv")
+    for arcov in arcov_file_list:
+        arcov_sheetname = os.path.basename(os.path.splitext(arcov)[0]) + "_allgenes"
+        arcov_sheetname_abbr = arcov_sheetname.replace("_", "")[-30:]
+        arcov_df = pd.read_csv(arcov)
+        with pd.ExcelWriter(main_excel, engine='openpyxl', mode='a') as writer:
+            arcov_df.to_excel(writer, sheet_name=arcov_sheetname_abbr) # may need to set index and or header to false here
 
     # generate per region stats and append to main excel
     excel_file_list = glob.glob(f"{insilicofolder}/**/*.xlsx")
-    print(f"excel_file_list: {excel_file_list}")
     for xlfile in excel_file_list:
         dataframe = pd.read_excel(xlfile, engine='openpyxl')
         dataframe = dataframe.iloc[: , 1:]
         sheetname = os.path.basename(os.path.splitext(xlfile)[0])
-        print(f"sheetname: {sheetname}")
+        sheetname_abbr = sheetname.replace("_", "")[-30:]
         with pd.ExcelWriter(main_excel, engine='openpyxl', mode='a') as writer:
-            dataframe.to_excel(writer, sheet_name=sheetname, index=False)
+            dataframe.to_excel(writer, sheet_name=sheetname_abbr, index=False)
 
 
 def extract_stats(statsfile, statstype, sampletype, statsdict):
@@ -93,14 +102,35 @@ def create_excel(statsdict, output, normalname, tumorname, match_dict, canvasdic
     cellformat["warning"] = excelfile.add_format({'bg_color': 'FF9A00'})
     cellformat["error"] = excelfile.add_format({'bg_color': 'FF0000'})
     cellformat["pass"] = excelfile.add_format({'bg_color': '95FF80'})
+    cellformat["malesex"] = excelfile.add_format({'bold': True, 'bg_color': '89CFF0', 'font_size': 13})
+    cellformat["femalesex"] = excelfile.add_format({'bold': True, 'bg_color': 'F4C2C2', 'font_size': 13})
 
     row = 1
     worksheet.write(row, 0, f"QC-report created: {current_date}")
     row += 1
-    worksheet.write(row, 0, f"{get_git_reponame()} tag: {get_git_tag()}, commit: {get_git_commit()}")
-    worksheet.write(row, 4, f"Computed sex of patient: {sex}")
+
+    # Version numbers & tag
+    worksheet.merge_range('A3:C3', f"{get_git_reponame()} tag: {get_git_tag()}, commit: {get_git_commit()}")
+    
+    print(f"STATSDICT: {statsdict}")
+
+
+    # Input calculated sex
+    if sex.lower() == "male":
+        worksheet.merge_range('D3:E3', f"Computed sex of patient: {sex}", cellformat["malesex"])
+    elif sex.lower() == "female":
+        worksheet.merge_range('D3:E3', f"Computed sex of patient: {sex}", cellformat["femalesex"])
+    else:
+        worksheet.merge_range('D3:E3', f"Something went wrong with sex calculation: {sex}", cellformat["error"])
+
+    # Specify sample used for sex calculation
+    if "normal" in statsdict["coverage"].keys():
+        worksheet.merge_range('D4:G4', f"Normal sample {normalname} used for sex calculation", cellformat["pass"])
+    else:
+        worksheet.merge_range('D4:G4', f"Warning: tumour sample {tumorname} used for sex calculation", cellformat["warning"])
     row += 2
  
+    # Coverage stats
     for statstype in statsdict:
         header = False
         if statstype == "coverage":
