@@ -83,7 +83,7 @@ def generate_context_objects(Rctx, logger):
 
     return Rctx
 
-def get_pipeline_args(config, Rctx_run, t=None, n=None):
+def get_pipeline_args(config, logger, Rctx_run, t=None, n=None):
 
     if n:
         runnormal = Rctx_run.run_name
@@ -256,7 +256,7 @@ def wrapper(instrument):
                         # The or statements are here to prepare to when we change to pair ID
                         # Pair ID for tumor will be normal name (minus DNA) and the opposite for normal
                         if n_ID == t_ID or t_ID == n.split("DNA")[1] or n_ID == t.split("DNA")[1]: 
-                            pipeline_args = get_pipeline_args(config, Rctx_run, t, n)
+                            pipeline_args = get_pipeline_args(config, logger, Rctx_run, t, n)
                             
                             # Use this list of final pairs for email
                             final_pairs.append(f'{t} (T) {n} (N), {department} {prio_sample}')
@@ -287,7 +287,7 @@ def wrapper(instrument):
                     final_pairs.append(f'{tumorsample} (T), {department} {prio_sample}')
 
                     # Using threading to start the pipeline for several samples at the same time
-                    pipeline_args = get_pipeline_args(config, Rctx_run, tumorsample, n == None)
+                    pipeline_args = get_pipeline_args(config, logger, Rctx_run, tumorsample, n == None)
                     threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
                     logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
 
@@ -307,7 +307,7 @@ def wrapper(instrument):
                     final_pairs.append(f'{normalsample} (T), {department} {prio_sample}')
 
                     # Using threading to start the pipeline for several samples at the same time
-                    pipeline_args = get_pipeline_args(config, Rctx_run, t == None, normalsample)
+                    pipeline_args = get_pipeline_args(config, logger, Rctx_run, t == None, normalsample)
                     threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
                     logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
 
