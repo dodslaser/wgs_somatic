@@ -90,20 +90,20 @@ def get_pipeline_args(config, logger, Rctx_run, t=None, n=None):
         normalsample = n
         normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
         if not t:
-            #outputdir = os.path.join(config['outputdir']['GMS-BT'], "normal_only", normalsample)
-            outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "normal_only", normalsample) #use for testing
+            outputdir = os.path.join(config['outputdir']['GMS-BT'], "normal_only", normalsample)
+            #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "normal_only", normalsample) #use for testing
     if t:
         runtumor = Rctx_run.run_name
         tumorsample = t
         tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
         if not n:
-            #outputdir = os.path.join(config['outputdir']['GMS-BT'], "tumor_only", tumorsample)
-            outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "tumor_only", tumorsample) #use for testing
+            outputdir = os.path.join(config['outputdir']['GMS-BT'], "tumor_only", tumorsample)
+            #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "tumor_only", tumorsample) #use for testing
         else:
-            #outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample)
-            outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
-    #igvuser = config['igv']['GMS-BT']
-    igvuser = 'alvar.almstedt' # use for testing
+            outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample)
+            #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
+    igvuser = config['igv']['GMS-BT']
+    #igvuser = 'alvar.almstedt' # use for testing
     # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
     hg38ref = config['hg38ref']['GMS-BT']
 
@@ -145,10 +145,10 @@ def analysis_end(outputdir, tumorsample=None, normalsample=None):
                 yearly_stats(tumorsample, normalsample)
             else:
                 yearly_stats(tumorsample, 'None')
-            #petagene_compress_bam(outputdir, tumorsample)
+            petagene_compress_bam(outputdir, tumorsample)
         else:
             yearly_stats('None', normalsample)
-            #petagene_compress_bam(outputdir, normalsample)
+            petagene_compress_bam(outputdir, normalsample)
     else:
         pass
 
