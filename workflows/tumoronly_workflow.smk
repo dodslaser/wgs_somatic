@@ -14,12 +14,13 @@ def group_insilico(paths):
     # Collect files under keys for better access than relying on indexes
     insilico_groups_named = {}
     for insilico_name, insilico_paths in insilico_groups.items():
-        ten_x, twenty_x, below_ten_x, csv = insilico_paths
+        ten_x, twenty_x, below_ten_x, csv, covtsv = insilico_paths
 
         named = {'10x': ten_x,
                  '20x': twenty_x,
                  'below_10x': below_ten_x,
-                 'csv': csv}
+                 'csv': csv,
+                 'covtsv': covtsv}
         insilico_groups_named[insilico_name] = named
 
     return insilico_groups_named
@@ -35,7 +36,8 @@ def get_insilico(wcs):
         insilico_files.extend([f"{workingdir}/tumor/insilico/{insilico_name}/{tumorid}_{insilico_name}_10x.xlsx",
                                f"{workingdir}/tumor/insilico/{insilico_name}/{tumorid}_{insilico_name}_20x.xlsx",
                                f"{workingdir}/tumor/insilico/{insilico_name}/{tumorid}_{insilico_name}_genes_below10x.xlsx",
-                               f"{workingdir}/tumor/insilico/{insilico_name}/{tumorid}_{insilico_name}.csv"])
+                               f"{workingdir}/tumor/insilico/{insilico_name}/{tumorid}_{insilico_name}.csv",
+                               f"{workingdir}/tumor/insilico/{insilico_name}/{tumorid}_{insilico_name}_cov.tsv"])
     return insilico_files
 
 
