@@ -270,47 +270,30 @@ def wrapper(instrument):
                             paired_samples.append(n)
 
         # Find possible unpaired samples in run
-        for key in pair_dict_all_pairs:
+        for key, value in pair_dict_all_pairs.items():
             if not key in paired_samples:
-                if 'tumor' in pair_dict_all_pairs.get(key):
+                department = value[2]
+                prio_sample = 'prio' if value[3] else ''
+                if 'tumor' in value:
                     tumorsample = key
-                    department = pair_dict_all_pairs.get(key)[2]
-                    is_prio = pair_dict_all_pairs.get(key)[3]
-                    if is_prio:
-                        prio_sample = 'prio'
-                    else:
-                        prio_sample = ''
+                    normalsample = None
                     # Use this list of final pairs for email
                     final_pairs.append(f'{tumorsample} (T), {department} {prio_sample}')
 
-                    # Using threading to start the pipeline for several samples at the same time
-                    pipeline_args = get_pipeline_args(config, logger, Rctx_run, tumorsample, n == None)
-                    threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
-                    logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
-
-                    outputdir = pipeline_args.get('output')
-                    check_ok_outdirs.append(outputdir)
-                    end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, n == None)))
-
-                elif 'normal' in pair_dict_all_pairs.get(key):
+                elif 'normal' in value:
+                    tumorsample = None
                     normalsample = key
-                    department = pair_dict_all_pairs.get(key)[2]
-                    is_prio = pair_dict_all_pairs.get(key)[3]
-                    if is_prio:
-                        prio_sample = 'prio'
-                    else:
-                        prio_sample = ''
                     # Use this list of final pairs for email
-                    final_pairs.append(f'{normalsample} (T), {department} {prio_sample}')
+                    final_pairs.append(f'{normalsample} (N), {department} {prio_sample}')
 
-                    # Using threading to start the pipeline for several samples at the same time
-                    pipeline_args = get_pipeline_args(config, logger, Rctx_run, t == None, normalsample)
-                    threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
-                    logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
+                # Using threading to start the pipeline for several samples at the same time
+                pipeline_args = get_pipeline_args(config, logger, Rctx_run, t=tumorsample, n=normalsample)
+                threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
+                logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
 
-                    outputdir = pipeline_args.get('output')
-                    check_ok_outdirs.append(outputdir)
-                    end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, t == None, normalsample)))
+                outputdir = pipeline_args.get('output')
+                check_ok_outdirs.append(outputdir)
+                end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample)))
 
         # Start several samples at the same time
         for t in threads:
