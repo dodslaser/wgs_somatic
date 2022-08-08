@@ -85,6 +85,11 @@ def generate_context_objects(Rctx, logger):
 
 def get_pipeline_args(config, logger, Rctx_run, t=None, n=None):
 
+    igvuser = config['igv']['GMS-BT']
+    #igvuser = 'alvar.almstedt' # use for testing
+    # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
+    hg38ref = config['hg38ref']['GMS-BT']
+
     if n:
         runnormal = Rctx_run.run_name
         normalsample = n
@@ -92,6 +97,7 @@ def get_pipeline_args(config, logger, Rctx_run, t=None, n=None):
         if not t:
             outputdir = os.path.join(config['outputdir']['GMS-BT'], "normal_only", normalsample)
             #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "normal_only", normalsample) #use for testing
+            pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
     if t:
         runtumor = Rctx_run.run_name
         tumorsample = t
@@ -99,24 +105,15 @@ def get_pipeline_args(config, logger, Rctx_run, t=None, n=None):
         if not n:
             outputdir = os.path.join(config['outputdir']['GMS-BT'], "tumor_only", tumorsample)
             #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "tumor_only", tumorsample) #use for testing
+            pipeline_args = {'output': f'{outputdir}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
         else:
             outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample)
             #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
-    igvuser = config['igv']['GMS-BT']
-    #igvuser = 'alvar.almstedt' # use for testing
-    # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
-    hg38ref = config['hg38ref']['GMS-BT']
+            pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
 
     if os.path.exists(outputdir):
         logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
         os.rename(outputdir, f'{outputdir}_old')
-
-    if t and n:
-        pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
-    if t and not n:
-        pipeline_args = {'output': f'{outputdir}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
-    if n and not t:
-        pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
 
     return pipeline_args
 
