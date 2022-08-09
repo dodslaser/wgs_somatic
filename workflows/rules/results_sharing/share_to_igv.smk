@@ -21,7 +21,8 @@ if tumorid:
                 expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
                 expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-                expand("{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
+                expand("{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/pindel/{sname}_pindel.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
             params:
                 updateigv = pipeconfig["rules"]["share_to_igv"]["updateigv"],
                 igvdatadir = pipeconfig["rules"]["share_to_igv"]["igvdatadir"],
