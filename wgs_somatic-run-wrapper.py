@@ -15,7 +15,7 @@ import traceback
 import subprocess
 import threading
 
-from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH, INSILICO_CONFIG, INSILICO_PANELS_ROOT
+from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH#, INSILICO_CONFIG, INSILICO_PANELS_ROOT
 from context import RunContext, SampleContext
 from helpers import setup_logger
 from tools.slims import get_sample_slims_info, SlimsSample, find_more_fastqs, get_pair_dict
