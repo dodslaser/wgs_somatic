@@ -19,10 +19,12 @@ tumorname = config["tumorname"]
 tumorid = config["tumorid"]
 
 igvuser = config["igvuser"]
-ivauser = config["ivauser"]
+#ivauser = config["ivauser"]
 reference = config["reference"]
 
 workingdir = config["workingdir"]
+
+insilico_panels = config["insilico"]
 
 ##################################################
 # Chose Config based on Reference
@@ -51,6 +53,7 @@ sampleconfig["normal"] = normalid
 sampleconfig["tumor"] = tumorid
 sampleconfig["normalname"] = normalname
 sampleconfig["tumorname"] = tumorname
+sampleconfig["insilico"] = insilico_panels #What should this be?
 
 ####################################################
 # Prepare Fastq Variables 
@@ -131,6 +134,7 @@ else:
 # VariantCalling
 if tumorid:
     include:        "workflows/rules/variantcalling/tnscope.smk"
+    include:        "workflows/rules/variantcalling/pindel.smk"
 include:        "workflows/rules/variantcalling/dnascope.smk"
 include:        "workflows/rules/small_tools/ballele.smk"
 include:        "workflows/rules/variantcalling/canvas.smk"
@@ -138,6 +142,7 @@ include:        "workflows/rules/variantcalling/canvas.smk"
 #########################################
 # QC
 include:        "workflows/rules/qc/aggregate_qc.smk"
+include:        "workflows/rules/qc/insilico_coverage.smk"
 
 #########################################
 # ResultSharing:
@@ -173,10 +178,12 @@ else:
     # Generate tdf
     include:    "workflows/rules/mapping/generate_tdf.smk"
 
+
 def get_igv_input(wildcards):
     if igvuser:
         return expand("{workingdir}/reporting/shared_igv_files.txt", workingdir=workingdir)
     return []
+
 
 def upload_germline_iva(wildcards):
     if ivauser:
@@ -185,6 +192,8 @@ def upload_germline_iva(wildcards):
         else:
             return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=normalid, stype="normal", caller="dnascope", vcftype="germline")
     return []
+
+
 def upload_somatic_iva(wildcards):
     if ivauser:
         if ivauser == "testing":
@@ -193,14 +202,20 @@ def upload_somatic_iva(wildcards):
             return expand("{workingdir}/reporting/uploaded_to_iva_{stype}_{caller}_{sname}_{vcftype}.txt", workingdir=workingdir, sname=tumorid, stype="tumor", caller="tnscope", vcftype="somatic")
     return []
 
+
 def alissa_vcf_conversion(wildcards):
     if tumorid:
         return expand("{workingdir}/{sname}_somatic_refseq3kfilt_Alissa.vcf", workingdir=workingdir, sname=tumorid)
     return []
+
+
+def insilico_coverage(wildcards):
+    if tumorid:
+        return expand("{workingdir}/{sname}_insilicostuffplaceholder", workingdir=workingdir, sname=normalid)
+
+
 rule all:
     input: 
         get_igv_input,
-        upload_somatic_iva,
-        upload_germline_iva,
         expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir),
         alissa_vcf_conversion

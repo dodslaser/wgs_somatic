@@ -15,7 +15,7 @@ import traceback
 import subprocess
 import threading
 
-from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH
+from definitions import CONFIG_PATH, ROOT_DIR, ROOT_LOGGING_PATH#, INSILICO_CONFIG, INSILICO_PANELS_ROOT
 from context import RunContext, SampleContext
 from helpers import setup_logger
 from tools.slims import get_sample_slims_info, SlimsSample, find_more_fastqs, get_pair_dict
@@ -83,10 +83,45 @@ def generate_context_objects(Rctx, logger):
 
     return Rctx
 
+def get_pipeline_args(config, logger, Rctx_run, t=None, n=None):
+
+    igvuser = config['igv']['GMS-BT']
+    #igvuser = 'alvar.almstedt' # use for testing
+    # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
+    hg38ref = config['hg38ref']['GMS-BT']
+
+    if n:
+        runnormal = Rctx_run.run_name
+        normalsample = n
+        normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
+        if not t:
+            outputdir = os.path.join(config['outputdir']['GMS-BT'], "normal_only", normalsample)
+            #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "normal_only", normalsample) #use for testing
+            pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+    if t:
+        runtumor = Rctx_run.run_name
+        tumorsample = t
+        tumorfastqs = os.path.join(Rctx_run.run_path, "fastq")
+        if not n:
+            outputdir = os.path.join(config['outputdir']['GMS-BT'], "tumor_only", tumorsample)
+            #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "tumor_only", tumorsample) #use for testing
+            pipeline_args = {'output': f'{outputdir}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+        else:
+            outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample)
+            #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
+            pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+
+    if os.path.exists(outputdir):
+        logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
+        os.rename(outputdir, f'{outputdir}_old')
+
+    return pipeline_args
+
 def call_script(**kwargs):
     '''Function to call main function from launch_snakemake.py'''
     args = argparse.Namespace(**kwargs)
     subprocess.call(analysis_main(args, **kwargs))
+
 
 def check_ok(outputdir):
     '''Function to check if analysis has finished correctly'''
@@ -96,19 +131,53 @@ def check_ok(outputdir):
     else:
         return False
 
-def analysis_end(outputdir, tumorsample, normalsample):
+
+def analysis_end(outputdir, tumorsample=None, normalsample=None):
     '''Function to check if analysis has finished correctly and add to yearly stats and start petagene compression'''
 
     if os.path.isfile(f"{outputdir}/reporting/workflow_finished.txt"):
         if tumorsample:
-            # these functions are only executed if snakemake workflow has finished successfully
-            yearly_stats(tumorsample, normalsample)
+            if normalsample:
+                # these functions are only executed if snakemake workflow has finished successfully
+                yearly_stats(tumorsample, normalsample)
+            else:
+                yearly_stats(tumorsample, 'None')
             petagene_compress_bam(outputdir, tumorsample)
         else:
             yearly_stats('None', normalsample)
             petagene_compress_bam(outputdir, normalsample)
     else:
         pass
+
+
+#def get_insilico_info(all_insilico=True, panel_names=[]):
+#    """NOTE: This whole function is horrible. This was copied from WOPR"""
+#    with open(INSILICO_CONFIG, 'r') as conf:
+#        insilico_config = json.load(conf)
+
+    # All AND specific both set
+#    if all_insilico:
+#        if panel_names:
+#            raise Exception(f'All insilico flag set but also found specific panel names: {panel_names}.')
+
+#    panels = {}
+
+#    for panel_name, panel_info in insilico_config.items():
+        # TODO: Overwrites, fix this and make proper
+#        panel_info['bedfile'] = os.path.join(INSILICO_PANELS_ROOT, panel_info['bedfile'])
+
+#        if all_insilico:
+#            panels[panel_name] = panel_info
+#        else:
+#            if panel_name in panel_names:
+#                panels[panel_name] = panel_info
+
+#    if not all_insilico:
+#        if len(panels) != len(panel_names):
+#            raise Exception(f'One or more panel names not found in insilico config: {panel_names}')
+
+#    return panels
+
 
 def wrapper(instrument):
     '''Wrapper function'''
@@ -161,6 +230,7 @@ def wrapper(instrument):
         check_ok_outdirs = []
         end_threads = []
         final_pairs = []
+        paired_samples = []
         for key in pair_dict_all_pairs:
             if 'tumor' in pair_dict_all_pairs.get(key):
                 t = key
@@ -183,39 +253,47 @@ def wrapper(instrument):
                         # The or statements are here to prepare to when we change to pair ID
                         # Pair ID for tumor will be normal name (minus DNA) and the opposite for normal
                         if n_ID == t_ID or t_ID == n.split("DNA")[1] or n_ID == t.split("DNA")[1]: 
-                            runnormal = Rctx_run.run_name
-                            runtumor = Rctx_run.run_name
-                            tumorsample = t
-                            normalsample = n
-                            normalfastqs = os.path.join(Rctx_run.run_path, "fastq")
-                            tumorfastqs = normalfastqs
-                            outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample) 
-                            #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
-                            igvuser = config['igv']['GMS-BT']
-                            #igvuser = 'alvar.almstedt' # use for testing
-                            # FIXME Use boolean values instead of 'yes' for hg38ref and handle the translation later on
-                            hg38ref = config['hg38ref']['GMS-BT']
-
+                            pipeline_args = get_pipeline_args(config, logger, Rctx_run, t, n)
                             
                             # Use this list of final pairs for email
-                            final_pairs.append(f'{tumorsample} (T) {normalsample} (N), {department} {prio_sample}')
-
-                            # If sample has been run before, outdir already exists. Changing the name of old outdir to make room for new outdir. Should maybe move old outdir to archive instead.
-                            # Won't work if outputdir_old also already exists. Need to be solved in a better way 
-                            if os.path.exists(outputdir):
-                                logger.info(f'Outputdir exists for {tumorsample}. Renaming old outputdir {outputdir} to {outputdir}_old')
-                                os.rename(outputdir, f'{outputdir}_old')
-
-                            pipeline_args = {'runnormal': f'{runnormal}', 'output': f'{outputdir}', 'normalname': f'{normalsample}', 'normalfastqs': f'{normalfastqs}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
-
+                            final_pairs.append(f'{t} (T) {n} (N), {department} {prio_sample}')
 
                             # Using threading to start the pipeline for several samples at the same time
                             threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
                             logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
 
+                            outputdir = pipeline_args.get('output')
                             check_ok_outdirs.append(outputdir)
-                            end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample)))
+                            end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, t, n)))
 
+                            paired_samples.append(t)
+                            paired_samples.append(n)
+
+        # Find possible unpaired samples in run
+        for key, value in pair_dict_all_pairs.items():
+            if not key in paired_samples:
+                department = value[2]
+                prio_sample = 'prio' if value[3] else ''
+                if 'tumor' in value:
+                    tumorsample = key
+                    normalsample = None
+                    # Use this list of final pairs for email
+                    final_pairs.append(f'{tumorsample} (T), {department} {prio_sample}')
+
+                elif 'normal' in value:
+                    tumorsample = None
+                    normalsample = key
+                    # Use this list of final pairs for email
+                    final_pairs.append(f'{normalsample} (N), {department} {prio_sample}')
+
+                # Using threading to start the pipeline for several samples at the same time
+                pipeline_args = get_pipeline_args(config, logger, Rctx_run, t=tumorsample, n=normalsample)
+                threads.append(threading.Thread(target=call_script, kwargs=pipeline_args))
+                logger.info(f'Starting wgs_somatic with arguments {pipeline_args}')
+
+                outputdir = pipeline_args.get('output')
+                check_ok_outdirs.append(outputdir)
+                end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample)))
 
         # Start several samples at the same time
         for t in threads:
@@ -265,8 +343,7 @@ def wrapper(instrument):
         # if cron runs every 30 mins it will find other runs at the next cron instance and run from there instead (and add to novaseq_runlist)
         break
 
-
-
+    # DON'T FORGET TO UNCOMMENT PETAGENE COMPRESSION AND CHANGE BACK TO CORRECT OUTPUTDIR AND IGVUSER!!!!!!
 
     # some arguments are hardcoded right now, need to fix this. 
     # only considers barncancer hg38 (GMS-AL + GMS-BT samples) right now. 
