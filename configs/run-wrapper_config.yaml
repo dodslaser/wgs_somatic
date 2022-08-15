@@ -20,7 +20,14 @@ hg38ref:
   GMS-BT: 'yes'
   GMS-AL: 'yes'
 
-outputdir:
+workingdir: '/medstore/results/wgs/wgs_somatic'
+
+resultdir:
   GMS-BT: '/seqstore/webfolders/wgs/barncancer/hg38'
   GMS-AL: '/seqstore/webfolders/wgs/barncancer/hg38'
   G21-004: '/seqstore/webfolders/wgs/neuroblastom'
+
+testresultdir:
+  GMS-BT: '/home/xshang/ws_testoutput/outdir'
+  GMS-AL: '/home/xshang/ws_testoutput/outdir'
+  G21-004: '/home/xshang/ws_testoutput/outdir'
