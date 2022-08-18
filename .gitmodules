@@ -14,3 +14,7 @@
 	path = workflows/scripts/alissa_connector_upload
 	url = git@github.com:ClinicalGenomicsGBG/alissa_connector_upload
         ignore = dirty
+[submodule "workflows/scripts/Alissa_API_tools"]
+	path = workflows/scripts/Alissa_API_tools
+	url = git@github.com:ClinicalGenomicsGBG/Alissa_API_tools.git
+	branch = hg38
