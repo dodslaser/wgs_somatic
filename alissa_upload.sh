@@ -2,7 +2,7 @@
 #$ -cwd
 #$ -S /bin/bash
 #$ -l excl=1
-#$ -pe mpi 40
+#$ -pe mpi 1
 
 SAMPLE=$(echo "$1")
 VCF=$(echo "$2")

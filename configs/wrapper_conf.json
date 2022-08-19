@@ -15,7 +15,7 @@
     "alissa":
     {
 	    "threads": 1,
-	    "queue": "batch.q",
+	    "queue": "wgs.q",
 	    "qsub_script": "alissa_upload.sh"
     },
     "singularitybinddirs":
