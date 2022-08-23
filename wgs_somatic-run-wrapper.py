@@ -20,7 +20,7 @@ from context import RunContext, SampleContext
 from helpers import setup_logger
 from tools.slims import get_sample_slims_info, SlimsSample, find_more_fastqs, get_pair_dict
 from tools.email import start_email, end_email, error_email
-from launch_snakemake import analysis_main, petagene_compress_bam, yearly_stats
+from launch_snakemake import analysis_main, petagene_compress_bam, yearly_stats, alissa_upload
 
 
 # Store info about samples to use for sending report emails
@@ -105,7 +105,7 @@ def get_pipeline_args(config, logger, Rctx_run, t=None, n=None):
         if not n:
             outputdir = os.path.join(config['outputdir']['GMS-BT'], "tumor_only", tumorsample)
             #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", "tumor_only", tumorsample) #use for testing
-            pipeline_args = {'output': f'{outputdir}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}'}
+            pipeline_args = {'output': f'{outputdir}', 'runtumor': f'{runtumor}', 'tumorname': f'{tumorsample}', 'tumorfastqs': f'{tumorfastqs}', 'igvuser': f'{igvuser}', 'hg38ref': f'{hg38ref}', 'runnormal': None}
         else:
             outputdir = os.path.join(config['outputdir']['GMS-BT'], tumorsample)
             #outputdir = os.path.join("/home/xshang/ws_testoutput/outdir/", tumorsample) #use for testing
@@ -132,51 +132,24 @@ def check_ok(outputdir):
         return False
 
 
-def analysis_end(outputdir, tumorsample=None, normalsample=None):
+def analysis_end(outputdir, tumorsample=None, normalsample=None, runnormal=None, hg38ref=None):
     '''Function to check if analysis has finished correctly and add to yearly stats and start petagene compression'''
 
     if os.path.isfile(f"{outputdir}/reporting/workflow_finished.txt"):
         if tumorsample:
             if normalsample:
                 # these functions are only executed if snakemake workflow has finished successfully
+                alissa_upload(outputdir, normalsample, runnormal, hg38ref)
                 yearly_stats(tumorsample, normalsample)
             else:
                 yearly_stats(tumorsample, 'None')
             petagene_compress_bam(outputdir, tumorsample)
         else:
             yearly_stats('None', normalsample)
+            alissa_upload(outputdir, normalsample, runnormal, hg38ref)
             petagene_compress_bam(outputdir, normalsample)
     else:
         pass
-
-
-#def get_insilico_info(all_insilico=True, panel_names=[]):
-#    """NOTE: This whole function is horrible. This was copied from WOPR"""
-#    with open(INSILICO_CONFIG, 'r') as conf:
-#        insilico_config = json.load(conf)
-
-    # All AND specific both set
-#    if all_insilico:
-#        if panel_names:
-#            raise Exception(f'All insilico flag set but also found specific panel names: {panel_names}.')
-
-#    panels = {}
-
-#    for panel_name, panel_info in insilico_config.items():
-        # TODO: Overwrites, fix this and make proper
-#        panel_info['bedfile'] = os.path.join(INSILICO_PANELS_ROOT, panel_info['bedfile'])
-
-#        if all_insilico:
-#            panels[panel_name] = panel_info
-#        else:
-#            if panel_name in panel_names:
-#                panels[panel_name] = panel_info
-
-#    if not all_insilico:
-#        if len(panels) != len(panel_names):
-#            raise Exception(f'One or more panel names not found in insilico config: {panel_names}')
-
-#    return panels
 
 
 def wrapper(instrument):
@@ -264,7 +237,7 @@ def wrapper(instrument):
 
                             outputdir = pipeline_args.get('output')
                             check_ok_outdirs.append(outputdir)
-                            end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, t, n)))
+                            end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, t, n, pipeline_args['runnormal'], pipeline_args['hg38ref'])))
 
                             paired_samples.append(t)
                             paired_samples.append(n)
@@ -293,7 +266,7 @@ def wrapper(instrument):
 
                 outputdir = pipeline_args.get('output')
                 check_ok_outdirs.append(outputdir)
-                end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample)))
+                end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample,  pipeline_args['runnormal'], pipeline_args['hg38ref'])))
 
         # Start several samples at the same time
         for t in threads:
