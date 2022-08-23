@@ -310,6 +310,7 @@ if __name__ == '__main__':
     parser.add_argument('-hg38', '--hg38ref', nargs='?', help='run analysis on hg38 reference (write yes if you want this option)', required=False)
     parser.add_argument('-stype', '--starttype', nargs='?', help='write forcestart if you want to ignore fastqs', required=False)
     parser.add_argument('-nc', '--nocompress', action="store_true", help='Disables petagene compression', required=False)
+    parser.add_argument('-na', '--noalissa', action="store_true", help='Disables Alissa upload', required=False)
     args = parser.parse_args()
     analysis_main(args, args.outputdir, args.runnormal, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.igvuser, args.hg38ref, args.starttype)
 
@@ -318,7 +319,7 @@ if __name__ == '__main__':
             if args.normalsample:
             # these functions are only executed if snakemake workflow has finished successfully
                 yearly_stats(args.tumorsample, args.normalsample)
-                if args.hg38ref:
+                if args.hg38ref and not args.noalissa:
                     alissa_upload(args.outputdir, args.normalsample, args.runnormal, args.hg38ref)
                 if not args.nocompress:
                     petagene_compress_bam(args.outputdir, args.tumorsample)    
@@ -328,7 +329,7 @@ if __name__ == '__main__':
                     petagene_compress_bam(args.outputdir, args.tumorsample)
         else:
             yearly_stats('None', args.normalsample)
-            if args.hg38ref:
+            if args.hg38ref and not args.noalissa:
                 alissa_upload(args.outputdir, args.normalsample, args.runnormal, args.hg38ref)
             if not args.nocompress:
                 petagene_compress_bam(args.outputdir, args.normalsample)
