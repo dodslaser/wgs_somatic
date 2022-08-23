@@ -4,10 +4,10 @@
 #$ -l excl=1
 #$ -pe mpi 1
 
-SAMPLE=$(echo "$1")
-VCF=$(echo "$2")
-SIZE=$(echo "$3")
-REF=$(echo "$4")
+SAMPLE="$1"
+VCF="$2"
+SIZE="$3"
+REF="$4"
 
 conda deactivate
 module load anaconda2
