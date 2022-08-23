@@ -13,5 +13,5 @@ conda deactivate
 module load anaconda2
 source activate wopr_alissa
 
-python workflows/scripts/Alissa_API_tools/alissa_API_tools.py -a $SAMPLE -v $VCF -s $SIZE -n $SAMPLE -ref $REF
+python workflows/scripts/Alissa_API_tools/alissa_API_tools.py -a $SAMPLE -v $VCF -s $SIZE -n $SAMPLE -i production -ref $REF
 
