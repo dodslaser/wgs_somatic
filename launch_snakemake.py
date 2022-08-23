@@ -66,7 +66,7 @@ def alissa_upload(outputdir, normalname, runnormal, ref=False):
     ref = 'hg38' # reference genome, change so it can also be hg19. but probably shouldn't upload vcf for hg19 samples
     size = '240_000_000' # needed as argument for alissa upload. if vcf is larger than this, it is split
     date, _, _, chip, *_ = runnormal.split('_')
-    normalid= '_'.join([normalname, date, chip])
+    normalid = f"{normalname}_{date}_{chip}"
     vcfpath = f"{outputdir}/{normalid}_{ref}_SNV_CNV_germline.vcf.gz"
     config = read_wrapperconf()
     logger(f"Uploading vcf to Alissa for {normalname}")
