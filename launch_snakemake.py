@@ -59,7 +59,23 @@ def petagene_compress_bam(outputdir, tumorname):
     qsub_script = config["petagene"]["qsub_script"]
     standardout = f"{outputdir}/logs/{tumorname}_petagene_compression_standardout.txt"
     standarderr = f"{outputdir}/logs/{tumorname}_petagene_compression_standarderr.txt"
-    qsub_args = ["qsub", "-N", f"WS-{tumorname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, outputdir]
+    qsub_args = ["qsub", "-N", f"WGSSomatic-{tumorname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, outputdir]
+    subprocess.call(qsub_args, shell=False)
+
+def alissa_upload(outputdir, normalname, runnormal, ref=False):
+    ref = 'hg38' # reference genome, change so it can also be hg19. but probably shouldn't upload vcf for hg19 samples
+    size = '240_000_000' # needed as argument for alissa upload. if vcf is larger than this, it is split
+    date, _, _, chip, *_ = runnormal.split('_')
+    normalid = f"{normalname}_{date}_{chip}"
+    vcfpath = f"{outputdir}/{normalid}_{ref}_SNV_CNV_germline.vcf.gz"
+    config = read_wrapperconf()
+    logger(f"Uploading vcf to Alissa for {normalname}")
+    queue = config["alissa"]["queue"]
+    threads = config["alissa"]["threads"]
+    qsub_script = config["alissa"]["qsub_script"]
+    standardout = f"{outputdir}/logs/{normalid}_alissa_upload_standardout.txt"
+    standarderr = f"{outputdir}/logs/{normalid}_alissa_upload_standarderr.txt"
+    qsub_args = ["qsub", "-N", f"WGSSomatic-{normalname}_alissa_upload", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, normalname, vcfpath, size, ref]
     subprocess.call(qsub_args, shell=False)
 
 def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=False, runtumor=False, tumorname=False, tumorfastqs=False, igvuser=False, hg38ref=False, starttype=False):
@@ -294,6 +310,7 @@ if __name__ == '__main__':
     parser.add_argument('-hg38', '--hg38ref', nargs='?', help='run analysis on hg38 reference (write yes if you want this option)', required=False)
     parser.add_argument('-stype', '--starttype', nargs='?', help='write forcestart if you want to ignore fastqs', required=False)
     parser.add_argument('-nc', '--nocompress', action="store_true", help='Disables petagene compression', required=False)
+    parser.add_argument('-na', '--noalissa', action="store_true", help='Disables Alissa upload', required=False)
     args = parser.parse_args()
     analysis_main(args, args.outputdir, args.runnormal, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.igvuser, args.hg38ref, args.starttype)
 
@@ -302,6 +319,8 @@ if __name__ == '__main__':
             if args.normalsample:
             # these functions are only executed if snakemake workflow has finished successfully
                 yearly_stats(args.tumorsample, args.normalsample)
+                if args.hg38ref and not args.noalissa:
+                    alissa_upload(args.outputdir, args.normalsample, args.runnormal, args.hg38ref)
                 if not args.nocompress:
                     petagene_compress_bam(args.outputdir, args.tumorsample)    
             else:
@@ -310,5 +329,7 @@ if __name__ == '__main__':
                     petagene_compress_bam(args.outputdir, args.tumorsample)
         else:
             yearly_stats('None', args.normalsample)
+            if args.hg38ref and not args.noalissa:
+                alissa_upload(args.outputdir, args.normalsample, args.runnormal, args.hg38ref)
             if not args.nocompress:
                 petagene_compress_bam(args.outputdir, args.normalsample)

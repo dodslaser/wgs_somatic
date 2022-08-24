@@ -12,6 +12,12 @@
         "queue": "batch.q@hoth.medair.lcl",
         "qsub_script": "petagene_compress.sh"
     },
+    "alissa":
+    {
+	    "threads": 1,
+	    "queue": "wgs.q",
+	    "qsub_script": "alissa_upload.sh"
+    },
     "singularitybinddirs":
     {
         "petagene":
