@@ -327,9 +327,6 @@ def wrapper(instrument):
 
     # some arguments are hardcoded right now, need to fix this. 
     # only considers barncancer hg38 (GMS-AL + GMS-BT samples) right now. 
-    # could have outputdirs and arguments in config and get them from there. 
-
-    # this will only work for pairs. have to consider tumor only/normal only as well. 
 
     # the arguments runtumor and runnormal could be "wrong" by doing it like this 
     # since they use run name of current run 
