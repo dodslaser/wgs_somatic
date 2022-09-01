@@ -281,20 +281,20 @@ def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=
             analysisdict["reference"] = "hg38"
             if tumorname:
                 if normalname:
-                    analysisdict["resultdir"] = f'{config["testresultdir"]}/{tumorname}' #CHANGE BACK ALL 3: f'{config["resultdir_hg38"]}/{tumorname}'
+                    analysisdict["resultdir"] = f'{config["resultdir_hg38"]}/{tumorname}' #Use f'{config["testresultdir"]}/{tumorname}'for testing
                 else:
-                    analysisdict["resultdir"] = f'{config["testresultdir"]}/tumor_only/{tumorname}'
+                    analysisdict["resultdir"] = f'{config["resultdir_hg38"]}/tumor_only/{tumorname}'
             else:
-                analysisdict["resultdir"] = f'{config["testresultdir"]}/normal_only/{normalname}'
+                analysisdict["resultdir"] = f'{config["resultdir_hg38"]}/normal_only/{normalname}'
         else:
             analysisdict["reference"] = "hg19"
             if tumorname:
                 if normalname:
-                    analysisdict["resultdir"] = f'{config["testresultdir"]}/{tumorname}'#CHANGE BACK ALL 3: f'{config["resultdir_hg19"]}/{tumorname}'
+                    analysisdict["resultdir"] = f'{config["resultdir_hg19"]}/{tumorname}'
                 else:
-                    analysisdict["resultdir"] = f'{config["testresultdir"]}/tumor_only/{tumorname}'
+                    analysisdict["resultdir"] = f'{config["resultdir_hg19"]}/tumor_only/{tumorname}'
             else:
-                analysisdict["resultdir"] = f'{config["testresultdir"]}/normal_only/{normalname}'
+                analysisdict["resultdir"] = f'{config["resultdir_hg19"]}/normal_only/{normalname}'
         if tumorname:
             with open(f"{runconfigs}/{tumorid}_config.json", 'w') as analysisconf:
                 json.dump(analysisdict, analysisconf, ensure_ascii=False, indent=4)
