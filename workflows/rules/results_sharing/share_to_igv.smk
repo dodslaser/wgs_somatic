@@ -21,10 +21,10 @@ if tumorid:
                 expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
                 expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-                expand("{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                #expand("{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/pindel/{sname}_pindel.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
             params:
-                updateigv = pipeconfig["rules"]["share_to_igv"]["updateigv"],
+                #updateigv = pipeconfig["rules"]["share_to_igv"]["updateigv"],
                 igvdatadir = pipeconfig["rules"]["share_to_igv"]["igvdatadir"],
                 bgzip = pipeconfig["rules"]["share_to_igv"]["bgzip"],
                 bcftools = pipeconfig["rules"]["share_to_igv"]["bcftools"]
@@ -40,11 +40,14 @@ if tumorid:
                         shell(f"{params.bcftools} index -f {sharefile}.gz")
                         sharefile = os.path.abspath(f"{sharefile}.gz")
                     link_sharefile = os.path.abspath(sharefile)
-                    shell("ln -sf {link_sharefile} {igvsharedir}")
+                    #shell("ln -sf {link_sharefile} {igvsharedir}")
                     if sharefile.endswith("REALIGNED.bam"):
-                        shell("ln -sf {link_sharefile}.bai {igvsharedir}")
+                        shell("mv {link_sharefile} {igvsharedir}")
+                        shell("rsync {link_sharefile}.bai {igvsharedir}")
+                        continue
                     if sharefile.endswith(".vcf.gz"):
-                        shell("ln -sf {link_sharefile}.csi {igvsharedir}")
+                        shell("rsync {link_sharefile}.csi {igvsharedir}")
+                    shell("rsync {link_sharefile} {igvsharedir}")
                 #shell("{params.updateigv}")
                 shell("echo {input} >> {output}")
 
@@ -58,10 +61,10 @@ if tumorid:
                 expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/reports/{sname}_baf.igv", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])#,
+                #expand("{workingdir}/{stype}/tnscope/{sname}_REALIGNED_realignedTNscope.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
             params:
-                updateigv = pipeconfig["rules"]["share_to_igv"]["updateigv"],
+                #updateigv = pipeconfig["rules"]["share_to_igv"]["updateigv"],
                 igvdatadir = pipeconfig["rules"]["share_to_igv"]["igvdatadir"],
                 bgzip = pipeconfig["rules"]["share_to_igv"]["bgzip"],
                 bcftools = pipeconfig["rules"]["share_to_igv"]["bcftools"]
@@ -77,11 +80,14 @@ if tumorid:
                         shell(f"{params.bcftools} index -f {sharefile}.gz")
                         sharefile = os.path.abspath(f"{sharefile}.gz")
                     link_sharefile = os.path.abspath(sharefile)
-                    shell("ln -sf {link_sharefile} {igvsharedir}")
+                    #shell("ln -sf {link_sharefile} {igvsharedir}")
                     if sharefile.endswith("REALIGNED.bam"):
-                        shell("ln -sf {link_sharefile}.bai {igvsharedir}")
+                        shell("rsync {link_sharefile}.bai {igvsharedir}")
+                        shell("mv {link_sharefile} {igvsharedir}")
+                        continue
                     if sharefile.endswith(".vcf.gz"):
-                        shell("ln -sf {link_sharefile}.csi {igvsharedir}")
+                        shell("rsync {link_sharefile}.csi {igvsharedir}")
+                    shell("rsync {link_sharefile} {igvsharedir}")
                 #shell("{params.updateigv}")
                 shell("echo {input} >> {output}")
 
@@ -114,10 +120,13 @@ else:
                     shell(f"{params.bcftools} index -f {sharefile}.gz")
                     sharefile = os.path.abspath(f"{sharefile}.gz")
                 link_sharefile = os.path.abspath(sharefile)
-                shell("ln -sf {link_sharefile} {igvsharedir}")
+                #shell("ln -sf {link_sharefile} {igvsharedir}")
                 if sharefile.endswith("REALIGNED.bam"):
-                    shell("ln -sf {link_sharefile}.bai {igvsharedir}")
+                    shell("rsync {link_sharefile}.bai {igvsharedir}")
+                    shell("mv {link_sharefile} {igvsharedir}")
+                    continue
                 if sharefile.endswith(".vcf.gz"):
-                    shell("ln -sf {link_sharefile}.csi {igvsharedir}")
+                    shell("rsync {link_sharefile}.csi {igvsharedir}")
+                shell("rsync {link_sharefile} {igvsharedir}")
             #shell("{params.updateigv}")
             shell("echo {input} >> {output}")
