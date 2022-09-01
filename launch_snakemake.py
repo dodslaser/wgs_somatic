@@ -7,7 +7,7 @@ import helpers
 import sys
 import time
 import traceback
-from shutil import copyfile
+from shutil import copyfile, copy
 import subprocess
 import stat
 #from snakemake import snakemake
@@ -38,7 +38,25 @@ def logger(message, logfile=False):
     print(message)
 
 
+def get_normalid_tumorid(runnormal=None, normalname=None, runtumor=None, tumorname=None):
+    '''Get tumorid and normalid based on runnormal/tumor and normal/tumorname '''
+    if runnormal:
+        date, _, _, chip, *_ = runnormal.split('_')
+    if normalname:
+        normalid= '_'.join([normalname, date, chip])
+    else:
+        normalid = None
+    if runtumor:
+        date, _, _, chip, *_ = runtumor.split('_')
+    if tumorname:
+        tumorid = '_'.join([tumorname, date, chip])
+    else:
+        tumorid = None
+    return normalid, tumorid
+
+
 def yearly_stats(tumorname, normalname):
+    '''Update yearly stats file with sample that has finished running in pipeline correctly'''
     #config_data = read_wrapperconf()
     #yearly_stats = open(config_data["yearly_stats"], "a")
     yearly_stats = "yearly_stats.txt"
@@ -52,6 +70,7 @@ def yearly_stats(tumorname, normalname):
 
 
 def petagene_compress_bam(outputdir, tumorname):
+    '''Petagene compress bam file to save space'''
     config = read_wrapperconf()
     logger(f"Starting petagene compression on bamfiles for sample {outputdir}")
     queue = config["petagene"]["queue"]
@@ -63,6 +82,7 @@ def petagene_compress_bam(outputdir, tumorname):
     subprocess.call(qsub_args, shell=False)
 
 def alissa_upload(outputdir, normalname, runnormal, ref=False):
+    '''Upload germline SNV_CNV vcf to Alissa'''
     ref = 'hg38' # reference genome, change so it can also be hg19. but probably shouldn't upload vcf for hg19 samples
     size = '240_000_000' # needed as argument for alissa upload. if vcf is larger than this, it is split
     date, _, _, chip, *_ = runnormal.split('_')
@@ -77,6 +97,31 @@ def alissa_upload(outputdir, normalname, runnormal, ref=False):
     standarderr = f"{outputdir}/logs/{normalid}_alissa_upload_standarderr.txt"
     qsub_args = ["qsub", "-N", f"WGSSomatic-{normalname}_alissa_upload", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, normalname, vcfpath, size, ref]
     subprocess.call(qsub_args, shell=False)
+
+def copy_results(outputdir, runnormal=None, normalname=None, runtumor=None, tumorname=None):
+    '''Rsync result files from workingdir to resultdir'''
+    # Find correct resultdir on seqstore from sample config in workingdir
+    normalid, tumorid = get_normalid_tumorid(runnormal, normalname, runtumor, tumorname)
+    if tumorid:
+        with open(f"{outputdir}/configs/{tumorid}_config.json", "r") as analysisdict:
+            analysisdict = json.load(analysisdict)
+    else:
+        with open(f"{outputdir}/configs/{normalid}_config.json", "r") as analysisdict:
+            analysisdict = json.load(analysisdict)
+    resultdir = analysisdict["resultdir"]
+    os.makedirs(resultdir, exist_ok=True)
+
+    # Find resultfiles to copy to resultdir on seqstore
+    with open(f'{outputdir}/reporting/shared_result_files.txt') as resultfiles:
+        files = resultfiles.read().splitlines()
+    for f in files:
+        for sharefile in f.split():
+            try:
+                copy(sharefile, resultdir)
+                logger(f"{sharefile} copied successfully")
+            except:
+                logger(f"Error occurred while copying {sharefile}")
+
 
 def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=False, runtumor=False, tumorname=False, tumorfastqs=False, igvuser=False, hg38ref=False, starttype=False):
     try:
@@ -178,6 +223,8 @@ def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=
         #################################################################
         # Prepare AnalysisFolder
         #################################################################
+        normalid, tumorid = get_normalid_tumorid(runnormal, normalname, runtumor, tumorname)
+        '''
         if runnormal:
             date, _, _, chip, *_ = runnormal.split('_')
         if normalname:
@@ -190,7 +237,7 @@ def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=
             tumorid = '_'.join([tumorname, date, chip])
         else:
             tumorid = None
-
+        '''
         samplelogs = f"{output}/logs"
         if not os.path.isdir(samplelogs):
             os.mkdir(samplelogs)
@@ -232,8 +279,22 @@ def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=
 
         if hg38ref == "yes":
             analysisdict["reference"] = "hg38"
+            if tumorname:
+                if normalname:
+                    analysisdict["resultdir"] = f'{config["testresultdir"]}/{tumorname}' #CHANGE BACK ALL 3: f'{config["resultdir_hg38"]}/{tumorname}'
+                else:
+                    analysisdict["resultdir"] = f'{config["testresultdir"]}/tumor_only/{tumorname}'
+            else:
+                analysisdict["resultdir"] = f'{config["testresultdir"]}/normal_only/{normalname}'
         else:
             analysisdict["reference"] = "hg19"
+            if tumorname:
+                if normalname:
+                    analysisdict["resultdir"] = f'{config["testresultdir"]}/{tumorname}'#CHANGE BACK ALL 3: f'{config["resultdir_hg19"]}/{tumorname}'
+                else:
+                    analysisdict["resultdir"] = f'{config["testresultdir"]}/tumor_only/{tumorname}'
+            else:
+                analysisdict["resultdir"] = f'{config["testresultdir"]}/normal_only/{normalname}'
         if tumorname:
             with open(f"{runconfigs}/{tumorid}_config.json", 'w') as analysisconf:
                 json.dump(analysisdict, analysisconf, ensure_ascii=False, indent=4)
@@ -311,6 +372,7 @@ if __name__ == '__main__':
     parser.add_argument('-stype', '--starttype', nargs='?', help='write forcestart if you want to ignore fastqs', required=False)
     parser.add_argument('-nc', '--nocompress', action="store_true", help='Disables petagene compression', required=False)
     parser.add_argument('-na', '--noalissa', action="store_true", help='Disables Alissa upload', required=False)
+    parser.add_argument('-cr', '--copyresults', action="store_true", help='Copy results to resultdir on seqstore', required=False)
     args = parser.parse_args()
     analysis_main(args, args.outputdir, args.runnormal, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.igvuser, args.hg38ref, args.starttype)
 
@@ -319,16 +381,22 @@ if __name__ == '__main__':
             if args.normalsample:
             # these functions are only executed if snakemake workflow has finished successfully
                 yearly_stats(args.tumorsample, args.normalsample)
+                if args.copyresults:
+                    copy_results(args.outputdir, args.runnormal, args.normalsample, args.runtumor, args.tumorsample)
                 if args.hg38ref and not args.noalissa:
                     alissa_upload(args.outputdir, args.normalsample, args.runnormal, args.hg38ref)
                 if not args.nocompress:
                     petagene_compress_bam(args.outputdir, args.tumorsample)    
             else:
                 yearly_stats(args.tumorsample, 'None')
+                if args.copyresults:
+                    copy_results(args.outputdir, runtumor=args.runtumor, tumorname=args.tumorsample)
                 if not args.nocompress:
                     petagene_compress_bam(args.outputdir, args.tumorsample)
         else:
             yearly_stats('None', args.normalsample)
+            if args.copyresults:
+                copy_results(args.outputdir, runnormal=args.runnormal, normalname=args.normalsample)
             if args.hg38ref and not args.noalissa:
                 alissa_upload(args.outputdir, args.normalsample, args.runnormal, args.hg38ref)
             if not args.nocompress:
