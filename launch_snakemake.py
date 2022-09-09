@@ -54,7 +54,6 @@ def get_normalid_tumorid(runnormal=None, normalname=None, runtumor=None, tumorna
         tumorid = None
     return normalid, tumorid
 
-
 def yearly_stats(tumorname, normalname):
     '''Update yearly stats file with sample that has finished running in pipeline correctly'''
     #config_data = read_wrapperconf()
@@ -69,17 +68,34 @@ def yearly_stats(tumorname, normalname):
     yearly_stats.close()
 
 
-def petagene_compress_bam(outputdir, tumorname):
+def petagene_compress_bam(outputdir, igvuser, hg38ref, tumorname=False, normalname=False):
     '''Petagene compress bam file to save space'''
+    if hg38ref == "yes":
+        mainconf = "hg38conf"
+    else:
+        mainconf = "hg19conf"
     config = read_wrapperconf()
+    configdir = config["configdir"]
+    mainconf_name = config[mainconf]
+    mainconf_path = f"{configdir}/{mainconf_name}"
+    mainconf = helpers.read_config(mainconf_path)
+    igvdatadir = mainconf["rules"]["share_to_igv"]["igvdatadir"]
+    igvdir = f"{igvdatadir}/{igvuser}"
+
     logger(f"Starting petagene compression on bamfiles for sample {outputdir}")
     queue = config["petagene"]["queue"]
     threads = config["petagene"]["threads"]
     qsub_script = config["petagene"]["qsub_script"]
-    standardout = f"{outputdir}/logs/{tumorname}_petagene_compression_standardout.txt"
-    standarderr = f"{outputdir}/logs/{tumorname}_petagene_compression_standarderr.txt"
-    qsub_args = ["qsub", "-N", f"WGSSomatic-{tumorname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, outputdir]
-    subprocess.call(qsub_args, shell=False)
+    if tumorname:
+        standardout = f"{outputdir}/logs/{tumorname}_petagene_compression_standardout.txt"
+        standarderr = f"{outputdir}/logs/{tumorname}_petagene_compression_standarderr.txt"
+        qsub_args = ["qsub", "-N", f"WGSSomatic-{tumorname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, igvdir, tumorname]
+        subprocess.call(qsub_args, shell=False)
+    if normalname:
+        standardout = f"{outputdir}/logs/{normalname}_petagene_compression_standardout.txt"
+        standarderr = f"{outputdir}/logs/{normalname}_petagene_compression_standarderr.txt"
+        qsub_args = ["qsub", "-N", f"WGSSomatic-{tumorname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, igvdir, normalname]
+        subprocess.call(qsub_args, shell=False)
 
 def alissa_upload(outputdir, normalname, runnormal, ref=False):
     '''Upload germline SNV_CNV vcf to Alissa'''
@@ -123,7 +139,7 @@ def copy_results(outputdir, runnormal=None, normalname=None, runtumor=None, tumo
                 logger(f"Error occurred while copying {sharefile}")
 
 
-def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=False, runtumor=False, tumorname=False, tumorfastqs=False, igvuser=False, hg38ref=False, starttype=False):
+def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=False, runtumor=False, tumorname=False, tumorfastqs=False, igvuser=False, hg38ref=False, starttype=False, nocompress=False):
     try:
         ################################################################
         # Write InputArgs to logfile
@@ -224,20 +240,6 @@ def analysis_main(args, output, runnormal=False, normalname=False, normalfastqs=
         # Prepare AnalysisFolder
         #################################################################
         normalid, tumorid = get_normalid_tumorid(runnormal, normalname, runtumor, tumorname)
-        '''
-        if runnormal:
-            date, _, _, chip, *_ = runnormal.split('_')
-        if normalname:
-            normalid= '_'.join([normalname, date, chip])
-        else:
-            normalid = None
-        if runtumor:
-            date, _, _, chip, *_ = runtumor.split('_')
-        if tumorname:
-            tumorid = '_'.join([tumorname, date, chip])
-        else:
-            tumorid = None
-        '''
         samplelogs = f"{output}/logs"
         if not os.path.isdir(samplelogs):
             os.mkdir(samplelogs)
@@ -374,7 +376,7 @@ if __name__ == '__main__':
     parser.add_argument('-na', '--noalissa', action="store_true", help='Disables Alissa upload', required=False)
     parser.add_argument('-cr', '--copyresults', action="store_true", help='Copy results to resultdir on seqstore', required=False)
     args = parser.parse_args()
-    analysis_main(args, args.outputdir, args.runnormal, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.igvuser, args.hg38ref, args.starttype)
+    analysis_main(args, args.outputdir, args.runnormal, args.normalsample, args.normalfastqs, args.runtumor, args.tumorsample, args.tumorfastqs, args.igvuser, args.hg38ref, args.starttype, args.nocompress)
 
     if os.path.isfile(f"{args.outputdir}/reporting/workflow_finished.txt"):
         if args.tumorsample:
@@ -386,13 +388,13 @@ if __name__ == '__main__':
                 if args.hg38ref and not args.noalissa:
                     alissa_upload(args.outputdir, args.normalsample, args.runnormal, args.hg38ref)
                 if not args.nocompress:
-                    petagene_compress_bam(args.outputdir, args.tumorsample)    
+                    petagene_compress_bam(args.outputdir, args.igvuser, args.hg38ref, args.tumorsample, args.normalsample)    
             else:
                 yearly_stats(args.tumorsample, 'None')
                 if args.copyresults:
                     copy_results(args.outputdir, runtumor=args.runtumor, tumorname=args.tumorsample)
                 if not args.nocompress:
-                    petagene_compress_bam(args.outputdir, args.tumorsample)
+                    petagene_compress_bam(args.outputdir, args.igvuser, args.hg38ref, tumorname=args.tumorsample)
         else:
             yearly_stats('None', args.normalsample)
             if args.copyresults:
@@ -400,4 +402,4 @@ if __name__ == '__main__':
             if args.hg38ref and not args.noalissa:
                 alissa_upload(args.outputdir, args.normalsample, args.runnormal, args.hg38ref)
             if not args.nocompress:
-                petagene_compress_bam(args.outputdir, args.normalsample)
+                petagene_compress_bam(args.outputdir, args.igvuser, args.hg38ref, normalname=args.normalsample)
