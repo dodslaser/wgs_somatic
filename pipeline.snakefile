@@ -111,13 +111,13 @@ if tumorfastqdirs:
 if tumorid:
     if normalid:
         # Runs tn_workflow / paired if tumorid and normalid
-        localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
+        localrules: all, upload_to_iva, share_to_igv, share_to_igv_webstore, tn_workflow, share_to_resultdir, excel_qc
     else:
         # Runs tumoronly_workflow if tumorid but not normalid
-        localrules: all, upload_to_iva, share_to_igv, share_to_resultdir, excel_qc, tumoronly_workflow
+        localrules: all, upload_to_iva, share_to_igv, share_to_igv_webstore, share_to_resultdir, excel_qc, tumoronly_workflow
 else: 
     # Runs normalonly_workflow if normalid but not tumorid
-    localrules: all, upload_to_iva, share_to_igv, share_to_resultdir, excel_qc, normalonly_workflow
+    localrules: all, upload_to_iva, share_to_igv, share_to_igv_webstore, share_to_resultdir, excel_qc, normalonly_workflow
 ###########################################################
 
 ########################################
@@ -185,6 +185,12 @@ def get_igv_input(wildcards):
     return []
 
 
+def get_igv_webstore_input(wildcards):
+    if igvuser:
+        return expand("{workingdir}/reporting/shared_igv_webstore_files.txt", workingdir=workingdir)
+    return []
+
+
 def upload_germline_iva(wildcards):
     if ivauser:
         if ivauser == "testing":
@@ -217,5 +223,6 @@ def insilico_coverage(wildcards):
 rule all:
     input: 
         get_igv_input,
+        get_igv_webstore_input,
         expand("{workingdir}/reporting/workflow_finished.txt", workingdir=workingdir),
         alissa_vcf_conversion
