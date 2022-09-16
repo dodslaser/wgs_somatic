@@ -5,8 +5,9 @@ rule generate_tdf:
     input:
         "{workingdir}/{stype}/realign/{sname}_REALIGNED.bam"
     params:
-        igvjar = pipeconfig["rules"]["generate_tdf"]["tdfgen"]
+        igvtools_jar_path = pipeconfig["rules"]["generate_tdf"]["igvtools_jar_path"],
+        igvtools_memory_limit = pipeconfig["rules"]["generate_tdf"]["igvtools_memory_limit"]
     output:
         "{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf"
     run:
-        shell("nohup java -Xmx32768m -jar {params.igvjar} count {input} {output} hg19")
+        shell("nohup java -Xmx{params.igvtools_memory_limit} -jar {params.igvtools_jar_path} count {input} {output} hg19")
