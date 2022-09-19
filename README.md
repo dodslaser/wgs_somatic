@@ -1,13 +1,5 @@
 # The WGS Somatic Pipeline
 
-### Needs a cool name
-
-Ideas:
-
-Just anothEr Wholegenome aNalysis for detection of Somatic variants -- JEWNS
-
-WOPR - junior
-
 
 ## General description
 
@@ -27,7 +19,7 @@ WOPR - junior
 
 `$ git submodule update --init --recursive --remote`
 
-Submodules used are annotate\_manta\_canvas, b\_allele\_igv\_plot, canvas\_to\_interpreter and alissa\_connector\_upload. They can all be found at [CGG](https://github.com/ClinicalGenomicsGBG).
+Submodules used are annotate\_manta\_canvas, b\_allele\_igv\_plot, canvas\_to\_interpreter and Alissa\_API\_tools. They can all be found at [CGG](https://github.com/ClinicalGenomicsGBG).
 
 
 
@@ -37,7 +29,7 @@ Singularity images are located here: /apps/bio/singularities/wgs\_somatic/
 
 
 
-### How to run:
+### How to run manually:
 
 1. Start a screen
 
@@ -77,6 +69,16 @@ If you want to run pipeline for tumor only, simply don't use arguments runnormal
 Runnormal and runtumor is only used to create a unique samplename based on the sequencing run the data comes from. Could probably be done in a better way.
 
 
+Optional arguments to launch_snakemake.py:
+
+```--nocompress``` Disables petagene compression of bamfiles after snakemake has finished.
+
+```--noalissa``` Disables automatic upload of germline SNV_CNV vcf to Alissa. 
+
+```--copyresults``` Use this argument if you want to automatically copy result files to result directory on seqstore webfolders.
+
+
+
 Need to be on medair because python environment is hard-coded in launch_snakemake.py, also some tools in the snakemake workflow is hardcoded to install-locations on medair, and finally some dependencies such as references and databases are on medair.
 
  > \#!/apps/bio/software/anaconda2/envs/wgs_somatic/bin/python
@@ -97,6 +99,18 @@ Need to be on medair because python environment is hard-coded in launch_snakemak
  * Robust and well-documented to fit into the clinical requirements.
 
 
+ ### Yearly statistics
+
+After running the pipeline for the first time, a yearly\_statistics text file is created in the repo. Every time the pipeline is run, sample name and date/time is added to this text file.
+
+
+ ### Automatic start of pipeline
+
+The pipeline is started automatically when new runs with GMS-BT/AL samples appear in novaseq_687_gc or novaseq_A01736 Demultiplexdirs.
+
+Cron runs every 30 minutes (in crontab of cronuser)
+
+Wrapper script ```wgs_somatic-run-wrapper.py``` looks for runs in Demultiplexdir. Every time there is a new run in Demultiplexdir, it is added to text file ```/apps/bio/repos/wgs_somatic/wgs_somatic-run-wrapper.py``` to keep track of which runs that have already been analyzed. If a new run has GMS-BT/AL samples, the pipeline starts for these samples. Output is placed in working directory ```/medstore/results/wgs/wgs_somatic``` and the final result files are then copied to seqstore webfolders. You can find a more detailed description of the automation on GMS-BT confluence page.
 
 
  ### Status (2020-10-19):
@@ -127,9 +141,5 @@ Can be run using either hg38 or hg19 reference genomes.
 
  * Analyse all samples in the project with hg38 (nearly done)
  * Calculate sensitivity and precision with artificial truthset (nearly done)
-
-### Yearly statistics
-
-After running the pipeline for the first time, a yearly\_statistics text file is created in the repo. Every time the pipeline is run, sample name and date/time is added to this text file.
 
 
