@@ -136,7 +136,7 @@ def check_ok(outputdir):
         return False
 
 
-def analysis_end(outputdir, tumorsample=None, normalsample=None, runtumor=None, runnormal=None, hg38ref=None):
+def analysis_end(outputdir, igvuser, tumorsample=None, normalsample=None, runtumor=None, runnormal=None, hg38ref=None):
     '''Function to check if analysis has finished correctly and add to yearly stats, upload to alissa, copy results and start petagene compression'''
 
     if os.path.isfile(f"{outputdir}/reporting/workflow_finished.txt"):
@@ -146,15 +146,16 @@ def analysis_end(outputdir, tumorsample=None, normalsample=None, runtumor=None, 
                 alissa_upload(outputdir, normalsample, runnormal, hg38ref)
                 yearly_stats(tumorsample, normalsample)
                 copy_results(outputdir, runnormal=runnormal, normalname=normalsample, runtumor=runtumor, tumorname=tumorsample)
+                petagene_compress_bam(outputdir, igvuser, hg38ref, tumorname=tumorsample, normalname=normalsample)
             else:
                 yearly_stats(tumorsample, 'None')
                 copy_results(outputdir, runtumor=runtumor, tumorname=tumorsample)
-            petagene_compress_bam(outputdir, tumorsample)
+                petagene_compress_bam(outputdir, igvuser, hg38ref, tumorname=tumorsample)
         else:
             yearly_stats('None', normalsample)
             copy_results(outputdir, runnormal=runnormal, normalname=normalsample)
             alissa_upload(outputdir, normalsample, runnormal, hg38ref)
-            petagene_compress_bam(outputdir, normalsample)
+            petagene_compress_bam(outputdir, igvuser, hg38ref, normalname=normalsample)
     else:
         pass
 
@@ -244,7 +245,7 @@ def wrapper(instrument):
 
                             outputdir = pipeline_args.get('output')
                             check_ok_outdirs.append(outputdir)
-                            end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, t, n, pipeline_args['runtumor'], pipeline_args['runnormal'], pipeline_args['hg38ref'])))
+                            end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, pipeline_args['igvuser'], t, n, pipeline_args['runtumor'], pipeline_args['runnormal'], pipeline_args['hg38ref'])))
 
                             paired_samples.append(t)
                             paired_samples.append(n)
@@ -273,7 +274,7 @@ def wrapper(instrument):
 
                 outputdir = pipeline_args.get('output')
                 check_ok_outdirs.append(outputdir)
-                end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, tumorsample, normalsample, pipeline_args['runtumor'], pipeline_args['runnormal'], pipeline_args['hg38ref'])))
+                end_threads.append(threading.Thread(target=analysis_end, args=(outputdir, pipeline_args['igvuser'], tumorsample, normalsample, pipeline_args['runtumor'], pipeline_args['runnormal'], pipeline_args['hg38ref'])))
 
         # Start several samples at the same time
         for t in threads:
