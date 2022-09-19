@@ -94,7 +94,7 @@ def petagene_compress_bam(outputdir, igvuser, hg38ref, tumorname=False, normalna
     if normalname:
         standardout = f"{outputdir}/logs/{normalname}_petagene_compression_standardout.txt"
         standarderr = f"{outputdir}/logs/{normalname}_petagene_compression_standarderr.txt"
-        qsub_args = ["qsub", "-N", f"WGSSomatic-{tumorname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, igvdir, normalname]
+        qsub_args = ["qsub", "-N", f"WGSSomatic-{normalname}_petagene_compress_bam", "-q", queue, "-o", standardout, "-e", standarderr, qsub_script, igvdir, normalname]
         subprocess.call(qsub_args, shell=False)
 
 def alissa_upload(outputdir, normalname, runnormal, ref=False):
