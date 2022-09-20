@@ -87,7 +87,8 @@
         },
        "generate_tdf":
         {
-            "tdfgen": "/seqstore/webfolders/IGVTools/igvtools.jar" 
+           "igvtools_jar_path": "/apps/bio/software/igvtools/2.3.71/igvtools.jar",
+           "igvtools_memory_limit": "32768m"
         },
         "canvas":
         {
