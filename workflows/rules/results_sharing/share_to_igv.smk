@@ -1,6 +1,7 @@
 # vim: syntax=python tabstop=4 expandtab
 # coding: utf-8
 import os
+import shutil
 
 if tumorid:
     if normalid:
@@ -86,7 +87,6 @@ if tumorid:
                 shell("echo {input} >> {output}")
 
 else:
-
     rule share_to_igv:
         input:
             expand("{workingdir}/{stype}/canvas/{sname}_CNV_germline.vcf", workingdir=workingdir, sname=normalid, vartype="germline", stype=sampleconfig[normalname]["stype"]),
@@ -121,3 +121,29 @@ else:
                     shell("ln -sf {link_sharefile}.csi {igvsharedir}")
             #shell("{params.updateigv}")
             shell("echo {input} >> {output}")
+
+
+rule share_to_igv_webstore:
+    input:
+        "{workingdir}/reporting/shared_igv_files.txt"
+    params:
+        root_webstore_igv_path = pipeconfig["rules"]["share_to_igv"]["webstore_igv"]
+    output:
+        "{workingdir}/reporting/shared_igv_webstore_files.txt"
+    run:
+        with open(str(input), 'r') as inp:
+            file_paths = inp.readline().strip().split(' ')  # One single line of paths as input
+            for file_path in file_paths:
+                file_basename = os.path.basename(file_path)
+                sample_name = file_basename.split('_')[0]  # Assumes DNA123_date_flowcell for all files
+
+                # Create the output directory if not existing
+                sample_igv_path = os.path.join(params.root_webstore_igv_path, sample_name)
+                os.makedirs(sample_igv_path, exist_ok=True)
+
+                # Copy if not existing
+                file_igv_path = os.path.join(sample_igv_path, file_basename)
+                if not os.path.exists(file_igv_path):
+                    shutil.copy(file_path, file_igv_path)
+
+        shell("echo {input} >> {output}")
