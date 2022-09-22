@@ -110,7 +110,7 @@ The pipeline is started automatically when new runs with GMS-BT/AL samples appea
 
 Cron runs every 30 minutes (in crontab of cronuser)
 
-Wrapper script ```wgs_somatic-run-wrapper.py``` looks for runs in Demultiplexdir. Every time there is a new run in Demultiplexdir, it is added to text file ```/apps/bio/repos/wgs_somatic/wgs_somatic-run-wrapper.py``` to keep track of which runs that have already been analyzed. If a new run has GMS-BT/AL samples, the pipeline starts for these samples. Output is placed in working directory ```/medstore/results/wgs/wgs_somatic``` and the final result files are then copied to seqstore webfolders. You can find a more detailed description of the automation on GMS-BT confluence page.
+Wrapper script ```wgs_somatic-run-wrapper.py``` looks for runs in Demultiplexdir. Every time there is a new run in Demultiplexdir, it is added to text file ```/apps/bio/repos/wgs_somatic/novaseq_runlist.txt``` to keep track of which runs that have already been analyzed. If a new run has GMS-BT/AL samples, the pipeline starts for these samples. Output is placed in working directory ```/medstore/results/wgs/wgs_somatic``` and the final result files are then copied to seqstore webfolders. You can find a more detailed description of the automation on GMS-BT confluence page.
 
 
  ### Status (2020-10-19):
