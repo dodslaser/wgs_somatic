@@ -42,7 +42,7 @@ if tumorid:
                     link_sharefile = os.path.abspath(sharefile)
                     #shell("ln -sf {link_sharefile} {igvsharedir}")
                     if sharefile.endswith("REALIGNED.bam"):
-                        shell("mv {link_sharefile} {igvsharedir}")
+                        shell("rsync {link_sharefile} {igvsharedir}")
                         shell("rsync {link_sharefile}.bai {igvsharedir}")
                         continue
                     if sharefile.endswith(".vcf.gz"):
@@ -83,7 +83,7 @@ if tumorid:
                     #shell("ln -sf {link_sharefile} {igvsharedir}")
                     if sharefile.endswith("REALIGNED.bam"):
                         shell("rsync {link_sharefile}.bai {igvsharedir}")
-                        shell("mv {link_sharefile} {igvsharedir}")
+                        shell("rsync {link_sharefile} {igvsharedir}")
                         continue
                     if sharefile.endswith(".vcf.gz"):
                         shell("rsync {link_sharefile}.csi {igvsharedir}")
@@ -123,7 +123,7 @@ else:
                 #shell("ln -sf {link_sharefile} {igvsharedir}")
                 if sharefile.endswith("REALIGNED.bam"):
                     shell("rsync {link_sharefile}.bai {igvsharedir}")
-                    shell("mv {link_sharefile} {igvsharedir}")
+                    shell("rsync {link_sharefile} {igvsharedir}")
                     continue
                 if sharefile.endswith(".vcf.gz"):
                     shell("rsync {link_sharefile}.csi {igvsharedir}")
