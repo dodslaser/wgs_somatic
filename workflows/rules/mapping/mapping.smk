@@ -42,7 +42,7 @@ rule mapping:
     singularity:
         pipeconfig["singularities"]["sentieon"]["sing"]
     output:
-        "{workingdir}/{stype}/mapping/{fastqpattern}.bam"
+        temp("{workingdir}/{stype}/mapping/{fastqpattern}.bam")
     shell:
         "echo $HOSTNAME;"
         "{params.sentieon} bwa mem "
@@ -54,7 +54,7 @@ rule dedup:
     input:
         bamfiles = get_mapping
     output:
-        "{workingdir}/{stype}/dedup/{sname}_DEDUP.bam",
+        temp("{workingdir}/{stype}/dedup/{sname}_DEDUP.bam"),
         "{workingdir}/{stype}/dedup/{sname}_DEDUP.txt"
     params:
         threads = clusterconf["dedup"]["threads"],
