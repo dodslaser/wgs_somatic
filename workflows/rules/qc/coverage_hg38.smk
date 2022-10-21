@@ -14,7 +14,7 @@ rule wgs_coverage:
     output:
         "{workingdir}/{stype}/reports/{sname}_WGScov.tsv"
     shell:
-        "{params.sentieon} driver -i {input} -r {params.reference} "
+        "{params.sentieon} driver -t {params.threads} -i {input} -r {params.reference} "
             "--interval chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY,chrM --algo WgsMetricsAlgo {output}"
 
 rule y_coverage:
@@ -29,4 +29,4 @@ rule y_coverage:
     output:
         "{workingdir}/{stype}/reports/{sname}_Ycov.tsv"
     shell:
-        "{params.sentieon} driver -i {input} -r {params.reference} --interval chrY --algo WgsMetricsAlgo {output}"
+        "{params.sentieon} driver -t {params.threads} -i {input} -r {params.reference} --interval chrY --algo WgsMetricsAlgo {output}"

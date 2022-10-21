@@ -18,31 +18,60 @@ else:
             pindelConfig = "{workingdir}/{stype}/pindel/{sname}_pindelConfig.txt"
         shell:
             "echo '{input.tumorbam}\t300\t{tumorname}'>{output.pindelConfig}"
+if normalid:
+    rule pindel:
+        input:
+            tumorbam = expand("{workingdir}/{stype}/dedup/{sname}_DEDUP.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+            normalbam = expand("{workingdir}/{stype}/dedup/{sname}_DEDUP.bam", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            pindelConfig = expand("{workingdir}/{stype}/pindel/{sname}_pindelConfig.txt", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
+        params:
+            bed = pipeconfig["rules"]["pindel"]["bed"],
+            reference = pipeconfig["referencegenome"],
+            threads = clusterconf["pindel"]["threads"],
+            x = 2,
+            B = 60
+        singularity:
+            pipeconfig["singularities"]["pindel"]["sing"]
+        output:
+            "{workingdir}/{stype}/pindel/{sname}_BP",
+            "{workingdir}/{stype}/pindel/{sname}_CloseEndMapped",
+            "{workingdir}/{stype}/pindel/{sname}_D",
+            "{workingdir}/{stype}/pindel/{sname}_INT_final",
+            "{workingdir}/{stype}/pindel/{sname}_INV",
+            "{workingdir}/{stype}/pindel/{sname}_LI",
+            "{workingdir}/{stype}/pindel/{sname}_RP",
+            "{workingdir}/{stype}/pindel/{sname}_SI",
+            "{workingdir}/{stype}/pindel/{sname}_TD"
+        shell:
+            "echo $HOSTNAME;"
+            " (pindel -f {params.reference} -i {input.pindelConfig} -T {params.threads} -x {params.x} -B {params.B} -j {params.bed} -o {workingdir}/{wildcards.stype}/pindel/{wildcards.sname} ) "
 
-rule pindel:
-    input:
-        pindelConfig = expand("{workingdir}/{stype}/pindel/{sname}_pindelConfig.txt", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
-    params:
-        bed = pipeconfig["rules"]["pindel"]["bed"],
-        reference = pipeconfig["referencegenome"],
-        threads = clusterconf["pindel"]["threads"],
-        x = 2,
-        B = 60
-    singularity:
-        pipeconfig["singularities"]["pindel"]["sing"]
-    output:
-        "{workingdir}/{stype}/pindel/{sname}_BP",
-        "{workingdir}/{stype}/pindel/{sname}_CloseEndMapped",
-        "{workingdir}/{stype}/pindel/{sname}_D",
-        "{workingdir}/{stype}/pindel/{sname}_INT_final",
-        "{workingdir}/{stype}/pindel/{sname}_INV",
-        "{workingdir}/{stype}/pindel/{sname}_LI",
-        "{workingdir}/{stype}/pindel/{sname}_RP",
-        "{workingdir}/{stype}/pindel/{sname}_SI",
-        "{workingdir}/{stype}/pindel/{sname}_TD"
-    shell:
-        "echo $HOSTNAME;"
-        " (pindel -f {params.reference} -i {input.pindelConfig} -T {params.threads} -x {params.x} -B {params.B} -j {params.bed} -o {workingdir}/{wildcards.stype}/pindel/{wildcards.sname} ) "
+else:
+    rule pindel:
+        input:
+            tumorbam = expand("{workingdir}/{stype}/dedup/{sname}_DEDUP.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+            pindelConfig = expand("{workingdir}/{stype}/pindel/{sname}_pindelConfig.txt", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
+        params:
+            bed = pipeconfig["rules"]["pindel"]["bed"],
+            reference = pipeconfig["referencegenome"],
+            threads = clusterconf["pindel"]["threads"],
+            x = 2,
+            B = 60
+        singularity:
+            pipeconfig["singularities"]["pindel"]["sing"]
+        output:
+            "{workingdir}/{stype}/pindel/{sname}_BP",
+            "{workingdir}/{stype}/pindel/{sname}_CloseEndMapped",
+            "{workingdir}/{stype}/pindel/{sname}_D",
+            "{workingdir}/{stype}/pindel/{sname}_INT_final",
+            "{workingdir}/{stype}/pindel/{sname}_INV",
+            "{workingdir}/{stype}/pindel/{sname}_LI",
+            "{workingdir}/{stype}/pindel/{sname}_RP",
+            "{workingdir}/{stype}/pindel/{sname}_SI",
+            "{workingdir}/{stype}/pindel/{sname}_TD"
+        shell:
+            "echo $HOSTNAME;"
+            " (pindel -f {params.reference} -i {input.pindelConfig} -T {params.threads} -x {params.x} -B {params.B} -j {params.bed} -o {workingdir}/{wildcards.stype}/pindel/{wildcards.sname} ) "
 
 rule pindel2vcf:
     input:

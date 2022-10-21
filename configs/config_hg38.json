@@ -87,7 +87,8 @@
         },
        "generate_tdf":
         {
-            "tdfgen": "/seqstore/webfolders/IGVTools/igvtools.jar" 
+           "igvtools_jar_path": "/apps/bio/software/igvtools/2.3.71/igvtools.jar",
+           "igvtools_memory_limit": "32768m"
         },
         "canvas":
         {
@@ -99,7 +100,8 @@
             "igvdatadir": "/seqstore/webfolders/igv/data",
             "updateigv": "/apps/bio/repos/igv_xml_sync/igv_xml_sync.sh",
             "bcftools": "/apps/bio/software/bcftools/1.9/bin/bcftools",
-            "bgzip": "/apps/bio/software/htslib/htslib/bgzip"
+            "bgzip": "/apps/bio/software/htslib/htslib/bgzip",
+            "webstore_igv": "/igv/pipelines/wgs-somatic/current"
         },
         "filter_variants_in_bed":
         {
