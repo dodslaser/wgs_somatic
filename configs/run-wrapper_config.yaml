@@ -21,3 +21,10 @@ hg38ref:
   GMS-AL: 'yes'
 
 workingdir: '/medstore/results/wgs/wgs_somatic'
+
+hcp:
+  fqdir: '/medstore/Development/WGS_Somatic/tmp_fqs'
+  qsub_script: 'hcp_download_fq.sh'
+  queue: 'production.q'
+  threads: 1
+  credentials: '/home/xshang/credentials/iris_credentials.json' #FIXME Credentials need to be maybe in /medstore/credentials ??
