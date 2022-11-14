@@ -26,4 +26,4 @@ hcp:
   qsub_script: 'hcp_download_fq.sh'
   queue: 'production.q'
   threads: 1
-  credentials: '/home/xshang/credentials/iris_credentials.json' #FIXME Credentials need to be maybe in /medstore/credentials ??
+  credentials: '/medstore/credentials/iris_credentials.json'
