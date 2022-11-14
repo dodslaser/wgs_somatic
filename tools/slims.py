@@ -133,7 +133,6 @@ def download_hcp_fqs(fqSSample, run_path, logger):
     json_info = json.loads(fqSSample.fastq.cntn_cstm_demuxerBackupSampleResult.value)
     bucket = json_info['bucket']
     remote_keys = json_info['remote_keys']
-    local_path = f'{config["hcp"]["fqdir"]}'
 
     queue = config["hcp"]["queue"]
     threads = config["hcp"]["threads"]
@@ -141,18 +140,13 @@ def download_hcp_fqs(fqSSample, run_path, logger):
     credentials = config["hcp"]["credentials"]
 
     for key in remote_keys:
-        local_path = f'{config["hcp"]["fqdir"]}/{os.path.basename(key)}'
+        local_path = f'{run_path}/fastq/{os.path.basename(key)}'
         if not os.path.exists(local_path):
             standardout = os.path.join(ROOT_LOGGING_PATH, f"hcp_download_{os.path.basename(key)}.stdout")
             standarderr = os.path.join(ROOT_LOGGING_PATH, f"hcp_download_{os.path.basename(key)}.stderr")
             qsub_args = ["qsub", "-N", f"hcp_download_{os.path.basename(key)}", "-q", queue, "-sync", "y", "-o", standardout, "-e", standarderr, qsub_script, credentials, bucket, key, local_path]
             logger.info(f'Downloading {os.path.basename(key)} from HCP')
             subprocess.call(qsub_args)
-        if local_path.endswith('.fasterq'):
-            local_path = local_path.replace('fasterq', 'fastq.gz')
-        fq_link = os.path.join(run_path, "fastq", os.path.basename(local_path))
-        if not os.path.islink(fq_link):
-            os.symlink(local_path, fq_link)
 
 
 
