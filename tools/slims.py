@@ -126,7 +126,7 @@ def get_sample_slims_info(Sctx, run_tag):
     return translate_slims_info(SSample.dna)
 
 def download_hcp_fqs(fqSSample, run_path, logger):
-    '''Find and download fqs from HCP to tmp folder on medstore and then link to fastqdir on seqstore for run'''
+    '''Find and download fqs from HCP to fastqdir on seqstore for run'''
     with open(CONFIG_PATH, 'r') as conf:
         config = yaml.safe_load(conf)
 
