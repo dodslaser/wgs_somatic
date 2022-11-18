@@ -21,3 +21,9 @@ hg38ref:
   GMS-AL: 'yes'
 
 workingdir: '/medstore/results/wgs/wgs_somatic'
+
+hcp:
+  qsub_script: 'hcp_download_fq.sh'
+  queue: 'production.q'
+  threads: 1
+  credentials: '/medstore/credentials/iris_credentials.json'

@@ -146,16 +146,16 @@ def analysis_end(outputdir, igvuser, tumorsample=None, normalsample=None, runtum
                 alissa_upload(outputdir, normalsample, runnormal, hg38ref)
                 yearly_stats(tumorsample, normalsample)
                 copy_results(outputdir, runnormal=runnormal, normalname=normalsample, runtumor=runtumor, tumorname=tumorsample)
-                petagene_compress_bam(outputdir, igvuser, hg38ref, tumorname=tumorsample, normalname=normalsample)
+                #petagene_compress_bam(outputdir, igvuser, hg38ref, tumorname=tumorsample, normalname=normalsample)
             else:
                 yearly_stats(tumorsample, 'None')
                 copy_results(outputdir, runtumor=runtumor, tumorname=tumorsample)
-                petagene_compress_bam(outputdir, igvuser, hg38ref, tumorname=tumorsample)
+                #petagene_compress_bam(outputdir, igvuser, hg38ref, tumorname=tumorsample)
         else:
             yearly_stats('None', normalsample)
             copy_results(outputdir, runnormal=runnormal, normalname=normalsample)
             alissa_upload(outputdir, normalsample, runnormal, hg38ref)
-            petagene_compress_bam(outputdir, igvuser, hg38ref, normalname=normalsample)
+            #petagene_compress_bam(outputdir, igvuser, hg38ref, normalname=normalsample)
     else:
         pass
 
