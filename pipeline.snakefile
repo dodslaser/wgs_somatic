@@ -111,13 +111,13 @@ if tumorfastqdirs:
 if tumorid:
     if normalid:
         # Runs tn_workflow / paired if tumorid and normalid
-        localrules: all, upload_to_iva, share_to_igv, share_to_igv_webstore, tn_workflow, share_to_resultdir, excel_qc
+        localrules: all, upload_to_iva, share_to_igv, tn_workflow, share_to_resultdir, excel_qc
     else:
         # Runs tumoronly_workflow if tumorid but not normalid
-        localrules: all, upload_to_iva, share_to_igv, share_to_igv_webstore, share_to_resultdir, excel_qc, tumoronly_workflow
+        localrules: all, upload_to_iva, share_to_igv, share_to_resultdir, excel_qc, tumoronly_workflow
 else: 
     # Runs normalonly_workflow if normalid but not tumorid
-    localrules: all, upload_to_iva, share_to_igv, share_to_igv_webstore, share_to_resultdir, excel_qc, normalonly_workflow
+    localrules: all, upload_to_iva, share_to_igv, share_to_resultdir, excel_qc, normalonly_workflow
 ###########################################################
 
 ########################################
