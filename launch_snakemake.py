@@ -116,7 +116,7 @@ def alissa_upload(outputdir, normalname, runnormal, ref=False):
 
 def copy_results(outputdir, runnormal=None, normalname=None, runtumor=None, tumorname=None):
     '''Rsync result files from workingdir to resultdir'''
-    # Find correct resultdir on seqstore from sample config in workingdir
+    # Find correct resultdir on webstore from sample config in workingdir
     normalid, tumorid = get_normalid_tumorid(runnormal, normalname, runtumor, tumorname)
     if tumorid:
         with open(f"{outputdir}/configs/{tumorid}_config.json", "r") as analysisdict:
@@ -127,7 +127,7 @@ def copy_results(outputdir, runnormal=None, normalname=None, runtumor=None, tumo
     resultdir = analysisdict["resultdir"]
     os.makedirs(resultdir, exist_ok=True)
 
-    # Find resultfiles to copy to resultdir on seqstore
+    # Find resultfiles to copy to resultdir on webstore
     with open(f'{outputdir}/reporting/shared_result_files.txt') as resultfiles:
         files = resultfiles.read().splitlines()
     for f in files:
