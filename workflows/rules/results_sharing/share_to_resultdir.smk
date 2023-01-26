@@ -22,14 +22,20 @@ if tumorid:
                 expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_observed.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
                 expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_called.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
                 expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+                expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
                 expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir,  sname=normalid, stype=sampleconfig[normalname]["stype"]),
                 expand("{workingdir}/{stype}/reports/{sname}_baf.igv", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf.gz", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf.gzi.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf.gz", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf.gzi.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf.gz", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf.gzi.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf.gz", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf.gz.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
             output:
                 "{workingdir}/reporting/shared_result_files.txt"
             run:
@@ -49,10 +55,13 @@ if tumorid:
                 expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_observed.seg", workingdir=workingdir, vartype="germline", sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_called.seg", workingdir=workingdir, vartype="germline", sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/reports/{sname}_baf.igv", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf.gz", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf.gz.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf.gz", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf.gzi.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
             output:
                 "{workingdir}/reporting/shared_result_files.txt"
             run:
@@ -72,9 +81,12 @@ else:
             expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_observed.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
             expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_called.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
             expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
             expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir,  sname=normalid, stype=sampleconfig[normalname]["stype"]),
-            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf.gz", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf.gz.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf.gz", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
             expand("{workingdir}/{stype}/reports/{sname}_baf.igv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
         output:
             "{workingdir}/reporting/shared_result_files.txt"
