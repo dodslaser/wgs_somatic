@@ -22,25 +22,36 @@ if tumorid:
                 expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_observed.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
                 expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_called.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
                 expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                #expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-                expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+                #expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
                 expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir,  sname=normalid, stype=sampleconfig[normalname]["stype"]),
                 expand("{workingdir}/{stype}/reports/{sname}_baf.igv", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf.gz", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf.gzi.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf.gz", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf.gzi.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf.gz", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf.gzi.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf.gz", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf.gz.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                #expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf.gzi.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                #expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf.gzi.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+                #expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf.gzi.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
+                #expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf.gz.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
             output:
                 "{workingdir}/reporting/shared_result_files.txt"
             run:
                 for resultfile in input:
+                    if resultfile.endswith(".vcf"):
+                        if not os.path.isfile(f"{resultfile}.gz"):
+                            shell(f"{params.bgzip} --stdout {resultfile} > {resultfile}.gz")
+                        shell(f"{params.bcftools} index -f {resultfile}.gz")
+                        resultfile = os.path.abspath(f"{resultfile}.gz")
                     filebase = os.path.basename(f"{resultfile}")
+                    if resultfile.endswith("REALIGNED.bam"):
+                        copyfile(f"{resultfile}", f"{wildcards.workingdir}/{filebase}")
+                        copyfile(f"{resultfile}.bai", f"{wildcards.workingdir}/{filebase}.bai")
+                        continue
+                    if resultfile.endswith(".vcf.gz"):
+                        copyfile(f"{resultfile}.csi", f"{wildcards.workingdir}/{filebase}.csi")
                     copyfile(f"{resultfile}", f"{wildcards.workingdir}/{filebase}")
                 shell("echo {input} >> {output}")
     else:
@@ -55,21 +66,31 @@ if tumorid:
                 expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_observed.seg", workingdir=workingdir, vartype="germline", sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_called.seg", workingdir=workingdir, vartype="germline", sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                #expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
                 expand("{workingdir}/{stype}/reports/{sname}_baf.igv", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf.gz", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf.gz.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf.gz", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
-                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf.gzi.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                #expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaBNDs.vcf.gz.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"]),
+                expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
+                #expand("{workingdir}/{stype}/manta/{sname}_somatic_MantaNOBNDs.vcf.gzi.csi", workingdir=workingdir, sname=tumorid, stype=sampleconfig[tumorname]["stype"])
             output:
                 "{workingdir}/reporting/shared_result_files.txt"
             run:
                 for resultfile in input:
+                    if resultfile.endswith(".vcf"):
+                        if not os.path.isfile(f"{resultfile}.gz"):
+                            shell(f"{params.bgzip} --stdout {resultfile} > {resultfile}.gz")
+                        shell(f"{params.bcftools} index -f {resultfile}.gz")
+                        resultfile = os.path.abspath(f"{resultfile}.gz")
                     filebase = os.path.basename(f"{resultfile}")
+                    if resultfile.endswith("REALIGNED.bam"):
+                        copyfile(f"{resultfile}", f"{wildcards.workingdir}/{filebase}")
+                        copyfile(f"{resultfile}.bai", f"{wildcards.workingdir}/{filebase}.bai")
+                        continue
+                    if resultfile.endswith(".vcf.gz"):
+                        copyfile(f"{resultfile}.csi", f"{wildcards.workingdir}/{filebase}.csi")
                     copyfile(f"{resultfile}", f"{wildcards.workingdir}/{filebase}")
                 shell("echo {input} >> {output}")
-
 
 else:
     rule share_to_resultdir:
@@ -81,17 +102,28 @@ else:
             expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_observed.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
             expand("{workingdir}/{stype}/canvas/{sname}_germline_CNV_called.seg", workingdir=workingdir, vartype="germline", sname=normalid, stype=sampleconfig[normalname]["stype"]),
             expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-            expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            #expand("{workingdir}/{stype}/realign/{sname}_REALIGNED.bam.bai", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
             expand("{workingdir}/{stype}/reports/{sname}_REALIGNED.bam.tdf", workingdir=workingdir,  sname=normalid, stype=sampleconfig[normalname]["stype"]),
-            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf.gz", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf.gz.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf.gz", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
-            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            #expand("{workingdir}/{stype}/manta/{sname}_germline_MantaBNDs.vcf.gz.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
+            #expand("{workingdir}/{stype}/manta/{sname}_germline_MantaNOBNDs.vcf.csi", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"]),
             expand("{workingdir}/{stype}/reports/{sname}_baf.igv", workingdir=workingdir, sname=normalid, stype=sampleconfig[normalname]["stype"])
         output:
             "{workingdir}/reporting/shared_result_files.txt"
         run:
-            for resultfile in input:
-                filebase = os.path.basename(f"{resultfile}")
-                copyfile(f"{resultfile}", f"{wildcards.workingdir}/{filebase}")
-            shell("echo {input} >> {output}")
+                for resultfile in input:
+                    if resultfile.endswith(".vcf"):
+                        if not os.path.isfile(f"{resultfile}.gz"):
+                            shell(f"{params.bgzip} --stdout {resultfile} > {resultfile}.gz")
+                        shell(f"{params.bcftools} index -f {resultfile}.gz")
+                        resultfile = os.path.abspath(f"{resultfile}.gz")
+                    filebase = os.path.basename(f"{resultfile}")
+                    if resultfile.endswith("REALIGNED.bam"):
+                        copyfile(f"{resultfile}", f"{wildcards.workingdir}/{filebase}")
+                        copyfile(f"{resultfile}.bai", f"{wildcards.workingdir}/{filebase}.bai")
+                        continue
+                    if resultfile.endswith(".vcf.gz"):
+                        copyfile(f"{resultfile}.csi", f"{wildcards.workingdir}/{filebase}.csi")
+                    copyfile(f"{resultfile}", f"{wildcards.workingdir}/{filebase}")
+                shell("echo {input} >> {output}")
